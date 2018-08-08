@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import axios from 'axios';
 import setupRoot from './setupRoot';
+import processCloneInfo from './processCloneInfo';
 
 //initialise root and navbar
 setupRoot();
@@ -10,7 +11,9 @@ axios.get('assets/files/clone-info.xml').then(function(cloneInfo) {
     //hide loader one file loading and processing is complete
     d3.select('#loader-container').classed('hide', true);
     console.log('Data loading and processing complete...');
-    start();
+    var cloneInfoString = processCloneInfo(cloneInfo.data);
+
+
 
 });
 
@@ -37,7 +40,9 @@ function start() {
         .size([2 * Math.PI, 500])
         .separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
 
+
     d3.csv("assets/files/flare.csv", function(error, data) {
+
         if (error) throw error;
 
         var root = tree(stratify(data));
