@@ -1,0 +1,44 @@
+{
+    "name": "clone-swarm-ui",
+    "version": "1.0.0",
+    "description": "UI for the clone swarm project , that lets users visualize the clones in their open source projects.",
+    "main": "src/app.js",
+    "scripts": {
+        "start": "webpack-dev-server --config ./build-config/webpack.config.js --watch-poll",
+        "build": "webpack --config ./build-config/webpack.prod.config.js",
+        "deploy": "npm run build && npm run deploy-gh",
+        "deploy-gh": "gh-pages -d build"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/kiranbandi/mcscanx-synteny-visualizer.git"
+    },
+    "keywords": [
+        "visualization",
+        "d3",
+        "code-clone",
+        "NiCad"
+    ],
+    "author": "kiranbandi",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/kiranbandi/mcscanx-synteny-visualizer/issues"
+    },
+    "homepage": "https://github.com/kiranbandi/mcscanx-synteny-visualizer#readme",
+    "devDependencies": {
+        "babel-core": "^6.26.0",
+        "babel-loader": "^7.1.2",
+        "babel-minify-webpack-plugin": "^0.2.0",
+        "babel-plugin-transform-object-rest-spread": "^6.26.0",
+        "babel-polyfill": "^6.26.0",
+        "gh-pages": "^0.12.0",
+        "html-loader": "^0.5.5",
+        "uglifyjs-webpack-plugin": "^1.0.1",
+        "webpack": "^3.8.1",
+        "webpack-dev-server": "^2.9.4"
+    },
+    "dependencies": {
+        "axios": "^0.17.1",
+        "d3": "^4.12.2"
+    }
+}
