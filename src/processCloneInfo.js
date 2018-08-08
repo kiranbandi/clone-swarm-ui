@@ -48,6 +48,8 @@ export default function(cloneInfoXML) {
         // increment iterator to go to the next line
         iterator += 1;
     }
+
+    cloneInfo.uniqueSourceKeyStore = processSources(cloneInfo.sources);
     return cloneInfo;
 };
 
@@ -66,9 +68,33 @@ function processCloneClassInfo(cloneClassInfo) {
 function processCloneSourceInfo(cloneSourceInfo) {
     var sourceInfoArray = cloneSourceInfo.slice(8, -1).split(" ");
     return {
-        'file': sourceInfoArray[0].slice(6, -1),
+        'id': sourceInfoArray[0].slice(6, -1),
         'startLine': sourceInfoArray[1].slice(11, -1),
         'endLine': sourceInfoArray[2].slice(9, -1),
         'pcid': sourceInfoArray[3].slice(6, -1)
     };
+}
+
+function processSources(sources) {
+
+    var sourcesUniqueStore = [];
+    _.each(sources, function(source, index) {
+        var pathStore = source.id.split("/");
+        var pathIterator = 0;
+        var key;
+        var store = '';
+        var length = pathStore.length;
+
+        while (pathIterator < length) {
+            key = pathStore.shift();
+            store += (store == '') ? key : "/" + key;
+            if (!(sourcesUniqueStore.indexOf(store) > -1)) {
+                sourcesUniqueStore.push(store);
+            }
+            pathIterator += 1;
+        }
+    });
+
+    return sourcesUniqueStore;
+
 }
