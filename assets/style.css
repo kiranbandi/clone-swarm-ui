@@ -20,6 +20,7 @@ body {
     margin: 20px auto 40px auto;
     display: block;
     border-radius: 1em;
+    border: 2px solid black;
 }
 
 .footer-link {
