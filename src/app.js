@@ -10,7 +10,7 @@ setupRoot();
 // get the source name based on window query params or set to default powershell
 let sourceName = processQueryParams().source || 'powershell';
 let sourceLink;
-if (sourceName == 'powershell' || sourceName == 'sentinel' || sourceName == 'jhotdraw') {
+if (['powershell', 'sentinel', 'jhotdraw', 'curl', 'springboot'].indexOf(sourceName) > -1) {
     sourceLink = 'assets/files/clone-info-' + sourceName + '.xml';
 } else {
     sourceLink = "https://s3.ca-central-1.amazonaws.com/cloneswarm-store/clone-data/clone-xml-info/" + sourceName + "-clone-info.xml";
@@ -19,7 +19,6 @@ if (sourceName == 'powershell' || sourceName == 'sentinel' || sourceName == 'jho
 axios.get(sourceLink).then(function(cloneInfo) {
     //hide loader one file loading and processing is complete
     d3.select('#loader-container').classed('hide', true);
-    console.log('Data loading and processing complete...');
     var cloneInfo = processCloneInfo(cloneInfo.data);
     start(cloneInfo);
 });
