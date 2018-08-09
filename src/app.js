@@ -72,7 +72,7 @@ function start(cloneInfo) {
 
     node.filter(function(d) {
             var name = d.id.substring(d.id.lastIndexOf("/") + 1);
-            return name.indexOf("java") > -1;
+            return name.indexOf(".cs") > -1;
         })
         .append("text")
         .attr("dy", "0.31em")
