@@ -1,0 +1,3597 @@
+<clones>
+<systeminfo processor="nicad3" system="spring-boot" granularity="functions" threshold="30%" minlines="10" maxlines="2500"/>
+<cloneinfo npcs="14601" npairs="172"/>
+<runinfo ncompares="634937" cputime="186"/>
+<classinfo nclasses="79"/>
+
+<class classid="1" nclones="2" nlines="13" similarity="76">
+<source file="spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/builder/ParentContextCloserApplicationListener.java" startline="105" endline="118" pcid="56">
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (obj instanceof ContextCloserListener) {
+				ContextCloserListener other = (ContextCloserListener) obj;
+				return ObjectUtils.nullSafeEquals(this.childContext.get(),
+						other.childContext.get());
+			}
+			return super.equals(obj);
+		}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/condition/ConditionOutcome.java" startline="126" endline="139" pcid="5523">
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() == obj.getClass()) {
+			ConditionOutcome other = (ConditionOutcome) obj;
+			return (this.match == other.match
+					&& ObjectUtils.nullSafeEquals(this.message, other.message));
+		}
+		return super.equals(obj);
+	}
+</source>
+</class>
+
+<class classid="2" nclones="2" nlines="13" similarity="76">
+<source file="spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/context/properties/source/ConfigurationProperty.java" startline="67" endline="79" pcid="295">
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null || getClass() != obj.getClass()) {
+			return false;
+		}
+		ConfigurationProperty other = (ConfigurationProperty) obj;
+		boolean result = true;
+		result = result && ObjectUtils.nullSafeEquals(this.name, other.name);
+		result = result && ObjectUtils.nullSafeEquals(this.value, other.value);
+		return result;
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/origin/TextResourceOrigin.java" startline="130" endline="142" pcid="967">
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null || getClass() != obj.getClass()) {
+				return false;
+			}
+			Location other = (Location) obj;
+			boolean result = true;
+			result = result && this.line == other.line;
+			result = result && this.column == other.column;
+			return result;
+		}
+</source>
+</class>
+
+<class classid="3" nclones="4" nlines="10" similarity="70">
+<source file="spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/web/embedded/netty/NettyWebServer.java" startline="91" endline="100" pcid="1210">
+	private ChannelBindException findBindException(Exception ex) {
+		Throwable candidate = ex;
+		while (candidate != null) {
+			if (candidate instanceof ChannelBindException) {
+				return (ChannelBindException) candidate;
+			}
+			candidate = candidate.getCause();
+		}
+		return null;
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/condition/OnBeanConditionTypeDeductionFailureTests.java" startline="64" endline="73" pcid="7549">
+	private Throwable findNestedCause(Throwable ex, Class<? extends Throwable> target) {
+		Throwable candidate = ex;
+		while (candidate != null) {
+			if (target.isInstance(candidate)) {
+				return candidate;
+			}
+			candidate = candidate.getCause();
+		}
+		return null;
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/web/embedded/undertow/UndertowWebServer.java" startline="139" endline="148" pcid="1322">
+	private BindException findBindException(Exception ex) {
+		Throwable candidate = ex;
+		while (candidate != null) {
+			if (candidate instanceof BindException) {
+				return (BindException) candidate;
+			}
+			candidate = candidate.getCause();
+		}
+		return null;
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/web/embedded/undertow/UndertowServletWebServer.java" startline="188" endline="197" pcid="1301">
+	private BindException findBindException(Exception ex) {
+		Throwable candidate = ex;
+		while (candidate != null) {
+			if (candidate instanceof BindException) {
+				return (BindException) candidate;
+			}
+			candidate = candidate.getCause();
+		}
+		return null;
+	}
+</source>
+</class>
+
+<class classid="4" nclones="2" nlines="32" similarity="87">
+<source file="spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/web/embedded/undertow/UndertowServletWebServer.java" startline="133" endline="169" pcid="1298">
+	public void start() throws WebServerException {
+		synchronized (this.monitor) {
+			if (this.started) {
+				return;
+			}
+			try {
+				if (!this.autoStart) {
+					return;
+				}
+				if (this.undertow == null) {
+					this.undertow = createUndertowServer();
+				}
+				this.undertow.start();
+				this.started = true;
+				UndertowServletWebServer.logger
+						.info("Undertow started on port(s) " + getPortsDescription()
+								+ " with context path '" + this.contextPath + "'");
+			}
+			catch (Exception ex) {
+				try {
+					if (findBindException(ex) != null) {
+						List<Port> failedPorts = getConfiguredPorts();
+						List<Port> actualPorts = getActualPorts();
+						failedPorts.removeAll(actualPorts);
+						if (failedPorts.size() == 1) {
+							throw new PortInUseException(
+									failedPorts.iterator().next().getNumber());
+						}
+					}
+					throw new WebServerException("Unable to start embedded Undertow", ex);
+				}
+				finally {
+					stopSilently();
+				}
+			}
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/web/embedded/undertow/UndertowWebServer.java" startline="90" endline="125" pcid="1320">
+	public void start() throws WebServerException {
+		synchronized (this.monitor) {
+			if (this.started) {
+				return;
+			}
+			try {
+				if (!this.autoStart) {
+					return;
+				}
+				if (this.undertow == null) {
+					this.undertow = this.builder.build();
+				}
+				this.undertow.start();
+				this.started = true;
+				UndertowWebServer.logger
+						.info("Undertow started on port(s) " + getPortsDescription());
+			}
+			catch (Exception ex) {
+				try {
+					if (findBindException(ex) != null) {
+						List<UndertowWebServer.Port> failedPorts = getConfiguredPorts();
+						List<UndertowWebServer.Port> actualPorts = getActualPorts();
+						failedPorts.removeAll(actualPorts);
+						if (failedPorts.size() == 1) {
+							throw new PortInUseException(
+									failedPorts.iterator().next().getNumber());
+						}
+					}
+					throw new WebServerException("Unable to start embedded Undertow", ex);
+				}
+				finally {
+					stopSilently();
+				}
+			}
+		}
+	}
+</source>
+</class>
+
+<class classid="5" nclones="2" nlines="14" similarity="78">
+<source file="spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/web/embedded/undertow/UndertowServletWebServer.java" startline="229" endline="245" pcid="1305">
+	private List<Port> getActualPorts() {
+		List<Port> ports = new ArrayList<>();
+		try {
+			if (!this.autoStart) {
+				ports.add(new Port(-1, "unknown"));
+			}
+			else {
+				for (BoundChannel channel : extractChannels()) {
+					ports.add(getPortFromChannel(channel));
+				}
+			}
+		}
+		catch (Exception ex) {
+			// Continue
+		}
+		return ports;
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/web/embedded/undertow/UndertowWebServer.java" startline="158" endline="174" pcid="1324">
+	private List<UndertowWebServer.Port> getActualPorts() {
+		List<UndertowWebServer.Port> ports = new ArrayList<>();
+		try {
+			if (!this.autoStart) {
+				ports.add(new UndertowWebServer.Port(-1, "unknown"));
+			}
+			else {
+				for (BoundChannel channel : extractChannels()) {
+					ports.add(getPortFromChannel(channel));
+				}
+			}
+		}
+		catch (Exception ex) {
+			// Continue
+		}
+		return ports;
+	}
+</source>
+</class>
+
+<class classid="6" nclones="2" nlines="16" similarity="81">
+<source file="spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/web/embedded/undertow/UndertowServletWebServer.java" startline="299" endline="314" pcid="1311">
+	public void stop() throws WebServerException {
+		synchronized (this.monitor) {
+			if (!this.started) {
+				return;
+			}
+			this.started = false;
+			try {
+				this.manager.stop();
+				this.manager.undeploy();
+				this.undertow.stop();
+			}
+			catch (Exception ex) {
+				throw new WebServerException("Unable to stop undertow", ex);
+			}
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/web/embedded/undertow/UndertowWebServer.java" startline="226" endline="242" pcid="1330">
+	public void stop() throws WebServerException {
+		synchronized (this.monitor) {
+			if (!this.started) {
+				return;
+			}
+			this.started = false;
+			try {
+				this.undertow.stop();
+				if (this.closeable != null) {
+					this.closeable.close();
+				}
+			}
+			catch (Exception ex) {
+				throw new WebServerException("Unable to stop undertow", ex);
+			}
+		}
+	}
+</source>
+</class>
+
+<class classid="7" nclones="2" nlines="16" similarity="93">
+<source file="spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/web/embedded/undertow/UndertowServletWebServer.java" startline="344" endline="359" pcid="1315">
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			Port other = (Port) obj;
+			if (this.number != other.number) {
+				return false;
+			}
+			return true;
+		}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/web/embedded/undertow/UndertowWebServer.java" startline="272" endline="287" pcid="1334">
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() != obj.getClass()) {
+				return false;
+			}
+			UndertowWebServer.Port other = (UndertowWebServer.Port) obj;
+			if (this.number != other.number) {
+				return false;
+			}
+			return true;
+		}
+</source>
+</class>
+
+<class classid="8" nclones="2" nlines="15" similarity="75">
+<source file="spring-boot/spring-boot-project/spring-boot/src/main/java/org/springframework/boot/web/servlet/ServletComponentScanRegistrar.java" startline="75" endline="89" pcid="1635">
+	private Set<String> getPackagesToScan(AnnotationMetadata metadata) {
+		AnnotationAttributes attributes = AnnotationAttributes.fromMap(
+				metadata.getAnnotationAttributes(ServletComponentScan.class.getName()));
+		String[] basePackages = attributes.getStringArray("basePackages");
+		Class<?>[] basePackageClasses = attributes.getClassArray("basePackageClasses");
+		Set<String> packagesToScan = new LinkedHashSet<>();
+		packagesToScan.addAll(Arrays.asList(basePackages));
+		for (Class<?> basePackageClass : basePackageClasses) {
+			packagesToScan.add(ClassUtils.getPackageName(basePackageClass));
+		}
+		if (packagesToScan.isEmpty()) {
+			packagesToScan.add(ClassUtils.getPackageName(metadata.getClassName()));
+		}
+		return packagesToScan;
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/domain/EntityScanPackages.java" startline="152" endline="170" pcid="5846">
+		private Set<String> getPackagesToScan(AnnotationMetadata metadata) {
+			AnnotationAttributes attributes = AnnotationAttributes.fromMap(
+					metadata.getAnnotationAttributes(EntityScan.class.getName()));
+			String[] basePackages = attributes.getStringArray("basePackages");
+			Class<?>[] basePackageClasses = attributes
+					.getClassArray("basePackageClasses");
+			Set<String> packagesToScan = new LinkedHashSet<>();
+			packagesToScan.addAll(Arrays.asList(basePackages));
+			for (Class<?> basePackageClass : basePackageClasses) {
+				packagesToScan.add(ClassUtils.getPackageName(basePackageClass));
+			}
+			if (packagesToScan.isEmpty()) {
+				String packageName = ClassUtils.getPackageName(metadata.getClassName());
+				Assert.state(!StringUtils.isEmpty(packageName),
+						"@EntityScan cannot be used with the default package");
+				return Collections.singleton(packageName);
+			}
+			return packagesToScan;
+		}
+</source>
+</class>
+
+<class classid="9" nclones="2" nlines="10" similarity="70">
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/context/ApplicationPidFileWriterTests.java" startline="103" endline="113" pcid="1783">
+	public void tryEnvironmentPreparedEvent() throws Exception {
+		File file = this.temporaryFolder.newFile();
+		SpringApplicationEvent event = createEnvironmentPreparedEvent("spring.pid.file",
+				file.getAbsolutePath());
+		ApplicationPidFileWriter listener = new ApplicationPidFileWriter();
+		listener.onApplicationEvent(event);
+		assertThat(FileCopyUtils.copyToString(new FileReader(file))).isEmpty();
+		listener.setTriggerEventType(ApplicationEnvironmentPreparedEvent.class);
+		listener.onApplicationEvent(event);
+		assertThat(FileCopyUtils.copyToString(new FileReader(file))).isNotEmpty();
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/context/ApplicationPidFileWriterTests.java" startline="116" endline="126" pcid="1784">
+	public void tryReadyEvent() throws Exception {
+		File file = this.temporaryFolder.newFile();
+		SpringApplicationEvent event = createReadyEvent("spring.pid.file",
+				file.getAbsolutePath());
+		ApplicationPidFileWriter listener = new ApplicationPidFileWriter();
+		listener.onApplicationEvent(event);
+		assertThat(FileCopyUtils.copyToString(new FileReader(file))).isEmpty();
+		listener.setTriggerEventType(ApplicationReadyEvent.class);
+		listener.onApplicationEvent(event);
+		assertThat(FileCopyUtils.copyToString(new FileReader(file))).isNotEmpty();
+	}
+</source>
+</class>
+
+<class classid="10" nclones="2" nlines="12" similarity="83">
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/context/config/ConfigFileApplicationListenerYamlProfileNegationTests.java" startline="92" endline="103" pcid="1805">
+	public void yamlProfileCascading() {
+		SpringApplication application = new SpringApplication(Config.class);
+		application.setWebApplicationType(WebApplicationType.NONE);
+		String configName = "--spring.config.name=cascadingprofiles";
+		this.context = application.run(configName);
+		assertVersionProperty(this.context, "D", "A", "C", "E", "B", "D");
+		assertThat(this.context.getEnvironment().getProperty("not-a")).isNull();
+		assertThat(this.context.getEnvironment().getProperty("not-b")).isNull();
+		assertThat(this.context.getEnvironment().getProperty("not-c")).isNull();
+		assertThat(this.context.getEnvironment().getProperty("not-d")).isNull();
+		assertThat(this.context.getEnvironment().getProperty("not-e")).isNull();
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/context/config/ConfigFileApplicationListenerYamlProfileNegationTests.java" startline="120" endline="131" pcid="1807">
+	public void yamlProfileCascadingMultipleActiveProfilesViaPropertiesShouldPreserveOrder() {
+		SpringApplication application = new SpringApplication(Config.class);
+		application.setWebApplicationType(WebApplicationType.NONE);
+		String configName = "--spring.config.name=cascadingprofiles";
+		this.context = application.run(configName, "--spring.profiles.active=A,B");
+		assertVersionProperty(this.context, "D", "A", "C", "E", "B", "D");
+		assertThat(this.context.getEnvironment().getProperty("not-a")).isNull();
+		assertThat(this.context.getEnvironment().getProperty("not-b")).isNull();
+		assertThat(this.context.getEnvironment().getProperty("not-c")).isNull();
+		assertThat(this.context.getEnvironment().getProperty("not-d")).isNull();
+		assertThat(this.context.getEnvironment().getProperty("not-e")).isNull();
+	}
+</source>
+</class>
+
+<class classid="11" nclones="2" nlines="14" similarity="71">
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/context/properties/bind/ArrayBinderTests.java" startline="101" endline="114" pcid="1833">
+	public void bindToArrayWhenNestedShouldReturnPopulatedArray() {
+		MockConfigurationPropertySource source = new MockConfigurationPropertySource();
+		source.put("foo[0][0]", "1");
+		source.put("foo[0][1]", "2");
+		source.put("foo[1][0]", "3");
+		source.put("foo[1][1]", "4");
+		this.sources.add(source);
+		ResolvableType type = ResolvableType.forArrayComponent(INTEGER_ARRAY.getType());
+		Bindable<Integer[][]> target = Bindable.of(type);
+		Integer[][] result = this.binder.bind("foo", target).get();
+		assertThat(result).hasSize(2);
+		assertThat(result[0]).containsExactly(1, 2);
+		assertThat(result[1]).containsExactly(3, 4);
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/context/properties/bind/ArrayBinderTests.java" startline="117" endline="130" pcid="1834">
+	public void bindToArrayWhenNestedListShouldReturnPopulatedArray() {
+		MockConfigurationPropertySource source = new MockConfigurationPropertySource();
+		source.put("foo[0][0]", "1");
+		source.put("foo[0][1]", "2");
+		source.put("foo[1][0]", "3");
+		source.put("foo[1][1]", "4");
+		this.sources.add(source);
+		ResolvableType type = ResolvableType.forArrayComponent(INTEGER_LIST.getType());
+		Bindable<List<Integer>[]> target = Bindable.of(type);
+		List<Integer>[] result = this.binder.bind("foo", target).get();
+		assertThat(result).hasSize(2);
+		assertThat(result[0]).containsExactly(1, 2);
+		assertThat(result[1]).containsExactly(3, 4);
+	}
+</source>
+</class>
+
+<class classid="12" nclones="2" nlines="14" similarity="73">
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/context/properties/bind/JavaBeanBinderTests.java" startline="65" endline="78" pcid="1895">
+	public void bindToClassShouldCreateBoundBean() {
+		MockConfigurationPropertySource source = new MockConfigurationPropertySource();
+		source.put("foo.int-value", "12");
+		source.put("foo.long-value", "34");
+		source.put("foo.string-value", "foo");
+		source.put("foo.enum-value", "foo-bar");
+		this.sources.add(source);
+		ExampleValueBean bean = this.binder
+				.bind("foo", Bindable.of(ExampleValueBean.class)).get();
+		assertThat(bean.getIntValue()).isEqualTo(12);
+		assertThat(bean.getLongValue()).isEqualTo(34);
+		assertThat(bean.getStringValue()).isEqualTo("foo");
+		assertThat(bean.getEnumValue()).isEqualTo(ExampleEnum.FOO_BAR);
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/context/properties/bind/JavaBeanBinderTests.java" startline="97" endline="113" pcid="1897">
+	public void bindToInstanceShouldBindToInstance() {
+		MockConfigurationPropertySource source = new MockConfigurationPropertySource();
+		source.put("foo.int-value", "12");
+		source.put("foo.long-value", "34");
+		source.put("foo.string-value", "foo");
+		source.put("foo.enum-value", "foo-bar");
+		this.sources.add(source);
+		ExampleValueBean bean = new ExampleValueBean();
+		ExampleValueBean boundBean = this.binder
+				.bind("foo", Bindable.of(ExampleValueBean.class).withExistingValue(bean))
+				.get();
+		assertThat(boundBean).isSameAs(bean);
+		assertThat(bean.getIntValue()).isEqualTo(12);
+		assertThat(bean.getLongValue()).isEqualTo(34);
+		assertThat(bean.getStringValue()).isEqualTo("foo");
+		assertThat(bean.getEnumValue()).isEqualTo(ExampleEnum.FOO_BAR);
+	}
+</source>
+</class>
+
+<class classid="13" nclones="2" nlines="16" similarity="87">
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/context/properties/ConfigurationPropertiesTests.java" startline="578" endline="595" pcid="2069">
+	public void loadShouldSupportRebindableConfigurationProperties() {
+		// gh-9160
+		MutablePropertySources sources = this.context.getEnvironment()
+				.getPropertySources();
+		Map<String, Object> source = new LinkedHashMap<>();
+		source.put("example.one", "foo");
+		sources.addFirst(new MapPropertySource("test-source", source));
+		this.context.register(PrototypePropertiesConfiguration.class);
+		this.context.refresh();
+		PrototypeBean first = this.context.getBean(PrototypeBean.class);
+		assertThat(first.getOne()).isEqualTo("foo");
+		source.put("example.one", "bar");
+		sources.addFirst(new MapPropertySource("extra",
+				Collections.singletonMap("example.two", "baz")));
+		PrototypeBean second = this.context.getBean(PrototypeBean.class);
+		assertThat(second.getOne()).isEqualTo("bar");
+		assertThat(second.getTwo()).isEqualTo("baz");
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/context/properties/ConfigurationPropertiesTests.java" startline="598" endline="615" pcid="2070">
+	public void loadWhenHasPropertySourcesPlaceholderConfigurerShouldSupportRebindableConfigurationProperties() {
+		MutablePropertySources sources = this.context.getEnvironment()
+				.getPropertySources();
+		Map<String, Object> source = new LinkedHashMap<>();
+		source.put("example.one", "foo");
+		sources.addFirst(new MapPropertySource("test-source", source));
+		this.context.register(PrototypePropertiesConfiguration.class);
+		this.context.register(PropertySourcesPlaceholderConfigurer.class);
+		this.context.refresh();
+		PrototypeBean first = this.context.getBean(PrototypeBean.class);
+		assertThat(first.getOne()).isEqualTo("foo");
+		source.put("example.one", "bar");
+		sources.addFirst(new MapPropertySource("extra",
+				Collections.singletonMap("example.two", "baz")));
+		PrototypeBean second = this.context.getBean(PrototypeBean.class);
+		assertThat(second.getOne()).isEqualTo("bar");
+		assertThat(second.getTwo()).isEqualTo("baz");
+	}
+</source>
+</class>
+
+<class classid="14" nclones="2" nlines="15" similarity="86">
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/context/properties/source/ConfigurationPropertySourcesTests.java" startline="111" endline="131" pcid="2222">
+	public void fromPropertySourceShouldFlattenPropertySources() {
+		StandardEnvironment environment = new StandardEnvironment();
+		environment.getPropertySources().addFirst(
+				new MapPropertySource("foo", Collections.singletonMap("foo", "bar")));
+		environment.getPropertySources().addFirst(
+				new MapPropertySource("far", Collections.singletonMap("far", "far")));
+		MutablePropertySources sources = new MutablePropertySources();
+		sources.addFirst(new PropertySource<Environment>("env", environment) {
+
+			@Override
+			public String getProperty(String key) {
+				return this.source.getProperty(key);
+			}
+
+		});
+		sources.addLast(
+				new MapPropertySource("baz", Collections.singletonMap("baz", "barf")));
+		Iterable<ConfigurationPropertySource> configurationSources = ConfigurationPropertySources
+				.from(sources);
+		assertThat(configurationSources.iterator()).hasSize(5);
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/context/properties/source/SpringConfigurationPropertySourcesTests.java" startline="130" endline="150" pcid="2263">
+	public void shouldFlattenEnvironment() {
+		StandardEnvironment environment = new StandardEnvironment();
+		environment.getPropertySources().addFirst(
+				new MapPropertySource("foo", Collections.singletonMap("foo", "bar")));
+		environment.getPropertySources().addFirst(
+				new MapPropertySource("far", Collections.singletonMap("far", "far")));
+		MutablePropertySources sources = new MutablePropertySources();
+		sources.addFirst(new PropertySource<Environment>("env", environment) {
+
+			@Override
+			public String getProperty(String key) {
+				return this.source.getProperty(key);
+			}
+
+		});
+		sources.addLast(
+				new MapPropertySource("baz", Collections.singletonMap("baz", "barf")));
+		SpringConfigurationPropertySources configurationSources = new SpringConfigurationPropertySources(
+				sources);
+		assertThat(configurationSources.iterator()).hasSize(5);
+	}
+</source>
+</class>
+
+<class classid="15" nclones="2" nlines="10" similarity="70">
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/context/properties/source/SpringConfigurationPropertySourceTests.java" startline="75" endline="86" pcid="2270">
+	public void getValueOrigin() {
+		Map<String, Object> source = new LinkedHashMap<>();
+		source.put("key", "value");
+		PropertySource<?> propertySource = new MapPropertySource("test", source);
+		TestPropertyMapper mapper = new TestPropertyMapper();
+		ConfigurationPropertyName name = ConfigurationPropertyName.of("my.key");
+		mapper.addFromConfigurationProperty(name, "key");
+		SpringConfigurationPropertySource adapter = new SpringConfigurationPropertySource(
+				propertySource, mapper, null);
+		assertThat(adapter.getConfigurationProperty(name).getOrigin().toString())
+				.isEqualTo("\"key\" from property source \"test\"");
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/context/properties/source/SpringConfigurationPropertySourceTests.java" startline="89" endline="101" pcid="2271">
+	public void getValueWhenOriginCapableShouldIncludeSourceOrigin() {
+		Map<String, Object> source = new LinkedHashMap<>();
+		source.put("key", "value");
+		PropertySource<?> propertySource = new OriginCapablePropertySource<>(
+				new MapPropertySource("test", source));
+		TestPropertyMapper mapper = new TestPropertyMapper();
+		ConfigurationPropertyName name = ConfigurationPropertyName.of("my.key");
+		mapper.addFromConfigurationProperty(name, "key");
+		SpringConfigurationPropertySource adapter = new SpringConfigurationPropertySource(
+				propertySource, mapper, null);
+		assertThat(adapter.getConfigurationProperty(name).getOrigin().toString())
+				.isEqualTo("TestOrigin key");
+	}
+</source>
+</class>
+
+<class classid="16" nclones="7" nlines="12" similarity="75">
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/diagnostics/analyzer/BeanDefinitionOverrideFailureAnalyzerTests.java" startline="52" endline="64" pcid="2383">
+	private BeanDefinitionOverrideException createFailure(Class<?> configuration) {
+		try {
+			AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+			context.setAllowBeanDefinitionOverriding(false);
+			context.register(configuration);
+			context.refresh();
+			context.close();
+			return null;
+		}
+		catch (BeanDefinitionOverrideException ex) {
+			return ex;
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/diagnostics/analyzer/BindFailureAnalyzerTests.java" startline="102" endline="115" pcid="2393">
+	private BeanCreationException createFailure(Class<?> configuration,
+			String... environment) {
+		try {
+			AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+			addEnvironment(context, environment);
+			context.register(configuration);
+			context.refresh();
+			context.close();
+			return null;
+		}
+		catch (BeanCreationException ex) {
+			return ex;
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/jdbc/DataSourceBeanCreationFailureAnalyzerTests.java" startline="74" endline="86" pcid="7933">
+	private BeanCreationException createFailure(Class<?> configuration) {
+		try {
+			AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+			context.setEnvironment(this.environment);
+			context.register(configuration);
+			context.refresh();
+			context.close();
+			return null;
+		}
+		catch (BeanCreationException ex) {
+			return ex;
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/diagnostics/analyzer/BindValidationFailureAnalyzerTests.java" startline="117" endline="130" pcid="2413">
+	private BeanCreationException createFailure(Class<?> configuration,
+			String... environment) {
+		try {
+			AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+			addEnvironment(context, environment);
+			context.register(configuration);
+			context.refresh();
+			context.close();
+			return null;
+		}
+		catch (BeanCreationException ex) {
+			return ex;
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/diagnostics/analyzer/UnboundConfigurationPropertyFailureAnalyzerTests.java" startline="80" endline="93" pcid="2449">
+	private BeanCreationException createFailure(Class<?> configuration,
+			String... environment) {
+		try {
+			AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+			addEnvironment(context, environment);
+			context.register(configuration);
+			context.refresh();
+			context.close();
+			return null;
+		}
+		catch (BeanCreationException ex) {
+			return ex;
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/diagnostics/analyzer/InvalidConfigurationPropertyNameFailureAnalyzerTests.java" startline="50" endline="61" pcid="2426">
+	private BeanCreationException createFailure(Class<?> configuration) {
+		try {
+			AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+			context.register(configuration);
+			context.refresh();
+			context.close();
+			return null;
+		}
+		catch (BeanCreationException ex) {
+			return ex;
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/jdbc/HikariDriverConfigurationFailureAnalyzerTests.java" startline="62" endline="78" pcid="7961">
+	private BeanCreationException createFailure(Class<?> configuration) {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		TestPropertyValues
+				.of("spring.datasource.type=" + HikariDataSource.class.getName(),
+						"spring.datasource.hikari.data-source-class-name=com.example.Foo",
+						"spring.datasource.initialization-mode=always")
+				.applyTo(context);
+		context.register(configuration);
+		try {
+			context.refresh();
+			context.close();
+			return null;
+		}
+		catch (BeanCreationException ex) {
+			return ex;
+		}
+	}
+</source>
+</class>
+
+<class classid="17" nclones="3" nlines="11" similarity="100">
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/diagnostics/analyzer/BindFailureAnalyzerTests.java" startline="117" endline="128" pcid="2394">
+	private void addEnvironment(AnnotationConfigApplicationContext context,
+			String[] environment) {
+		MutablePropertySources sources = context.getEnvironment().getPropertySources();
+		Map<String, Object> map = new HashMap<>();
+		for (String pair : environment) {
+			int index = pair.indexOf("=");
+			String key = (index > 0) ? pair.substring(0, index) : pair;
+			String value = (index > 0) ? pair.substring(index + 1) : "";
+			map.put(key.trim(), value.trim());
+		}
+		sources.addFirst(new MapPropertySource("test", map));
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/diagnostics/analyzer/UnboundConfigurationPropertyFailureAnalyzerTests.java" startline="95" endline="106" pcid="2450">
+	private void addEnvironment(AnnotationConfigApplicationContext context,
+			String[] environment) {
+		MutablePropertySources sources = context.getEnvironment().getPropertySources();
+		Map<String, Object> map = new HashMap<>();
+		for (String pair : environment) {
+			int index = pair.indexOf("=");
+			String key = (index > 0) ? pair.substring(0, index) : pair;
+			String value = (index > 0) ? pair.substring(index + 1) : "";
+			map.put(key.trim(), value.trim());
+		}
+		sources.addFirst(new MapPropertySource("test", map));
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/diagnostics/analyzer/BindValidationFailureAnalyzerTests.java" startline="132" endline="143" pcid="2414">
+	private void addEnvironment(AnnotationConfigApplicationContext context,
+			String[] environment) {
+		MutablePropertySources sources = context.getEnvironment().getPropertySources();
+		Map<String, Object> map = new HashMap<>();
+		for (String pair : environment) {
+			int index = pair.indexOf("=");
+			String key = (index > 0) ? pair.substring(0, index) : pair;
+			String value = (index > 0) ? pair.substring(index + 1) : "";
+			map.put(key.trim(), value.trim());
+		}
+		sources.addFirst(new MapPropertySource("test", map));
+	}
+</source>
+</class>
+
+<class classid="18" nclones="2" nlines="10" similarity="90">
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/jta/atomikos/AtomikosConnectionFactoryBeanTests.java" startline="34" endline="44" pcid="2654">
+	public void beanMethods() throws Exception {
+		MockAtomikosConnectionFactoryBean bean = spy(
+				new MockAtomikosConnectionFactoryBean());
+		bean.setBeanName("bean");
+		bean.afterPropertiesSet();
+		assertThat(bean.getUniqueResourceName()).isEqualTo("bean");
+		verify(bean).init();
+		verify(bean, never()).close();
+		bean.destroy();
+		verify(bean).close();
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/jta/atomikos/AtomikosDataSourceBeanTests.java" startline="34" endline="43" pcid="2657">
+	public void beanMethods() throws Exception {
+		MockAtomikosDataSourceBean bean = spy(new MockAtomikosDataSourceBean());
+		bean.setBeanName("bean");
+		bean.afterPropertiesSet();
+		assertThat(bean.getUniqueResourceName()).isEqualTo("bean");
+		verify(bean).init();
+		verify(bean, never()).close();
+		bean.destroy();
+		verify(bean).close();
+	}
+</source>
+</class>
+
+<class classid="19" nclones="3" nlines="11" similarity="72">
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/logging/log4j2/Log4J2LoggingSystemTests.java" startline="89" endline="99" pcid="2785">
+	public void noFile() {
+		this.loggingSystem.beforeInitialize();
+		this.logger.info("Hidden");
+		this.loggingSystem.initialize(null, null, null);
+		this.logger.info("Hello world");
+		String output = this.output.toString().trim();
+		Configuration configuration = this.loggingSystem.getConfiguration();
+		assertThat(output).contains("Hello world").doesNotContain("Hidden");
+		assertThat(new File(tmpDir() + "/spring.log").exists()).isFalse();
+		assertThat(configuration.getConfigurationSource().getFile()).isNotNull();
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/logging/logback/LogbackLoggingSystemTests.java" startline="112" endline="121" pcid="2832">
+	public void noFile() {
+		this.loggingSystem.beforeInitialize();
+		this.logger.info("Hidden");
+		this.loggingSystem.initialize(this.initializationContext, null, null);
+		this.logger.info("Hello world");
+		String output = this.output.toString().trim();
+		assertThat(output).contains("Hello world").doesNotContain("Hidden");
+		assertThat(getLineWithText(output, "Hello world")).contains("INFO");
+		assertThat(new File(tmpDir() + "/spring.log").exists()).isFalse();
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/logging/log4j2/Log4J2LoggingSystemTests.java" startline="102" endline="112" pcid="2786">
+	public void withFile() {
+		this.loggingSystem.beforeInitialize();
+		this.logger.info("Hidden");
+		this.loggingSystem.initialize(null, null, getLogFile(null, tmpDir()));
+		this.logger.info("Hello world");
+		String output = this.output.toString().trim();
+		Configuration configuration = this.loggingSystem.getConfiguration();
+		assertThat(output).contains("Hello world").doesNotContain("Hidden");
+		assertThat(new File(tmpDir() + "/spring.log").exists()).isTrue();
+		assertThat(configuration.getConfigurationSource().getFile()).isNotNull();
+	}
+</source>
+</class>
+
+<class classid="20" nclones="2" nlines="10" similarity="90">
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/logging/log4j2/Log4J2LoggingSystemTests.java" startline="153" endline="163" pcid="2791">
+	public void setLevelToNull() {
+		this.loggingSystem.beforeInitialize();
+		this.loggingSystem.initialize(null, null, null);
+		this.logger.debug("Hello");
+		this.loggingSystem.setLogLevel("org.springframework.boot", LogLevel.DEBUG);
+		this.logger.debug("Hello");
+		this.loggingSystem.setLogLevel("org.springframework.boot", null);
+		this.logger.debug("Hello");
+		assertThat(StringUtils.countOccurrencesOf(this.output.toString(), "Hello"))
+				.isEqualTo(1);
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/logging/logback/LogbackLoggingSystemTests.java" startline="204" endline="214" pcid="2840">
+	public void setLevelToNull() {
+		this.loggingSystem.beforeInitialize();
+		this.loggingSystem.initialize(this.initializationContext, null, null);
+		this.logger.debug("Hello");
+		this.loggingSystem.setLogLevel("org.springframework.boot", LogLevel.DEBUG);
+		this.logger.debug("Hello");
+		this.loggingSystem.setLogLevel("org.springframework.boot", null);
+		this.logger.debug("Hello");
+		assertThat(StringUtils.countOccurrencesOf(this.output.toString(), "Hello"))
+				.isEqualTo(1);
+	}
+</source>
+</class>
+
+<class classid="21" nclones="2" nlines="15" similarity="93">
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/logging/log4j2/Log4J2LoggingSystemTests.java" startline="265" endline="284" pcid="2803">
+	public void customExceptionConversionWord() throws Exception {
+		System.setProperty(LoggingSystemProperties.EXCEPTION_CONVERSION_WORD, "%ex");
+		try {
+			this.loggingSystem.beforeInitialize();
+			this.logger.info("Hidden");
+			this.loggingSystem.initialize(null, null, getLogFile(null, tmpDir()));
+			Matcher<String> expectedOutput = Matchers.allOf(
+					containsString("java.lang.RuntimeException: Expected"),
+					not(containsString("Wrapped by:")));
+			this.output.expect(expectedOutput);
+			this.logger.warn("Expected exception",
+					new RuntimeException("Expected", new RuntimeException("Cause")));
+			String fileContents = FileCopyUtils
+					.copyToString(new FileReader(new File(tmpDir() + "/spring.log")));
+			assertThat(fileContents).is(Matched.by(expectedOutput));
+		}
+		finally {
+			System.clearProperty(LoggingSystemProperties.EXCEPTION_CONVERSION_WORD);
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/logging/logback/LogbackLoggingSystemTests.java" startline="432" endline="452" pcid="2859">
+	public void customExceptionConversionWord() throws Exception {
+		System.setProperty(LoggingSystemProperties.EXCEPTION_CONVERSION_WORD, "%ex");
+		try {
+			this.loggingSystem.beforeInitialize();
+			this.logger.info("Hidden");
+			this.loggingSystem.initialize(this.initializationContext, null,
+					getLogFile(null, tmpDir()));
+			Matcher<String> expectedOutput = Matchers.allOf(
+					containsString("java.lang.RuntimeException: Expected"),
+					not(containsString("Wrapped by:")));
+			this.output.expect(expectedOutput);
+			this.logger.warn("Expected exception",
+					new RuntimeException("Expected", new RuntimeException("Cause")));
+			String fileContents = FileCopyUtils
+					.copyToString(new FileReader(new File(tmpDir() + "/spring.log")));
+			assertThat(fileContents).is(Matched.by(expectedOutput));
+		}
+		finally {
+			System.clearProperty(LoggingSystemProperties.EXCEPTION_CONVERSION_WORD);
+		}
+	}
+</source>
+</class>
+
+<class classid="22" nclones="4" nlines="11" similarity="72">
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/logging/logback/LogbackLoggingSystemTests.java" startline="359" endline="371" pcid="2854">
+	public void testMaxFileSizeProperty() throws Exception {
+		MockEnvironment environment = new MockEnvironment();
+		environment.setProperty("logging.file.max-size", "100MB");
+		LoggingInitializationContext loggingInitializationContext = new LoggingInitializationContext(
+				environment);
+		File file = new File(tmpDir(), "logback-test.log");
+		LogFile logFile = getLogFile(file.getPath(), null);
+		this.loggingSystem.initialize(loggingInitializationContext, null, logFile);
+		this.logger.info("Hello world");
+		assertThat(getLineWithText(file, "Hello world")).contains("INFO");
+		assertThat(ReflectionTestUtils.getField(getRollingPolicy(), "maxFileSize")
+				.toString()).isEqualTo("100 MB");
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/logging/logback/LogbackLoggingSystemTests.java" startline="390" endline="401" pcid="2856">
+	public void testMaxHistoryProperty() throws Exception {
+		MockEnvironment environment = new MockEnvironment();
+		environment.setProperty("logging.file.max-history", "30");
+		LoggingInitializationContext loggingInitializationContext = new LoggingInitializationContext(
+				environment);
+		File file = new File(tmpDir(), "logback-test.log");
+		LogFile logFile = getLogFile(file.getPath(), null);
+		this.loggingSystem.initialize(loggingInitializationContext, null, logFile);
+		this.logger.info("Hello world");
+		assertThat(getLineWithText(file, "Hello world")).contains("INFO");
+		assertThat(getRollingPolicy().getMaxHistory()).isEqualTo(30);
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/logging/logback/LogbackLoggingSystemTests.java" startline="374" endline="387" pcid="2855">
+	public void testMaxFileSizePropertyWithXmlConfiguration() throws Exception {
+		MockEnvironment environment = new MockEnvironment();
+		environment.setProperty("logging.file.max-size", "100MB");
+		LoggingInitializationContext loggingInitializationContext = new LoggingInitializationContext(
+				environment);
+		File file = new File(tmpDir(), "logback-test.log");
+		LogFile logFile = getLogFile(file.getPath(), null);
+		this.loggingSystem.initialize(loggingInitializationContext,
+				"classpath:logback-include-base.xml", logFile);
+		this.logger.info("Hello world");
+		assertThat(getLineWithText(file, "Hello world")).contains("INFO");
+		assertThat(ReflectionTestUtils.getField(getRollingPolicy(), "maxFileSize")
+				.toString()).isEqualTo("100 MB");
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/logging/logback/LogbackLoggingSystemTests.java" startline="404" endline="416" pcid="2857">
+	public void testMaxHistoryPropertyWithXmlConfiguration() throws Exception {
+		MockEnvironment environment = new MockEnvironment();
+		environment.setProperty("logging.file.max-history", "30");
+		LoggingInitializationContext loggingInitializationContext = new LoggingInitializationContext(
+				environment);
+		File file = new File(tmpDir(), "logback-test.log");
+		LogFile logFile = getLogFile(file.getPath(), null);
+		this.loggingSystem.initialize(loggingInitializationContext,
+				"classpath:logback-include-base.xml", logFile);
+		this.logger.info("Hello world");
+		assertThat(getLineWithText(file, "Hello world")).contains("INFO");
+		assertThat(getRollingPolicy().getMaxHistory()).isEqualTo(30);
+	}
+</source>
+</class>
+
+<class classid="23" nclones="2" nlines="17" similarity="76">
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/web/servlet/context/ServletWebServerApplicationContextTests.java" startline="242" endline="262" pcid="3214">
+	public void multipleServletBeans() {
+		addWebServerFactoryBean();
+		Servlet servlet1 = mock(Servlet.class,
+				withSettings().extraInterfaces(Ordered.class));
+		given(((Ordered) servlet1).getOrder()).willReturn(1);
+		Servlet servlet2 = mock(Servlet.class,
+				withSettings().extraInterfaces(Ordered.class));
+		given(((Ordered) servlet2).getOrder()).willReturn(2);
+		this.context.registerBeanDefinition("servletBean2", beanDefinition(servlet2));
+		this.context.registerBeanDefinition("servletBean1", beanDefinition(servlet1));
+		this.context.refresh();
+		MockServletWebServerFactory factory = getWebServerFactory();
+		ServletContext servletContext = factory.getServletContext();
+		InOrder ordered = inOrder(servletContext);
+		ordered.verify(servletContext).addServlet("servletBean1", servlet1);
+		ordered.verify(servletContext).addServlet("servletBean2", servlet2);
+		verify(factory.getRegisteredServlet(0).getRegistration())
+				.addMapping("/servletBean1/");
+		verify(factory.getRegisteredServlet(1).getRegistration())
+				.addMapping("/servletBean2/");
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot/src/test/java/org/springframework/boot/web/servlet/context/ServletWebServerApplicationContextTests.java" startline="265" endline="285" pcid="3215">
+	public void multipleServletBeansWithMainDispatcher() {
+		addWebServerFactoryBean();
+		Servlet servlet1 = mock(Servlet.class,
+				withSettings().extraInterfaces(Ordered.class));
+		given(((Ordered) servlet1).getOrder()).willReturn(1);
+		Servlet servlet2 = mock(Servlet.class,
+				withSettings().extraInterfaces(Ordered.class));
+		given(((Ordered) servlet2).getOrder()).willReturn(2);
+		this.context.registerBeanDefinition("servletBean2", beanDefinition(servlet2));
+		this.context.registerBeanDefinition("dispatcherServlet",
+				beanDefinition(servlet1));
+		this.context.refresh();
+		MockServletWebServerFactory factory = getWebServerFactory();
+		ServletContext servletContext = factory.getServletContext();
+		InOrder ordered = inOrder(servletContext);
+		ordered.verify(servletContext).addServlet("dispatcherServlet", servlet1);
+		ordered.verify(servletContext).addServlet("servletBean2", servlet2);
+		verify(factory.getRegisteredServlet(0).getRegistration()).addMapping("/");
+		verify(factory.getRegisteredServlet(1).getRegistration())
+				.addMapping("/servletBean2/");
+	}
+</source>
+</class>
+
+<class classid="24" nclones="2" nlines="10" similarity="80">
+<source file="spring-boot/spring-boot-project/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/health/DefaultHealthIndicatorRegistry.java" startline="56" endline="67" pcid="3601">
+	public void register(String name, HealthIndicator healthIndicator) {
+		Assert.notNull(healthIndicator, "HealthIndicator must not be null");
+		Assert.notNull(name, "Name must not be null");
+		synchronized (this.monitor) {
+			HealthIndicator existing = this.healthIndicators.putIfAbsent(name,
+					healthIndicator);
+			if (existing != null) {
+				throw new IllegalStateException(
+						"HealthIndicator with name '" + name + "' already registered");
+			}
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/health/DefaultReactiveHealthIndicatorRegistry.java" startline="59" endline="70" pcid="3607">
+	public void register(String name, ReactiveHealthIndicator healthIndicator) {
+		Assert.notNull(healthIndicator, "HealthIndicator must not be null");
+		Assert.notNull(name, "Name must not be null");
+		synchronized (this.monitor) {
+			ReactiveHealthIndicator existing = this.healthIndicators.putIfAbsent(name,
+					healthIndicator);
+			if (existing != null) {
+				throw new IllegalStateException(
+						"HealthIndicator with name '" + name + "' already registered");
+			}
+		}
+	}
+</source>
+</class>
+
+<class classid="25" nclones="2" nlines="10" similarity="70">
+<source file="spring-boot/spring-boot-project/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/health/Health.java" startline="87" endline="96" pcid="3614">
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (obj != null && obj instanceof Health) {
+			Health other = (Health) obj;
+			return this.status.equals(other.status) && this.details.equals(other.details);
+		}
+		return false;
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-actuator/src/main/java/org/springframework/boot/actuate/info/Info.java" startline="72" endline="81" pcid="3682">
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (obj != null && obj instanceof Info) {
+			Info other = (Info) obj;
+			return this.details.equals(other.details);
+		}
+		return false;
+	}
+</source>
+</class>
+
+<class classid="26" nclones="2" nlines="10" similarity="80">
+<source file="spring-boot/spring-boot-project/spring-boot-actuator-autoconfigure/src/main/java/org/springframework/boot/actuate/autoconfigure/web/reactive/ReactiveManagementContextFactory.java" startline="53" endline="67" pcid="4850">
+	private void registerReactiveWebServerFactory(ApplicationContext parent,
+			AnnotationConfigReactiveWebServerApplicationContext childContext) {
+		try {
+			ConfigurableListableBeanFactory beanFactory = childContext.getBeanFactory();
+			if (beanFactory instanceof BeanDefinitionRegistry) {
+				BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+				registry.registerBeanDefinition("ReactiveWebServerFactory",
+						new RootBeanDefinition(
+								determineReactiveWebServerFactoryClass(parent)));
+			}
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Ignore and assume auto-configuration
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-actuator-autoconfigure/src/main/java/org/springframework/boot/actuate/autoconfigure/web/servlet/ServletManagementContextFactory.java" startline="56" endline="70" pcid="4909">
+	private void registerServletWebServerFactory(ApplicationContext parent,
+			AnnotationConfigServletWebServerApplicationContext childContext) {
+		try {
+			ConfigurableListableBeanFactory beanFactory = childContext.getBeanFactory();
+			if (beanFactory instanceof BeanDefinitionRegistry) {
+				BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+				registry.registerBeanDefinition("ServletWebServerFactory",
+						new RootBeanDefinition(
+								determineServletWebServerFactoryClass(parent)));
+			}
+		}
+		catch (NoSuchBeanDefinitionException ex) {
+			// Ignore and assume auto-configuration
+		}
+	}
+</source>
+</class>
+
+<class classid="27" nclones="2" nlines="10" similarity="100">
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/security/reactive/ReactiveUserDetailsServiceAutoConfiguration.java" startline="79" endline="90" pcid="6645">
+	private String getOrDeducePassword(SecurityProperties.User user,
+			PasswordEncoder encoder) {
+		String password = user.getPassword();
+		if (user.isPasswordGenerated()) {
+			logger.info(String.format("%n%nUsing generated security password: %s%n",
+					user.getPassword()));
+		}
+		if (encoder != null || PASSWORD_ALGORITHM_PATTERN.matcher(password).matches()) {
+			return password;
+		}
+		return NOOP_PASSWORD_PREFIX + password;
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/main/java/org/springframework/boot/autoconfigure/security/servlet/UserDetailsServiceAutoConfiguration.java" startline="82" endline="93" pcid="6668">
+	private String getOrDeducePassword(SecurityProperties.User user,
+			PasswordEncoder encoder) {
+		String password = user.getPassword();
+		if (user.isPasswordGenerated()) {
+			logger.info(String.format("%n%nUsing generated security password: %s%n",
+					user.getPassword()));
+		}
+		if (encoder != null || PASSWORD_ALGORITHM_PATTERN.matcher(password).matches()) {
+			return password;
+		}
+		return NOOP_PASSWORD_PREFIX + password;
+	}
+</source>
+</class>
+
+<class classid="28" nclones="2" nlines="10" similarity="90">
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/data/cassandra/CassandraReactiveDataAutoConfigurationTests.java" startline="89" endline="100" pcid="7631">
+	private void load(Class<?> config, String... environment) {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		TestPropertyValues.of(environment).applyTo(ctx);
+		if (config != null) {
+			ctx.register(config);
+		}
+		ctx.register(TestConfiguration.class, CassandraAutoConfiguration.class,
+				CassandraDataAutoConfiguration.class,
+				CassandraReactiveDataAutoConfiguration.class);
+		ctx.refresh();
+		this.context = ctx;
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/validation/ValidationAutoConfigurationTests.java" startline="218" endline="227" pcid="8398">
+	private void load(Class<?> config, String... environment) {
+		AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext();
+		TestPropertyValues.of(environment).applyTo(ctx);
+		if (config != null) {
+			ctx.register(config);
+		}
+		ctx.register(ValidationAutoConfiguration.class);
+		ctx.refresh();
+		this.context = ctx;
+	}
+</source>
+</class>
+
+<class classid="29" nclones="4" nlines="10" similarity="81">
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/data/couchbase/CouchbaseDataAutoConfigurationTests.java" startline="136" endline="147" pcid="7652">
+	private void load(Class<?> config, String... environment) {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		TestPropertyValues.of(environment).applyTo(context);
+		if (config != null) {
+			context.register(config);
+		}
+		context.register(PropertyPlaceholderAutoConfiguration.class,
+				ValidationAutoConfiguration.class, CouchbaseAutoConfiguration.class,
+				CouchbaseDataAutoConfiguration.class);
+		context.refresh();
+		this.context = context;
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/data/couchbase/CouchbaseRepositoriesAutoConfigurationTests.java" startline="84" endline="95" pcid="7685">
+	private void load(Class<?> config, String... environment) {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		TestPropertyValues.of(environment).applyTo(context);
+		if (config != null) {
+			context.register(config);
+		}
+		context.register(PropertyPlaceholderAutoConfiguration.class,
+				CouchbaseAutoConfiguration.class, CouchbaseDataAutoConfiguration.class,
+				CouchbaseRepositoriesAutoConfiguration.class);
+		context.refresh();
+		this.context = context;
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/data/couchbase/CouchbaseReactiveRepositoriesAutoConfigurationTests.java" startline="93" endline="106" pcid="7678">
+	private void load(Class<?> config, String... environment) {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		TestPropertyValues.of(environment).applyTo(context);
+		if (config != null) {
+			context.register(config);
+		}
+		context.register(PropertyPlaceholderAutoConfiguration.class,
+				CouchbaseAutoConfiguration.class, CouchbaseDataAutoConfiguration.class,
+				CouchbaseRepositoriesAutoConfiguration.class,
+				CouchbaseReactiveDataAutoConfiguration.class,
+				CouchbaseReactiveRepositoriesAutoConfiguration.class);
+		context.refresh();
+		this.context = context;
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/data/couchbase/CouchbaseReactiveDataAutoConfigurationTests.java" startline="109" endline="121" pcid="7666">
+	private void load(Class<?> config, String... environment) {
+		AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
+		TestPropertyValues.of(environment).applyTo(context);
+		if (config != null) {
+			context.register(config);
+		}
+		context.register(PropertyPlaceholderAutoConfiguration.class,
+				ValidationAutoConfiguration.class, CouchbaseAutoConfiguration.class,
+				CouchbaseDataAutoConfiguration.class,
+				CouchbaseReactiveDataAutoConfiguration.class);
+		context.refresh();
+		this.context = context;
+	}
+</source>
+</class>
+
+<class classid="30" nclones="2" nlines="13" similarity="76">
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/hateoas/HypermediaAutoConfigurationTests.java" startline="99" endline="112" pcid="7902">
+	public void supportedMediaTypesOfTypeConstrainedConvertersIsCustomized() {
+		this.context = new AnnotationConfigWebApplicationContext();
+		this.context.setServletContext(new MockServletContext());
+		this.context.register(BaseConfig.class);
+		this.context.refresh();
+		RequestMappingHandlerAdapter handlerAdapter = this.context
+				.getBean(RequestMappingHandlerAdapter.class);
+		for (HttpMessageConverter<?> converter : handlerAdapter.getMessageConverters()) {
+			if (converter instanceof TypeConstrainedMappingJackson2HttpMessageConverter) {
+				assertThat(converter.getSupportedMediaTypes())
+						.contains(MediaType.APPLICATION_JSON, MediaTypes.HAL_JSON);
+			}
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/hateoas/HypermediaAutoConfigurationTests.java" startline="115" endline="130" pcid="7903">
+	public void customizationOfSupportedMediaTypesCanBeDisabled() {
+		this.context = new AnnotationConfigWebApplicationContext();
+		this.context.setServletContext(new MockServletContext());
+		this.context.register(BaseConfig.class);
+		TestPropertyValues.of("spring.hateoas.use-hal-as-default-json-media-type:false")
+				.applyTo(this.context);
+		this.context.refresh();
+		RequestMappingHandlerAdapter handlerAdapter = this.context
+				.getBean(RequestMappingHandlerAdapter.class);
+		for (HttpMessageConverter<?> converter : handlerAdapter.getMessageConverters()) {
+			if (converter instanceof TypeConstrainedMappingJackson2HttpMessageConverter) {
+				assertThat(converter.getSupportedMediaTypes())
+						.containsExactly(MediaTypes.HAL_JSON, MediaTypes.HAL_JSON_UTF8);
+			}
+		}
+	}
+</source>
+</class>
+
+<class classid="31" nclones="2" nlines="12" similarity="75">
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/jdbc/JndiDataSourceAutoConfigurationTests.java" startline="100" endline="116" pcid="7966">
+	public void mbeanDataSourceIsExcludedFromExport()
+			throws IllegalStateException, NamingException {
+		DataSource dataSource = new BasicDataSource();
+		configureJndi("foo", dataSource);
+
+		this.context = new AnnotationConfigApplicationContext();
+		TestPropertyValues.of("spring.datasource.jndi-name:foo").applyTo(this.context);
+		this.context.register(JndiDataSourceAutoConfiguration.class,
+				MBeanExporterConfiguration.class);
+		this.context.refresh();
+
+		assertThat(this.context.getBean(DataSource.class)).isEqualTo(dataSource);
+		MBeanExporter exporter = this.context.getBean(MBeanExporter.class);
+		Set<String> excludedBeans = (Set<String>) new DirectFieldAccessor(exporter)
+				.getPropertyValue("excludedBeans");
+		assertThat(excludedBeans).containsExactly("dataSource");
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/jdbc/JndiDataSourceAutoConfigurationTests.java" startline="141" endline="157" pcid="7968">
+	public void standardDataSourceIsNotExcludedFromExport()
+			throws IllegalStateException, NamingException {
+		DataSource dataSource = mock(DataSource.class);
+		configureJndi("foo", dataSource);
+
+		this.context = new AnnotationConfigApplicationContext();
+		TestPropertyValues.of("spring.datasource.jndi-name:foo").applyTo(this.context);
+		this.context.register(JndiDataSourceAutoConfiguration.class,
+				MBeanExporterConfiguration.class);
+		this.context.refresh();
+
+		assertThat(this.context.getBean(DataSource.class)).isEqualTo(dataSource);
+		MBeanExporter exporter = this.context.getBean(MBeanExporter.class);
+		Set<String> excludedBeans = (Set<String>) new DirectFieldAccessor(exporter)
+				.getPropertyValue("excludedBeans");
+		assertThat(excludedBeans).isEmpty();
+	}
+</source>
+</class>
+
+<class classid="32" nclones="2" nlines="10" similarity="70">
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/jmx/JmxAutoConfigurationTests.java" startline="112" endline="121" pcid="8078">
+	public void testBasicParentContext() {
+		this.context = new AnnotationConfigApplicationContext();
+		this.context.register(JmxAutoConfiguration.class);
+		this.context.refresh();
+		AnnotationConfigApplicationContext parent = this.context;
+		this.context = new AnnotationConfigApplicationContext();
+		this.context.setParent(parent);
+		this.context.register(JmxAutoConfiguration.class);
+		this.context.refresh();
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/jmx/JmxAutoConfigurationTests.java" startline="124" endline="133" pcid="8079">
+	public void testParentContext() {
+		this.context = new AnnotationConfigApplicationContext();
+		this.context.register(JmxAutoConfiguration.class, TestConfiguration.class);
+		this.context.refresh();
+		AnnotationConfigApplicationContext parent = this.context;
+		this.context = new AnnotationConfigApplicationContext();
+		this.context.setParent(parent);
+		this.context.register(JmxAutoConfiguration.class, TestConfiguration.class);
+		this.context.refresh();
+	}
+</source>
+</class>
+
+<class classid="33" nclones="2" nlines="10" similarity="70">
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/jooq/SqlDialectLookupTests.java" startline="95" endline="104" pcid="8119">
+	private void testGetSqlDialect(String url, SQLDialect expected) throws Exception {
+		DataSource dataSource = mock(DataSource.class);
+		Connection connection = mock(Connection.class);
+		DatabaseMetaData metaData = mock(DatabaseMetaData.class);
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.getMetaData()).willReturn(metaData);
+		given(metaData.getURL()).willReturn(url);
+		SQLDialect sqlDialect = SqlDialectLookup.getDialect(dataSource);
+		assertThat(sqlDialect).isEqualTo(expected);
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/orm/jpa/DatabaseLookupTests.java" startline="95" endline="104" pcid="8202">
+	private void testGetDatabase(String url, Database expected) throws Exception {
+		DataSource dataSource = mock(DataSource.class);
+		Connection connection = mock(Connection.class);
+		DatabaseMetaData metaData = mock(DatabaseMetaData.class);
+		given(dataSource.getConnection()).willReturn(connection);
+		given(connection.getMetaData()).willReturn(metaData);
+		given(metaData.getURL()).willReturn(url);
+		Database database = DatabaseLookup.getDatabase(dataSource);
+		assertThat(database).isEqualTo(expected);
+	}
+</source>
+</class>
+
+<class classid="34" nclones="2" nlines="12" similarity="75">
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/mongo/MongoClientFactoryTests.java" startline="101" endline="113" pcid="8133">
+	public void uriCanBeCustomized() {
+		MongoProperties properties = new MongoProperties();
+		properties.setUri("mongodb://user:secret@mongo1.example.com:12345,"
+				+ "mongo2.example.com:23456/test");
+		MongoClient client = createMongoClient(properties);
+		List<ServerAddress> allAddresses = extractServerAddresses(client);
+		assertThat(allAddresses).hasSize(2);
+		assertServerAddress(allAddresses.get(0), "mongo1.example.com", 12345);
+		assertServerAddress(allAddresses.get(1), "mongo2.example.com", 23456);
+		List<MongoCredential> credentialsList = client.getCredentialsList();
+		assertThat(credentialsList).hasSize(1);
+		assertMongoCredential(credentialsList.get(0), "user", "secret", "test");
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/mongo/ReactiveMongoClientFactoryTests.java" startline="102" endline="113" pcid="8153">
+	public void uriCanBeCustomized() {
+		MongoProperties properties = new MongoProperties();
+		properties.setUri("mongodb://user:secret@mongo1.example.com:12345,"
+				+ "mongo2.example.com:23456/test");
+		MongoClient client = createMongoClient(properties);
+		List<ServerAddress> allAddresses = extractServerAddresses(client);
+		assertThat(allAddresses).hasSize(2);
+		assertServerAddress(allAddresses.get(0), "mongo1.example.com", 12345);
+		assertServerAddress(allAddresses.get(1), "mongo2.example.com", 23456);
+		MongoCredential credential = extractMongoCredentials(client);
+		assertMongoCredential(credential, "user", "secret", "test");
+	}
+</source>
+</class>
+
+<class classid="35" nclones="2" nlines="23" similarity="75">
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/security/oauth2/client/OAuth2ClientPropertiesRegistrationAdapterTests.java" startline="111" endline="143" pcid="8220">
+	public void getClientRegistrationsWhenUsingCommonProviderShouldAdapt() {
+		OAuth2ClientProperties properties = new OAuth2ClientProperties();
+		Registration registration = new Registration();
+		registration.setProvider("google");
+		registration.setClientId("clientId");
+		registration.setClientSecret("clientSecret");
+		properties.getRegistration().put("registration", registration);
+		Map<String, ClientRegistration> registrations = OAuth2ClientPropertiesRegistrationAdapter
+				.getClientRegistrations(properties);
+		ClientRegistration adapted = registrations.get("registration");
+		ProviderDetails adaptedProvider = adapted.getProviderDetails();
+		assertThat(adaptedProvider.getAuthorizationUri())
+				.isEqualTo("https://accounts.google.com/o/oauth2/v2/auth");
+		assertThat(adaptedProvider.getTokenUri())
+				.isEqualTo("https://www.googleapis.com/oauth2/v4/token");
+		assertThat(adaptedProvider.getUserInfoEndpoint().getUri())
+				.isEqualTo("https://www.googleapis.com/oauth2/v3/userinfo");
+		assertThat(adaptedProvider.getUserInfoEndpoint().getUserNameAttributeName())
+				.isEqualTo(IdTokenClaimNames.SUB);
+		assertThat(adaptedProvider.getJwkSetUri())
+				.isEqualTo("https://www.googleapis.com/oauth2/v3/certs");
+		assertThat(adapted.getRegistrationId()).isEqualTo("registration");
+		assertThat(adapted.getClientId()).isEqualTo("clientId");
+		assertThat(adapted.getClientSecret()).isEqualTo("clientSecret");
+		assertThat(adapted.getClientAuthenticationMethod()).isEqualTo(
+				org.springframework.security.oauth2.core.ClientAuthenticationMethod.BASIC);
+		assertThat(adapted.getAuthorizationGrantType()).isEqualTo(
+				org.springframework.security.oauth2.core.AuthorizationGrantType.AUTHORIZATION_CODE);
+		assertThat(adapted.getRedirectUriTemplate())
+				.isEqualTo("{baseUrl}/{action}/oauth2/code/{registrationId}");
+		assertThat(adapted.getScopes()).containsExactly("openid", "profile", "email");
+		assertThat(adapted.getClientName()).isEqualTo("Google");
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/security/oauth2/client/OAuth2ClientPropertiesRegistrationAdapterTests.java" startline="197" endline="226" pcid="8223">
+	public void getClientRegistrationsWhenProviderNotSpecifiedShouldUseRegistrationId() {
+		OAuth2ClientProperties properties = new OAuth2ClientProperties();
+		Registration registration = new Registration();
+		registration.setClientId("clientId");
+		registration.setClientSecret("clientSecret");
+		properties.getRegistration().put("google", registration);
+		Map<String, ClientRegistration> registrations = OAuth2ClientPropertiesRegistrationAdapter
+				.getClientRegistrations(properties);
+		ClientRegistration adapted = registrations.get("google");
+		ProviderDetails adaptedProvider = adapted.getProviderDetails();
+		assertThat(adaptedProvider.getAuthorizationUri())
+				.isEqualTo("https://accounts.google.com/o/oauth2/v2/auth");
+		assertThat(adaptedProvider.getTokenUri())
+				.isEqualTo("https://www.googleapis.com/oauth2/v4/token");
+		assertThat(adaptedProvider.getUserInfoEndpoint().getUri())
+				.isEqualTo("https://www.googleapis.com/oauth2/v3/userinfo");
+		assertThat(adaptedProvider.getJwkSetUri())
+				.isEqualTo("https://www.googleapis.com/oauth2/v3/certs");
+		assertThat(adapted.getRegistrationId()).isEqualTo("google");
+		assertThat(adapted.getClientId()).isEqualTo("clientId");
+		assertThat(adapted.getClientSecret()).isEqualTo("clientSecret");
+		assertThat(adapted.getClientAuthenticationMethod()).isEqualTo(
+				org.springframework.security.oauth2.core.ClientAuthenticationMethod.BASIC);
+		assertThat(adapted.getAuthorizationGrantType()).isEqualTo(
+				org.springframework.security.oauth2.core.AuthorizationGrantType.AUTHORIZATION_CODE);
+		assertThat(adapted.getRedirectUriTemplate())
+				.isEqualTo("{baseUrl}/{action}/oauth2/code/{registrationId}");
+		assertThat(adapted.getScopes()).containsExactly("openid", "profile", "email");
+		assertThat(adapted.getClientName()).isEqualTo("Google");
+	}
+</source>
+</class>
+
+<class classid="36" nclones="2" nlines="12" similarity="75">
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/validation/ValidationAutoConfigurationTests.java" startline="70" endline="83" pcid="8386">
+	public void validationAutoConfigurationShouldConfigureDefaultValidator() {
+		load(Config.class);
+		String[] jsrValidatorNames = this.context.getBeanNamesForType(Validator.class);
+		String[] springValidatorNames = this.context
+				.getBeanNamesForType(org.springframework.validation.Validator.class);
+		assertThat(jsrValidatorNames).containsExactly("defaultValidator");
+		assertThat(springValidatorNames).containsExactly("defaultValidator");
+		Validator jsrValidator = this.context.getBean(Validator.class);
+		org.springframework.validation.Validator springValidator = this.context
+				.getBean(org.springframework.validation.Validator.class);
+		assertThat(jsrValidator).isInstanceOf(LocalValidatorFactoryBean.class);
+		assertThat(jsrValidator).isEqualTo(springValidator);
+		assertThat(isPrimaryBean("defaultValidator")).isTrue();
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/validation/ValidationAutoConfigurationTests.java" startline="124" endline="138" pcid="8390">
+	public void validationAutoConfigurationWhenUserProvidesSpringValidatorShouldCreateJsrValidator() {
+		load(UserDefinedSpringValidatorConfig.class);
+		String[] jsrValidatorNames = this.context.getBeanNamesForType(Validator.class);
+		String[] springValidatorNames = this.context
+				.getBeanNamesForType(org.springframework.validation.Validator.class);
+		assertThat(jsrValidatorNames).containsExactly("defaultValidator");
+		assertThat(springValidatorNames).containsExactly("customValidator",
+				"anotherCustomValidator", "defaultValidator");
+		Validator jsrValidator = this.context.getBean(Validator.class);
+		org.springframework.validation.Validator springValidator = this.context
+				.getBean(org.springframework.validation.Validator.class);
+		assertThat(jsrValidator).isInstanceOf(LocalValidatorFactoryBean.class);
+		assertThat(jsrValidator).isEqualTo(springValidator);
+		assertThat(isPrimaryBean("defaultValidator")).isTrue();
+	}
+</source>
+</class>
+
+<class classid="37" nclones="2" nlines="10" similarity="70">
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/web/servlet/error/BasicErrorControllerIntegrationTests.java" startline="154" endline="164" pcid="8522">
+	public void testBindingExceptionForMachineClient() {
+		load("--server.error.include-exception=true");
+		RequestEntity request = RequestEntity.get(URI.create(createUrl("/bind")))
+				.accept(MediaType.APPLICATION_JSON).build();
+		ResponseEntity<Map> entity = new TestRestTemplate().exchange(request, Map.class);
+		String resp = entity.getBody().toString();
+		assertThat(resp).contains("Error count: 1");
+		assertThat(resp).contains("errors=[{");
+		assertThat(resp).contains("codes=[");
+		assertThat(resp).contains("org.springframework.validation.BindException");
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-autoconfigure/src/test/java/org/springframework/boot/autoconfigure/web/servlet/error/BasicErrorControllerIntegrationTests.java" startline="168" endline="180" pcid="8523">
+	public void testRequestBodyValidationForMachineClient() {
+		load("--server.error.include-exception=true");
+		RequestEntity request = RequestEntity
+				.post(URI.create(createUrl("/bodyValidation")))
+				.accept(MediaType.APPLICATION_JSON)
+				.contentType(MediaType.APPLICATION_JSON).body("{}");
+		ResponseEntity<Map> entity = new TestRestTemplate().exchange(request, Map.class);
+		String resp = entity.getBody().toString();
+		assertThat(resp).contains("Error count: 1");
+		assertThat(resp).contains("errors=[{");
+		assertThat(resp).contains("codes=[");
+		assertThat(resp).contains(MethodArgumentNotValidException.class.getName());
+	}
+</source>
+</class>
+
+<class classid="38" nclones="2" nlines="17" similarity="83">
+<source file="spring-boot/spring-boot-project/spring-boot-cli/src/main/java/org/springframework/boot/cli/compiler/dependencies/Dependency.java" startline="102" endline="119" pcid="9068">
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() == obj.getClass()) {
+			Dependency other = (Dependency) obj;
+			boolean result = true;
+			result = result && this.groupId.equals(other.groupId);
+			result = result && this.artifactId.equals(other.artifactId);
+			result = result && this.version.equals(other.version);
+			result = result && this.exclusions.equals(other.exclusions);
+			return result;
+		}
+		return false;
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-cli/src/main/java/org/springframework/boot/cli/compiler/dependencies/Dependency.java" startline="170" endline="185" pcid="9074">
+		public boolean equals(Object obj) {
+			if (this == obj) {
+				return true;
+			}
+			if (obj == null) {
+				return false;
+			}
+			if (getClass() == obj.getClass()) {
+				Exclusion other = (Exclusion) obj;
+				boolean result = true;
+				result = result && this.groupId.equals(other.groupId);
+				result = result && this.artifactId.equals(other.artifactId);
+				return result;
+			}
+			return false;
+		}
+</source>
+</class>
+
+<class classid="39" nclones="4" nlines="15" similarity="70">
+<source file="spring-boot/spring-boot-project/spring-boot-cli/src/main/java/org/springframework/boot/cli/compiler/DependencyCustomizer.java" startline="91" endline="106" pcid="9097">
+	public DependencyCustomizer ifAnyMissingClasses(String... classNames) {
+		return new DependencyCustomizer(this) {
+			@Override
+			protected boolean canAdd() {
+				for (String className : classNames) {
+					try {
+						DependencyCustomizer.this.loader.loadClass(className);
+					}
+					catch (Exception ex) {
+						return true;
+					}
+				}
+				return false;
+			}
+		};
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-cli/src/main/java/org/springframework/boot/cli/compiler/DependencyCustomizer.java" startline="114" endline="130" pcid="9099">
+	public DependencyCustomizer ifAllMissingClasses(String... classNames) {
+		return new DependencyCustomizer(this) {
+			@Override
+			protected boolean canAdd() {
+				for (String className : classNames) {
+					try {
+						DependencyCustomizer.this.loader.loadClass(className);
+						return false;
+					}
+					catch (Exception ex) {
+						// swallow exception and continue
+					}
+				}
+				return DependencyCustomizer.this.canAdd();
+			}
+		};
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-cli/src/main/java/org/springframework/boot/cli/compiler/DependencyCustomizer.java" startline="138" endline="156" pcid="9101">
+	public DependencyCustomizer ifAllResourcesPresent(String... paths) {
+		return new DependencyCustomizer(this) {
+			@Override
+			protected boolean canAdd() {
+				for (String path : paths) {
+					try {
+						if (DependencyCustomizer.this.loader.getResource(path) == null) {
+							return false;
+						}
+						return true;
+					}
+					catch (Exception ex) {
+						// swallow exception and continue
+					}
+				}
+				return DependencyCustomizer.this.canAdd();
+			}
+		};
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-cli/src/main/java/org/springframework/boot/cli/compiler/DependencyCustomizer.java" startline="164" endline="182" pcid="9103">
+	public DependencyCustomizer ifAnyResourcesPresent(String... paths) {
+		return new DependencyCustomizer(this) {
+			@Override
+			protected boolean canAdd() {
+				for (String path : paths) {
+					try {
+						if (DependencyCustomizer.this.loader.getResource(path) != null) {
+							return true;
+						}
+						return false;
+					}
+					catch (Exception ex) {
+						// swallow exception and continue
+					}
+				}
+				return DependencyCustomizer.this.canAdd();
+			}
+		};
+	}
+</source>
+</class>
+
+<class classid="40" nclones="2" nlines="10" similarity="80">
+<source file="spring-boot/spring-boot-project/spring-boot-devtools/src/test/java/org/springframework/boot/devtools/restart/ClassLoaderFilesResourcePatternResolverTests.java" startline="133" endline="142" pcid="10122">
+	public void customProtocolResolverIsUsedInNonWebApplication() {
+		GenericApplicationContext context = new GenericApplicationContext();
+		Resource resource = mock(Resource.class);
+		ProtocolResolver resolver = mockProtocolResolver("foo:some-file.txt", resource);
+		context.addProtocolResolver(resolver);
+		this.resolver = new ClassLoaderFilesResourcePatternResolver(context, this.files);
+		Resource actual = this.resolver.getResource("foo:some-file.txt");
+		assertThat(actual).isSameAs(resource);
+		verify(resolver).resolve(eq("foo:some-file.txt"), any(ResourceLoader.class));
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-devtools/src/test/java/org/springframework/boot/devtools/restart/ClassLoaderFilesResourcePatternResolverTests.java" startline="156" endline="166" pcid="10124">
+	public void customProtocolResolverIsUsedInWebApplication() {
+		GenericWebApplicationContext context = new GenericWebApplicationContext(
+				new MockServletContext());
+		Resource resource = mock(Resource.class);
+		ProtocolResolver resolver = mockProtocolResolver("foo:some-file.txt", resource);
+		context.addProtocolResolver(resolver);
+		this.resolver = new ClassLoaderFilesResourcePatternResolver(context, this.files);
+		Resource actual = this.resolver.getResource("foo:some-file.txt");
+		assertThat(actual).isSameAs(resource);
+		verify(resolver).resolve(eq("foo:some-file.txt"), any(ResourceLoader.class));
+	}
+</source>
+</class>
+
+<class classid="41" nclones="4" nlines="10" similarity="70">
+<source file="spring-boot/spring-boot-project/spring-boot-test/src/main/java/org/springframework/boot/test/context/ImportsContextCustomizer.java" startline="119" endline="129" pcid="10357">
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (obj == null || obj.getClass() != getClass()) {
+			return false;
+		}
+		// ImportSelectors are flexible so the only safe cache key is the test class
+		ImportsContextCustomizer other = (ImportsContextCustomizer) obj;
+		return this.key.equals(other.key);
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-test/src/main/java/org/springframework/boot/test/mock/mockito/QualifierDefinition.java" startline="64" endline="73" pcid="10571">
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (obj == null || !getClass().isAssignableFrom(obj.getClass())) {
+			return false;
+		}
+		QualifierDefinition other = (QualifierDefinition) obj;
+		return this.annotations.equals(other.annotations);
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-test/src/main/java/org/springframework/boot/test/mock/mockito/MockitoContextCustomizer.java" startline="50" endline="59" pcid="10557">
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (obj == null || obj.getClass() != getClass()) {
+			return false;
+		}
+		MockitoContextCustomizer other = (MockitoContextCustomizer) obj;
+		return this.definitions.equals(other.definitions);
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-test/src/main/java/sample/test/service/VehicleDetails.java" startline="53" endline="62" pcid="13981">
+	public boolean equals(Object obj) {
+		if (obj == this) {
+			return true;
+		}
+		if (obj == null || obj.getClass() != getClass()) {
+			return false;
+		}
+		VehicleDetails other = (VehicleDetails) obj;
+		return this.make.equals(other.make) && this.model.equals(other.model);
+	}
+</source>
+</class>
+
+<class classid="42" nclones="2" nlines="13" similarity="84">
+<source file="spring-boot/spring-boot-project/spring-boot-test/src/main/java/org/springframework/boot/test/json/JsonContentAssert.java" startline="987" endline="1003" pcid="10504">
+	private JSONCompareResult compare(CharSequence expectedJson,
+			JSONCompareMode compareMode) {
+		if (this.actual == null) {
+			return compareForNull(expectedJson);
+		}
+		try {
+			return JSONCompare.compareJSON(
+					(expectedJson != null) ? expectedJson.toString() : null,
+					this.actual.toString(), compareMode);
+		}
+		catch (Exception ex) {
+			if (ex instanceof RuntimeException) {
+				throw (RuntimeException) ex;
+			}
+			throw new IllegalStateException(ex);
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-test/src/main/java/org/springframework/boot/test/json/JsonContentAssert.java" startline="1005" endline="1021" pcid="10505">
+	private JSONCompareResult compare(CharSequence expectedJson,
+			JSONComparator comparator) {
+		if (this.actual == null) {
+			return compareForNull(expectedJson);
+		}
+		try {
+			return JSONCompare.compareJSON(
+					(expectedJson != null) ? expectedJson.toString() : null,
+					this.actual.toString(), comparator);
+		}
+		catch (Exception ex) {
+			if (ex instanceof RuntimeException) {
+				throw (RuntimeException) ex;
+			}
+			throw new IllegalStateException(ex);
+		}
+	}
+</source>
+</class>
+
+<class classid="43" nclones="2" nlines="20" similarity="100">
+<source file="spring-boot/spring-boot-project/spring-boot-test/src/main/java/org/springframework/boot/test/rule/OutputCapture.java" startline="55" endline="76" pcid="10595">
+	public Statement apply(Statement base, Description description) {
+		return new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				captureOutput();
+				try {
+					base.evaluate();
+				}
+				finally {
+					try {
+						if (!OutputCapture.this.matchers.isEmpty()) {
+							String output = OutputCapture.this.toString();
+							Assert.assertThat(output, allOf(OutputCapture.this.matchers));
+						}
+					}
+					finally {
+						releaseOutput();
+					}
+				}
+			}
+		};
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-test-support/src/main/java/org/springframework/boot/testsupport/rule/OutputCapture.java" startline="51" endline="72" pcid="13232">
+	public Statement apply(Statement base, Description description) {
+		return new Statement() {
+			@Override
+			public void evaluate() throws Throwable {
+				captureOutput();
+				try {
+					base.evaluate();
+				}
+				finally {
+					try {
+						if (!OutputCapture.this.matchers.isEmpty()) {
+							String output = OutputCapture.this.toString();
+							Assert.assertThat(output, allOf(OutputCapture.this.matchers));
+						}
+					}
+					finally {
+						releaseOutput();
+					}
+				}
+			}
+		};
+	}
+</source>
+</class>
+
+<class classid="44" nclones="3" nlines="10" similarity="90">
+<source file="spring-boot/spring-boot-project/spring-boot-test/src/test/java/org/springframework/boot/test/json/GsonTesterTests.java" startline="51" endline="60" pcid="10835">
+	public void initFieldsShouldSetNullFields() {
+		InitFieldsTestClass test = new InitFieldsTestClass();
+		assertThat(test.test).isNull();
+		assertThat(test.base).isNull();
+		GsonTester.initFields(test, new GsonBuilder().create());
+		assertThat(test.test).isNotNull();
+		assertThat(test.base).isNotNull();
+		assertThat(test.test.getType().resolve()).isEqualTo(List.class);
+		assertThat(test.test.getType().resolveGeneric()).isEqualTo(ExampleObject.class);
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-test/src/test/java/org/springframework/boot/test/json/JsonbTesterTests.java" startline="52" endline="61" pcid="10850">
+	public void initFieldsShouldSetNullFields() {
+		InitFieldsTestClass test = new InitFieldsTestClass();
+		assertThat(test.test).isNull();
+		assertThat(test.base).isNull();
+		JsonbTester.initFields(test, JsonbBuilder.create());
+		assertThat(test.test).isNotNull();
+		assertThat(test.base).isNotNull();
+		assertThat(test.test.getType().resolve()).isEqualTo(List.class);
+		assertThat(test.test.getType().resolveGeneric()).isEqualTo(ExampleObject.class);
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-test/src/test/java/org/springframework/boot/test/json/JacksonTesterTests.java" startline="50" endline="59" pcid="10846">
+	public void initFieldsShouldSetNullFields() {
+		InitFieldsTestClass test = new InitFieldsTestClass();
+		assertThat(test.test).isNull();
+		assertThat(test.base).isNull();
+		JacksonTester.initFields(test, new ObjectMapper());
+		assertThat(test.test).isNotNull();
+		assertThat(test.base).isNotNull();
+		assertThat(test.test.getType().resolve()).isEqualTo(List.class);
+		assertThat(test.test.getType().resolveGeneric()).isEqualTo(ExampleObject.class);
+	}
+</source>
+</class>
+
+<class classid="45" nclones="2" nlines="10" similarity="90">
+<source file="spring-boot/spring-boot-project/spring-boot-test/src/test/java/org/springframework/boot/test/mock/mockito/MockBeanOnContextHierarchyIntegrationTests.java" startline="51" endline="61" pcid="10907">
+	public void testMocking() {
+		ApplicationContext context = this.childConfig.getContext();
+		ApplicationContext parentContext = context.getParent();
+		assertThat(parentContext.getBeanNamesForType(ExampleService.class)).hasSize(1);
+		assertThat(parentContext.getBeanNamesForType(ExampleServiceCaller.class))
+				.hasSize(0);
+		assertThat(context.getBeanNamesForType(ExampleService.class)).hasSize(0);
+		assertThat(context.getBeanNamesForType(ExampleServiceCaller.class)).hasSize(1);
+		assertThat(context.getBean(ExampleService.class)).isNotNull();
+		assertThat(context.getBean(ExampleServiceCaller.class)).isNotNull();
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-test/src/test/java/org/springframework/boot/test/mock/mockito/SpyBeanOnContextHierarchyIntegrationTests.java" startline="52" endline="62" pcid="10991">
+	public void testSpying() {
+		ApplicationContext context = this.childConfig.getContext();
+		ApplicationContext parentContext = context.getParent();
+		assertThat(parentContext.getBeanNamesForType(ExampleService.class)).hasSize(1);
+		assertThat(parentContext.getBeanNamesForType(ExampleServiceCaller.class))
+				.hasSize(0);
+		assertThat(context.getBeanNamesForType(ExampleService.class)).hasSize(0);
+		assertThat(context.getBeanNamesForType(ExampleServiceCaller.class)).hasSize(1);
+		assertThat(context.getBean(ExampleService.class)).isNotNull();
+		assertThat(context.getBean(ExampleServiceCaller.class)).isNotNull();
+	}
+</source>
+</class>
+
+<class classid="46" nclones="5" nlines="10" similarity="100">
+<source file="spring-boot/spring-boot-project/spring-boot-test-autoconfigure/src/main/java/org/springframework/boot/test/autoconfigure/data/ldap/DataLdapTypeExcludeFilter.java" startline="47" endline="56" pcid="11097">
+	protected Filter[] getFilters(FilterType type) {
+		switch (type) {
+		case INCLUDE:
+			return this.annotation.includeFilters();
+		case EXCLUDE:
+			return this.annotation.excludeFilters();
+		default:
+			throw new IllegalStateException("Unsupported type " + type);
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-test-autoconfigure/src/main/java/org/springframework/boot/test/autoconfigure/data/mongo/DataMongoTypeExcludeFilter.java" startline="47" endline="56" pcid="11103">
+	protected Filter[] getFilters(FilterType type) {
+		switch (type) {
+		case INCLUDE:
+			return this.annotation.includeFilters();
+		case EXCLUDE:
+			return this.annotation.excludeFilters();
+		default:
+			throw new IllegalStateException("Unsupported type " + type);
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-test-autoconfigure/src/main/java/org/springframework/boot/test/autoconfigure/data/neo4j/DataNeo4jTypeExcludeFilter.java" startline="47" endline="56" pcid="11109">
+	protected Filter[] getFilters(FilterType type) {
+		switch (type) {
+		case INCLUDE:
+			return this.annotation.includeFilters();
+		case EXCLUDE:
+			return this.annotation.excludeFilters();
+		default:
+			throw new IllegalStateException("Unsupported type " + type);
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-test-autoconfigure/src/main/java/org/springframework/boot/test/autoconfigure/jooq/JooqTypeExcludeFilter.java" startline="47" endline="56" pcid="11166">
+	protected Filter[] getFilters(FilterType type) {
+		switch (type) {
+		case INCLUDE:
+			return this.annotation.includeFilters();
+		case EXCLUDE:
+			return this.annotation.excludeFilters();
+		default:
+			throw new IllegalStateException("Unsupported type " + type);
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-test-autoconfigure/src/main/java/org/springframework/boot/test/autoconfigure/data/redis/DataRedisTypeExcludeFilter.java" startline="47" endline="56" pcid="11115">
+	protected Filter[] getFilters(FilterType type) {
+		switch (type) {
+		case INCLUDE:
+			return this.annotation.includeFilters();
+		case EXCLUDE:
+			return this.annotation.excludeFilters();
+		default:
+			throw new IllegalStateException("Unsupported type " + type);
+		}
+	}
+</source>
+</class>
+
+<class classid="47" nclones="4" nlines="10" similarity="70">
+<source file="spring-boot/spring-boot-project/spring-boot-test-autoconfigure/src/test/java/org/springframework/boot/test/autoconfigure/web/servlet/WebMvcTypeExcludeFilterTests.java" startline="47" endline="57" pcid="11679">
+	public void matchWhenHasNoControllers() throws Exception {
+		WebMvcTypeExcludeFilter filter = new WebMvcTypeExcludeFilter(
+				WithNoControllers.class);
+		assertThat(excludes(filter, Controller1.class)).isFalse();
+		assertThat(excludes(filter, Controller2.class)).isFalse();
+		assertThat(excludes(filter, ExampleControllerAdvice.class)).isFalse();
+		assertThat(excludes(filter, ExampleWeb.class)).isFalse();
+		assertThat(excludes(filter, ExampleMessageConverter.class)).isFalse();
+		assertThat(excludes(filter, ExampleService.class)).isTrue();
+		assertThat(excludes(filter, ExampleRepository.class)).isTrue();
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-test-autoconfigure/src/test/java/org/springframework/boot/test/autoconfigure/web/servlet/WebMvcTypeExcludeFilterTests.java" startline="86" endline="96" pcid="11682">
+	public void matchWithIncludeFilter() throws Exception {
+		WebMvcTypeExcludeFilter filter = new WebMvcTypeExcludeFilter(
+				WithIncludeFilter.class);
+		assertThat(excludes(filter, Controller1.class)).isFalse();
+		assertThat(excludes(filter, Controller2.class)).isFalse();
+		assertThat(excludes(filter, ExampleControllerAdvice.class)).isFalse();
+		assertThat(excludes(filter, ExampleWeb.class)).isFalse();
+		assertThat(excludes(filter, ExampleMessageConverter.class)).isFalse();
+		assertThat(excludes(filter, ExampleService.class)).isTrue();
+		assertThat(excludes(filter, ExampleRepository.class)).isFalse();
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-test-autoconfigure/src/test/java/org/springframework/boot/test/autoconfigure/web/servlet/WebMvcTypeExcludeFilterTests.java" startline="60" endline="70" pcid="11680">
+	public void matchWhenHasController() throws Exception {
+		WebMvcTypeExcludeFilter filter = new WebMvcTypeExcludeFilter(
+				WithController.class);
+		assertThat(excludes(filter, Controller1.class)).isFalse();
+		assertThat(excludes(filter, Controller2.class)).isTrue();
+		assertThat(excludes(filter, ExampleControllerAdvice.class)).isFalse();
+		assertThat(excludes(filter, ExampleWeb.class)).isFalse();
+		assertThat(excludes(filter, ExampleMessageConverter.class)).isFalse();
+		assertThat(excludes(filter, ExampleService.class)).isTrue();
+		assertThat(excludes(filter, ExampleRepository.class)).isTrue();
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-test-autoconfigure/src/test/java/org/springframework/boot/test/autoconfigure/web/servlet/WebMvcTypeExcludeFilterTests.java" startline="99" endline="109" pcid="11683">
+	public void matchWithExcludeFilter() throws Exception {
+		WebMvcTypeExcludeFilter filter = new WebMvcTypeExcludeFilter(
+				WithExcludeFilter.class);
+		assertThat(excludes(filter, Controller1.class)).isTrue();
+		assertThat(excludes(filter, Controller2.class)).isFalse();
+		assertThat(excludes(filter, ExampleControllerAdvice.class)).isFalse();
+		assertThat(excludes(filter, ExampleWeb.class)).isFalse();
+		assertThat(excludes(filter, ExampleMessageConverter.class)).isFalse();
+		assertThat(excludes(filter, ExampleService.class)).isTrue();
+		assertThat(excludes(filter, ExampleRepository.class)).isTrue();
+	}
+</source>
+</class>
+
+<class classid="48" nclones="2" nlines="12" similarity="100">
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-configuration-metadata/src/main/java/org/springframework/boot/configurationmetadata/JsonReader.java" startline="196" endline="206" pcid="11780">
+	private Object readItemValue(Object value) throws Exception {
+		if (value instanceof JSONArray) {
+			JSONArray array = (JSONArray) value;
+			Object[] content = new Object[array.length()];
+			for (int i = 0; i < array.length(); i++) {
+				content[i] = array.get(i);
+			}
+			return content;
+		}
+		return value;
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-configuration-processor/src/main/java/org/springframework/boot/configurationprocessor/metadata/JsonMarshaller.java" startline="156" endline="166" pcid="12075">
+	private Object readItemValue(Object value) throws Exception {
+		if (value instanceof JSONArray) {
+			JSONArray array = (JSONArray) value;
+			Object[] content = new Object[array.length()];
+			for (int i = 0; i < array.length(); i++) {
+				content[i] = array.get(i);
+			}
+			return content;
+		}
+		return value;
+	}
+</source>
+</class>
+
+<class classid="49" nclones="2" nlines="10" similarity="80">
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-configuration-processor/src/main/java/org/springframework/boot/configurationprocessor/metadata/ItemDeprecation.java" startline="72" endline="83" pcid="12007">
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		ItemDeprecation other = (ItemDeprecation) o;
+		return nullSafeEquals(this.reason, other.reason)
+				&& nullSafeEquals(this.replacement, other.replacement)
+				&& nullSafeEquals(this.level, other.level);
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-cache/src/main/java/sample/cache/Country.java" startline="35" endline="46" pcid="13428">
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+
+		Country country = (Country) o;
+
+		return this.code.equals(country.code);
+	}
+</source>
+</class>
+
+<class classid="50" nclones="2" nlines="11" similarity="72">
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-configuration-processor/src/main/java/org/springframework/boot/configurationprocessor/metadata/ItemMetadata.java" startline="47" endline="58" pcid="12028">
+	ItemMetadata(ItemType itemType, String prefix, String name, String type,
+			String sourceType, String sourceMethod, String description,
+			Object defaultValue, ItemDeprecation deprecation) {
+		this.itemType = itemType;
+		this.name = buildName(prefix, name);
+		this.type = type;
+		this.sourceType = sourceType;
+		this.sourceMethod = sourceMethod;
+		this.description = description;
+		this.defaultValue = defaultValue;
+		this.deprecation = deprecation;
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-configuration-processor/src/test/java/org/springframework/boot/configurationprocessor/metadata/Metadata.java" startline="95" endline="107" pcid="12122">
+		public MetadataItemCondition(ItemType itemType, String name, String type,
+				Class<?> sourceType, String sourceMethod, String description,
+				Object defaultValue, ItemDeprecation deprecation) {
+			this.itemType = itemType;
+			this.name = name;
+			this.type = type;
+			this.sourceType = sourceType;
+			this.sourceMethod = sourceMethod;
+			this.description = description;
+			this.defaultValue = defaultValue;
+			this.deprecation = deprecation;
+			describedAs(createDescription());
+		}
+</source>
+</class>
+
+<class classid="51" nclones="2" nlines="10" similarity="80">
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-configuration-processor/src/test/java/org/springframework/boot/configurationprocessor/MetadataStoreTests.java" startline="63" endline="76" pcid="12153">
+	public void additionalMetadataIsLocatedInGradle3Build() throws IOException {
+		File app = this.temp.newFolder("app");
+		File classesLocation = new File(app, "build/classes/main");
+		File resourcesLocation = new File(app, "build/resources/main");
+		File metaInf = new File(resourcesLocation, "META-INF");
+		metaInf.mkdirs();
+		File additionalMetadata = new File(metaInf,
+				"additional-spring-configuration-metadata.json");
+		additionalMetadata.createNewFile();
+		assertThat(
+				this.metadataStore.locateAdditionalMetadataFile(new File(classesLocation,
+						"META-INF/additional-spring-configuration-metadata.json")))
+								.isEqualTo(additionalMetadata);
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-configuration-processor/src/test/java/org/springframework/boot/configurationprocessor/MetadataStoreTests.java" startline="79" endline="92" pcid="12154">
+	public void additionalMetadataIsLocatedInGradle4Build() throws IOException {
+		File app = this.temp.newFolder("app");
+		File classesLocation = new File(app, "build/classes/java/main");
+		File resourcesLocation = new File(app, "build/resources/main");
+		File metaInf = new File(resourcesLocation, "META-INF");
+		metaInf.mkdirs();
+		File additionalMetadata = new File(metaInf,
+				"additional-spring-configuration-metadata.json");
+		additionalMetadata.createNewFile();
+		assertThat(
+				this.metadataStore.locateAdditionalMetadataFile(new File(classesLocation,
+						"META-INF/additional-spring-configuration-metadata.json")))
+								.isEqualTo(additionalMetadata);
+	}
+</source>
+</class>
+
+<class classid="52" nclones="2" nlines="10" similarity="90">
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-gradle-plugin/src/main/java/org/springframework/boot/gradle/tasks/bundling/LaunchScriptConfiguration.java" startline="144" endline="154" pcid="12440">
+	private void putIfMissing(Map<String, String> properties, String key,
+			String... valueCandidates) {
+		if (!properties.containsKey(key)) {
+			for (String candidate : valueCandidates) {
+				if (candidate != null && !candidate.isEmpty()) {
+					properties.put(key, candidate);
+					return;
+				}
+			}
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-maven-plugin/src/main/java/org/springframework/boot/maven/RepackageMojo.java" startline="318" endline="328" pcid="13145">
+	private void putIfMissing(Properties properties, String key,
+			String... valueCandidates) {
+		if (!properties.containsKey(key)) {
+			for (String candidate : valueCandidates) {
+				if (candidate != null && !candidate.isEmpty()) {
+					properties.put(key, candidate);
+					return;
+				}
+			}
+		}
+	}
+</source>
+</class>
+
+<class classid="53" nclones="2" nlines="12" similarity="100">
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-loader/src/it/executable-dir/src/main/java/org/springframework/launcher/it/jar/EmbeddedJarStarter.java" startline="32" endline="46" pcid="12550">
+	public static void main(String[] args) throws Exception {
+		Server server = new Server(8080);
+
+		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+		context.setContextPath("/");
+		server.setHandler(context);
+
+		AnnotationConfigWebApplicationContext webApplicationContext = new AnnotationConfigWebApplicationContext();
+		webApplicationContext.register(SpringConfiguration.class);
+		DispatcherServlet dispatcherServlet = new DispatcherServlet(webApplicationContext);
+		context.addServlet(new ServletHolder(dispatcherServlet), "/*");
+
+		server.start();
+		server.join();
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-loader/src/it/executable-jar/src/main/java/org/springframework/launcher/it/jar/EmbeddedJarStarter.java" startline="32" endline="46" pcid="12552">
+	public static void main(String[] args) throws Exception {
+		Server server = new Server(8080);
+
+		ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+		context.setContextPath("/");
+		server.setHandler(context);
+
+		AnnotationConfigWebApplicationContext webApplicationContext = new AnnotationConfigWebApplicationContext();
+		webApplicationContext.register(SpringConfiguration.class);
+		DispatcherServlet dispatcherServlet = new DispatcherServlet(webApplicationContext);
+		context.addServlet(new ServletHolder(dispatcherServlet), "/*");
+
+		server.start();
+		server.join();
+	}
+</source>
+</class>
+
+<class classid="54" nclones="2" nlines="12" similarity="100">
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-maven-plugin/src/it/run-profiles/src/main/java/org/test/SampleApplication.java" startline="23" endline="34" pcid="13084">
+	public static void main(String[] args) {
+		if (args.length < 1) {
+			throw new IllegalArgumentException("Missing active profile argument " + Arrays.toString(args) + "");
+		}
+		String argument = args[0];
+		if (!argument.startsWith("--spring.profiles.active=")) {
+			throw new IllegalArgumentException("Invalid argument " + argument);
+		}
+		int index = args[0].indexOf("=");
+		String profile = argument.substring(index + 1);
+		System.out.println("I haz been run with profile(s) '" + profile + "'");
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-maven-plugin/src/it/run-profiles-fork/src/main/java/org/test/SampleApplication.java" startline="23" endline="34" pcid="13085">
+	public static void main(String[] args) {
+		if (args.length < 1) {
+			throw new IllegalArgumentException("Missing active profile argument " + Arrays.toString(args) + "");
+		}
+		String argument = args[0];
+		if (!argument.startsWith("--spring.profiles.active=")) {
+			throw new IllegalArgumentException("Invalid argument " + argument);
+		}
+		int index = args[0].indexOf("=");
+		String profile = argument.substring(index + 1);
+		System.out.println("I haz been run with profile(s) '" + profile + "'");
+	}
+</source>
+</class>
+
+<class classid="55" nclones="3" nlines="17" similarity="94">
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-maven-plugin/src/it/start-stop/src/main/java/org/test/SampleApplication.java" startline="30" endline="51" pcid="13088">
+	public static void main(String[] args) throws Exception {
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		ObjectName name = new ObjectName(
+				"org.springframework.boot:type=Admin,name=SpringApplication");
+		SpringApplicationAdmin mbean = new SpringApplicationAdmin();
+		mbs.registerMBean(mbean, name);
+
+		// Flag the app as ready
+		mbean.ready = true;
+
+		int waitAttempts = 0;
+		while (!mbean.shutdownInvoked) {
+			if (waitAttempts > 10) {
+				throw new IllegalStateException(
+						"Shutdown should have been invoked by now");
+			}
+			synchronized (lock) {
+				lock.wait(250);
+			}
+			waitAttempts++;
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-maven-plugin/src/it/start-stop-fork/src/main/java/org/test/SampleApplication.java" startline="31" endline="52" pcid="13094">
+	public static void main(String[] args) throws Exception {
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		ObjectName name = new ObjectName(
+				"org.springframework.boot:type=Admin,name=SpringApplication");
+		SpringApplicationAdmin mbean = new SpringApplicationAdmin();
+		mbs.registerMBean(mbean, name);
+
+		// Flag the app as ready
+		mbean.ready = true;
+
+		int waitAttempts = 0;
+		while (!mbean.shutdownInvoked) {
+			if (waitAttempts > 30) {
+				throw new IllegalStateException(
+						"Shutdown should have been invoked by now");
+			}
+			synchronized (lock) {
+				lock.wait(250);
+			}
+			waitAttempts++;
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-project/spring-boot-tools/spring-boot-maven-plugin/src/it/start-stop-automatic-fork/src/main/java/org/test/SampleApplication.java" startline="31" endline="52" pcid="13091">
+	public static void main(String[] args) throws Exception {
+		MBeanServer mbs = ManagementFactory.getPlatformMBeanServer();
+		ObjectName name = new ObjectName(
+				"org.springframework.boot:type=Admin,name=SpringApplication");
+		SpringApplicationAdmin mbean = new SpringApplicationAdmin();
+		mbs.registerMBean(mbean, name);
+
+		// Flag the app as ready
+		mbean.ready = true;
+
+		int waitAttempts = 0;
+		while (!mbean.shutdownInvoked) {
+			if (waitAttempts > 30) {
+				throw new IllegalStateException(
+						"Shutdown should have been invoked by now");
+			}
+			synchronized (lock) {
+				lock.wait(250);
+			}
+			waitAttempts++;
+		}
+	}
+</source>
+</class>
+
+<class classid="56" nclones="3" nlines="19" similarity="89">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-data-cassandra/src/main/java/sample/data/cassandra/SampleCassandraApplication.java" startline="33" endline="58" pcid="13447">
+	public void run(String... args) throws Exception {
+		this.repository.deleteAll();
+
+		// save a couple of customers
+		this.repository.save(new Customer(UUIDs.timeBased(), "Alice", "Smith"));
+		this.repository.save(new Customer(UUIDs.timeBased(), "Bob", "Smith"));
+
+		// fetch all customers
+		System.out.println("Customers found with findAll():");
+		System.out.println("-------------------------------");
+		for (Customer customer : this.repository.findAll()) {
+			System.out.println(customer);
+		}
+		System.out.println();
+
+		// fetch an individual customer
+		System.out.println("Customer found with findByFirstName('Alice'):");
+		System.out.println("--------------------------------");
+		System.out.println(this.repository.findByFirstName("Alice"));
+
+		System.out.println("Customers found with findByLastName('Smith'):");
+		System.out.println("--------------------------------");
+		for (Customer customer : this.repository.findByLastName("Smith")) {
+			System.out.println(customer);
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-data-mongodb/src/main/java/sample/data/mongo/SampleMongoApplication.java" startline="31" endline="56" pcid="13555">
+	public void run(String... args) throws Exception {
+		this.repository.deleteAll();
+
+		// save a couple of customers
+		this.repository.save(new Customer("Alice", "Smith"));
+		this.repository.save(new Customer("Bob", "Smith"));
+
+		// fetch all customers
+		System.out.println("Customers found with findAll():");
+		System.out.println("-------------------------------");
+		for (Customer customer : this.repository.findAll()) {
+			System.out.println(customer);
+		}
+		System.out.println();
+
+		// fetch an individual customer
+		System.out.println("Customer found with findByFirstName('Alice'):");
+		System.out.println("--------------------------------");
+		System.out.println(this.repository.findByFirstName("Alice"));
+
+		System.out.println("Customers found with findByLastName('Smith'):");
+		System.out.println("--------------------------------");
+		for (Customer customer : this.repository.findByLastName("Smith")) {
+			System.out.println(customer);
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-data-neo4j/src/main/java/sample/data/neo4j/SampleNeo4jApplication.java" startline="31" endline="56" pcid="13561">
+	public void run(String... args) throws Exception {
+		this.repository.deleteAll();
+
+		// save a couple of customers
+		this.repository.save(new Customer("Alice", "Smith"));
+		this.repository.save(new Customer("Bob", "Smith"));
+
+		// fetch all customers
+		System.out.println("Customers found with findAll():");
+		System.out.println("-------------------------------");
+		for (Customer customer : this.repository.findAll()) {
+			System.out.println(customer);
+		}
+		System.out.println();
+
+		// fetch an individual customer
+		System.out.println("Customer found with findByFirstName('Alice'):");
+		System.out.println("--------------------------------");
+		System.out.println(this.repository.findByFirstName("Alice"));
+
+		System.out.println("Customers found with findByLastName('Smith'):");
+		System.out.println("--------------------------------");
+		for (Customer customer : this.repository.findByLastName("Smith")) {
+			System.out.println(customer);
+		}
+	}
+</source>
+</class>
+
+<class classid="57" nclones="2" nlines="12" similarity="100">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-data-cassandra/src/test/java/sample/data/cassandra/SampleCassandraApplicationTests.java" startline="64" endline="79" pcid="13452">
+		public Statement apply(Statement base, Description description) {
+			return new Statement() {
+
+				@Override
+				public void evaluate() throws Throwable {
+					if (!runningOnWindows()) {
+						base.evaluate();
+					}
+				}
+
+				private boolean runningOnWindows() {
+					return File.separatorChar == '\\';
+				}
+
+			};
+		}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-data-elasticsearch/src/test/java/sample/data/elasticsearch/SampleElasticsearchApplicationTests.java" startline="76" endline="91" pcid="13483">
+		public Statement apply(Statement base, Description description) {
+			return new Statement() {
+
+				@Override
+				public void evaluate() throws Throwable {
+					if (!runningOnWindows()) {
+						base.evaluate();
+					}
+				}
+
+				private boolean runningOnWindows() {
+					return File.separatorChar == '\\';
+				}
+
+			};
+		}
+</source>
+</class>
+
+<class classid="58" nclones="4" nlines="11" similarity="72">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-data-couchbase/src/test/java/sample/data/couchbase/SampleCouchbaseApplicationTests.java" startline="35" endline="47" pcid="13465">
+	public void testDefaultSettings() {
+		try {
+			new SpringApplicationBuilder(SampleCouchbaseApplication.class)
+					.run("--server.port=0");
+		}
+		catch (RuntimeException ex) {
+			if (serverNotRunning(ex)) {
+				return;
+			}
+		}
+		String output = this.outputCapture.toString();
+		assertThat(output).contains("firstName='Alice', lastName='Smith'");
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-data-neo4j/src/test/java/sample/data/neo4j/SampleNeo4jApplicationTests.java" startline="38" endline="49" pcid="13563">
+	public void testDefaultSettings() {
+		try {
+			SampleNeo4jApplication.main(new String[0]);
+		}
+		catch (Exception ex) {
+			if (!neo4jServerRunning(ex)) {
+				return;
+			}
+		}
+		String output = this.outputCapture.toString();
+		assertThat(output).contains("firstName='Alice', lastName='Smith'");
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-data-redis/src/test/java/sample/data/redis/SampleRedisApplicationTests.java" startline="38" endline="49" pcid="13567">
+	public void testDefaultSettings() {
+		try {
+			SampleRedisApplication.main(new String[0]);
+		}
+		catch (Exception ex) {
+			if (!redisServerRunning(ex)) {
+				return;
+			}
+		}
+		String output = this.outputCapture.toString();
+		assertThat(output).contains("Found key spring.boot.redis.test");
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-data-elasticsearch/src/test/java/sample/data/elasticsearch/SampleElasticsearchApplicationTests.java" startline="48" endline="60" pcid="13481">
+	public void testDefaultSettings() {
+		try {
+			new SpringApplicationBuilder(SampleElasticsearchApplication.class).run();
+		}
+		catch (Exception ex) {
+			if (!elasticsearchRunning(ex)) {
+				return;
+			}
+			throw ex;
+		}
+		String output = this.outputCapture.toString();
+		assertThat(output).contains("firstName='Alice', lastName='Smith'");
+	}
+</source>
+</class>
+
+<class classid="59" nclones="3" nlines="12" similarity="83">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-data-couchbase/src/test/java/sample/data/couchbase/SampleCouchbaseApplicationTests.java" startline="49" endline="60" pcid="13466">
+	private boolean serverNotRunning(RuntimeException ex) {
+		@SuppressWarnings("serial")
+		NestedCheckedException nested = new NestedCheckedException("failed", ex) {
+		};
+		if (nested.contains(ConnectException.class)) {
+			Throwable root = nested.getRootCause();
+			if (root.getMessage().contains("Connection refused")) {
+				return true;
+			}
+		}
+		return false;
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-liquibase/src/test/java/sample/liquibase/SampleLiquibaseApplicationTests.java" startline="60" endline="70" pcid="13828">
+	private boolean serverNotRunning(IllegalStateException ex) {
+		NestedCheckedException nested = new NestedCheckedException("failed", ex) {
+		};
+		if (nested.contains(ConnectException.class)) {
+			Throwable root = nested.getRootCause();
+			if (root.getMessage().contains("Connection refused")) {
+				return true;
+			}
+		}
+		return false;
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-data-solr/src/test/java/sample/data/solr/SampleSolrApplicationTests.java" startline="47" endline="55" pcid="13610">
+	private boolean serverNotRunning(IllegalStateException ex) {
+		NestedCheckedException nested = new NestedCheckedException("failed", ex) {
+		};
+		Throwable root = nested.getRootCause();
+		if (root.getMessage().contains("Connection refused")) {
+			return true;
+		}
+		return false;
+	}
+</source>
+</class>
+
+<class classid="60" nclones="2" nlines="11" similarity="100">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-integration/src/test/java/sample/integration/producer/ProducerApplication.java" startline="30" endline="41" pcid="13655">
+	public void run(String... args) throws Exception {
+		new File("target/input").mkdirs();
+		if (args.length > 0) {
+			FileOutputStream stream = new FileOutputStream(
+					"target/input/data" + System.currentTimeMillis() + ".txt");
+			for (String arg : args) {
+				stream.write(arg.getBytes());
+			}
+			stream.flush();
+			stream.close();
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-parent-context/src/test/java/sample/parent/producer/ProducerApplication.java" startline="30" endline="41" pcid="13863">
+	public void run(String... args) throws Exception {
+		new File("target/input").mkdirs();
+		if (args.length > 0) {
+			FileOutputStream stream = new FileOutputStream(
+					"target/input/data" + System.currentTimeMillis() + ".txt");
+			for (String arg : args) {
+				stream.write(arg.getBytes());
+			}
+			stream.flush();
+			stream.close();
+		}
+	}
+</source>
+</class>
+
+<class classid="61" nclones="3" nlines="15" similarity="80">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-jta-atomikos/src/main/java/sample/atomikos/SampleAtomikosApplication.java" startline="28" endline="44" pcid="13780">
+	public static void main(String[] args) throws Exception {
+		ApplicationContext context = SpringApplication
+				.run(SampleAtomikosApplication.class, args);
+		AccountService service = context.getBean(AccountService.class);
+		AccountRepository repository = context.getBean(AccountRepository.class);
+		service.createAccountAndNotify("josh");
+		System.out.println("Count is " + repository.count());
+		try {
+			service.createAccountAndNotify("error");
+		}
+		catch (Exception ex) {
+			System.out.println(ex.getMessage());
+		}
+		System.out.println("Count is " + repository.count());
+		Thread.sleep(100);
+		((Closeable) context).close();
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-jta-narayana/src/main/java/sample/narayana/SampleNarayanaApplication.java" startline="28" endline="45" pcid="13810">
+	public static void main(String[] args) throws Exception {
+		ApplicationContext context = SpringApplication
+				.run(SampleNarayanaApplication.class, args);
+		AccountService service = context.getBean(AccountService.class);
+		AccountRepository repository = context.getBean(AccountRepository.class);
+		service.createAccountAndNotify("josh");
+		System.out.println("Count is " + repository.count());
+		try {
+			// Using username "error" will cause service to throw SampleRuntimeException
+			service.createAccountAndNotify("error");
+		}
+		catch (SampleRuntimeException ex) {
+			// Log message to let test case know that exception was thrown
+			System.out.println(ex.getMessage());
+		}
+		System.out.println("Count is " + repository.count());
+		((Closeable) context).close();
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-jta-bitronix/src/main/java/sample/bitronix/SampleBitronixApplication.java" startline="28" endline="44" pcid="13790">
+	public static void main(String[] args) throws Exception {
+		ApplicationContext context = SpringApplication
+				.run(SampleBitronixApplication.class, args);
+		AccountService service = context.getBean(AccountService.class);
+		AccountRepository repository = context.getBean(AccountRepository.class);
+		service.createAccountAndNotify("josh");
+		System.out.println("Count is " + repository.count());
+		try {
+			service.createAccountAndNotify("error");
+		}
+		catch (Exception ex) {
+			System.out.println(ex.getMessage());
+		}
+		System.out.println("Count is " + repository.count());
+		Thread.sleep(100);
+		((Closeable) context).close();
+	}
+</source>
+</class>
+
+<class classid="62" nclones="3" nlines="14" similarity="100">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-jta-atomikos/src/test/java/sample/atomikos/SampleAtomikosApplicationTests.java" startline="47" endline="63" pcid="13782">
+	private Condition<String> substring(int times, String substring) {
+		return new Condition<String>(
+				"containing '" + substring + "' " + times + " times") {
+
+			@Override
+			public boolean matches(String value) {
+				int i = 0;
+				while (value.contains(substring)) {
+					int beginIndex = value.indexOf(substring) + substring.length();
+					value = value.substring(beginIndex);
+					i++;
+				}
+				return i == times;
+			}
+
+		};
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-jta-narayana/src/test/java/sample/narayana/SampleNarayanaApplicationTests.java" startline="47" endline="63" pcid="13813">
+	private Condition<String> substring(int times, String substring) {
+		return new Condition<String>(
+				"containing '" + substring + "' " + times + " times") {
+
+			@Override
+			public boolean matches(String value) {
+				int i = 0;
+				while (value.contains(substring)) {
+					int beginIndex = value.indexOf(substring) + substring.length();
+					value = value.substring(beginIndex);
+					i++;
+				}
+				return i == times;
+			}
+
+		};
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-jta-bitronix/src/test/java/sample/bitronix/SampleBitronixApplicationTests.java" startline="63" endline="79" pcid="13793">
+	private Condition<String> substring(int times, String substring) {
+		return new Condition<String>(
+				"containing '" + substring + "' " + times + " times") {
+
+			@Override
+			public boolean matches(String value) {
+				int i = 0;
+				while (value.contains(substring)) {
+					int beginIndex = value.indexOf(substring) + substring.length();
+					value = value.substring(beginIndex);
+					i++;
+				}
+				return i == times;
+			}
+
+		};
+	}
+</source>
+</class>
+
+<class classid="63" nclones="2" nlines="11" similarity="100">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-testng/src/main/java/sample/testng/SampleTestNGApplication.java" startline="35" endline="49" pcid="14032">
+	protected ServletContextListener listener() {
+		return new ServletContextListener() {
+
+			@Override
+			public void contextInitialized(ServletContextEvent sce) {
+				logger.info("ServletContext initialized");
+			}
+
+			@Override
+			public void contextDestroyed(ServletContextEvent sce) {
+				logger.info("ServletContext destroyed");
+			}
+
+		};
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-tomcat/src/main/java/sample/tomcat/SampleTomcatApplication.java" startline="35" endline="49" pcid="14039">
+	protected ServletContextListener listener() {
+		return new ServletContextListener() {
+
+			@Override
+			public void contextInitialized(ServletContextEvent sce) {
+				logger.info("ServletContext initialized");
+			}
+
+			@Override
+			public void contextDestroyed(ServletContextEvent sce) {
+				logger.info("ServletContext destroyed");
+			}
+
+		};
+	}
+</source>
+</class>
+
+<class classid="64" nclones="3" nlines="12" similarity="91">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-web-secure/src/test/java/sample/web/secure/SampleSecureApplicationTests.java" startline="80" endline="93" pcid="14158">
+	public void testLogin() {
+		HttpHeaders headers = getHeaders();
+		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+		form.set("username", "user");
+		form.set("password", "password");
+		ResponseEntity<String> entity = this.restTemplate.exchange("/login",
+				HttpMethod.POST, new HttpEntity<>(form, headers), String.class);
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.FOUND);
+		assertThat(entity.getHeaders().getLocation().toString())
+				.endsWith(this.port + "/");
+		assertThat(entity.getHeaders().get("Set-Cookie")).isNotNull();
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-web-secure-custom/src/test/java/sample/web/secure/custom/SampleWebSecureCustomApplicationTests.java" startline="80" endline="93" pcid="14168">
+	public void testLogin() {
+		HttpHeaders headers = getHeaders();
+		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+		form.set("username", "user");
+		form.set("password", "password");
+		ResponseEntity<String> entity = this.restTemplate.exchange("/login",
+				HttpMethod.POST, new HttpEntity<>(form, headers), String.class);
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.FOUND);
+		assertThat(entity.getHeaders().getLocation().toString())
+				.endsWith(this.port + "/");
+		assertThat(entity.getHeaders().get("Set-Cookie")).isNotNull();
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-web-secure-jdbc/src/test/java/sample/web/secure/jdbc/SampleWebSecureJdbcApplicationTests.java" startline="80" endline="93" pcid="14179">
+	public void testLogin() {
+		HttpHeaders headers = getHeaders();
+		headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
+		headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+		MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+		form.set("username", "user");
+		form.set("password", "user");
+		ResponseEntity<String> entity = this.restTemplate.exchange("/login",
+				HttpMethod.POST, new HttpEntity<>(form, headers), String.class);
+		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.FOUND);
+		assertThat(entity.getHeaders().getLocation().toString())
+				.endsWith(this.port + "/");
+		assertThat(entity.getHeaders().get("Set-Cookie")).isNotNull();
+	}
+</source>
+</class>
+
+<class classid="65" nclones="3" nlines="12" similarity="100">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-web-secure/src/test/java/sample/web/secure/SampleSecureApplicationTests.java" startline="95" endline="107" pcid="14159">
+	private HttpHeaders getHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		ResponseEntity<String> page = this.restTemplate.getForEntity("/login",
+				String.class);
+		assertThat(page.getStatusCode()).isEqualTo(HttpStatus.OK);
+		String cookie = page.getHeaders().getFirst("Set-Cookie");
+		headers.set("Cookie", cookie);
+		Pattern pattern = Pattern.compile("(?s).*name=\"_csrf\".*?value=\"([^\"]+).*");
+		Matcher matcher = pattern.matcher(page.getBody());
+		assertThat(matcher.matches()).as(page.getBody()).isTrue();
+		headers.set("X-CSRF-TOKEN", matcher.group(1));
+		return headers;
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-web-secure-custom/src/test/java/sample/web/secure/custom/SampleWebSecureCustomApplicationTests.java" startline="95" endline="107" pcid="14169">
+	private HttpHeaders getHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		ResponseEntity<String> page = this.restTemplate.getForEntity("/login",
+				String.class);
+		assertThat(page.getStatusCode()).isEqualTo(HttpStatus.OK);
+		String cookie = page.getHeaders().getFirst("Set-Cookie");
+		headers.set("Cookie", cookie);
+		Pattern pattern = Pattern.compile("(?s).*name=\"_csrf\".*?value=\"([^\"]+).*");
+		Matcher matcher = pattern.matcher(page.getBody());
+		assertThat(matcher.matches()).as(page.getBody()).isTrue();
+		headers.set("X-CSRF-TOKEN", matcher.group(1));
+		return headers;
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-web-secure-jdbc/src/test/java/sample/web/secure/jdbc/SampleWebSecureJdbcApplicationTests.java" startline="95" endline="107" pcid="14180">
+	private HttpHeaders getHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		ResponseEntity<String> page = this.restTemplate.getForEntity("/login",
+				String.class);
+		assertThat(page.getStatusCode()).isEqualTo(HttpStatus.OK);
+		String cookie = page.getHeaders().getFirst("Set-Cookie");
+		headers.set("Cookie", cookie);
+		Pattern pattern = Pattern.compile("(?s).*name=\"_csrf\".*?value=\"([^\"]+).*");
+		Matcher matcher = pattern.matcher(page.getBody());
+		assertThat(matcher.matches()).as(page.getBody()).isTrue();
+		headers.set("X-CSRF-TOKEN", matcher.group(1));
+		return headers;
+	}
+</source>
+</class>
+
+<class classid="66" nclones="3" nlines="15" similarity="100">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-jetty/src/main/java/samples/websocket/jetty/snake/Location.java" startline="36" endline="51" pcid="14256">
+	public Location getAdjacentLocation(Direction direction) {
+		switch (direction) {
+		case NORTH:
+			return new Location(this.x, this.y - SnakeUtils.GRID_SIZE);
+		case SOUTH:
+			return new Location(this.x, this.y + SnakeUtils.GRID_SIZE);
+		case EAST:
+			return new Location(this.x + SnakeUtils.GRID_SIZE, this.y);
+		case WEST:
+			return new Location(this.x - SnakeUtils.GRID_SIZE, this.y);
+		case NONE:
+			// fall through
+		default:
+			return this;
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-tomcat/src/main/java/samples/websocket/tomcat/snake/Location.java" startline="36" endline="51" pcid="14329">
+	public Location getAdjacentLocation(Direction direction) {
+		switch (direction) {
+		case NORTH:
+			return new Location(this.x, this.y - SnakeUtils.GRID_SIZE);
+		case SOUTH:
+			return new Location(this.x, this.y + SnakeUtils.GRID_SIZE);
+		case EAST:
+			return new Location(this.x + SnakeUtils.GRID_SIZE, this.y);
+		case WEST:
+			return new Location(this.x - SnakeUtils.GRID_SIZE, this.y);
+		case NONE:
+			// fall through
+		default:
+			return this;
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-undertow/src/main/java/samples/websocket/undertow/snake/Location.java" startline="36" endline="51" pcid="14402">
+	public Location getAdjacentLocation(Direction direction) {
+		switch (direction) {
+		case NORTH:
+			return new Location(this.x, this.y - SnakeUtils.GRID_SIZE);
+		case SOUTH:
+			return new Location(this.x, this.y + SnakeUtils.GRID_SIZE);
+		case EAST:
+			return new Location(this.x + SnakeUtils.GRID_SIZE, this.y);
+		case WEST:
+			return new Location(this.x - SnakeUtils.GRID_SIZE, this.y);
+		case NONE:
+			// fall through
+		default:
+			return this;
+		}
+	}
+</source>
+</class>
+
+<class classid="67" nclones="3" nlines="16" similarity="100">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-jetty/src/main/java/samples/websocket/jetty/snake/Location.java" startline="54" endline="69" pcid="14257">
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		Location location = (Location) o;
+		if (this.x != location.x) {
+			return false;
+		}
+		if (this.y != location.y) {
+			return false;
+		}
+		return true;
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-undertow/src/main/java/samples/websocket/undertow/snake/Location.java" startline="54" endline="69" pcid="14403">
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		Location location = (Location) o;
+		if (this.x != location.x) {
+			return false;
+		}
+		if (this.y != location.y) {
+			return false;
+		}
+		return true;
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-tomcat/src/main/java/samples/websocket/tomcat/snake/Location.java" startline="54" endline="69" pcid="14330">
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		}
+		if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		Location location = (Location) o;
+		if (this.x != location.x) {
+			return false;
+		}
+		if (this.y != location.y) {
+			return false;
+		}
+		return true;
+	}
+</source>
+</class>
+
+<class classid="68" nclones="3" nlines="25" similarity="100">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-jetty/src/main/java/samples/websocket/jetty/snake/Snake.java" startline="78" endline="103" pcid="14264">
+	public void update(Collection<Snake> snakes) throws Exception {
+		synchronized (this.monitor) {
+			Location nextLocation = this.head.getAdjacentLocation(this.direction);
+			if (nextLocation.x >= SnakeUtils.PLAYFIELD_WIDTH) {
+				nextLocation.x = 0;
+			}
+			if (nextLocation.y >= SnakeUtils.PLAYFIELD_HEIGHT) {
+				nextLocation.y = 0;
+			}
+			if (nextLocation.x < 0) {
+				nextLocation.x = SnakeUtils.PLAYFIELD_WIDTH;
+			}
+			if (nextLocation.y < 0) {
+				nextLocation.y = SnakeUtils.PLAYFIELD_HEIGHT;
+			}
+			if (this.direction != Direction.NONE) {
+				this.tail.addFirst(this.head);
+				if (this.tail.size() > this.length) {
+					this.tail.removeLast();
+				}
+				this.head = nextLocation;
+			}
+
+			handleCollisions(snakes);
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-undertow/src/main/java/samples/websocket/undertow/snake/Snake.java" startline="78" endline="103" pcid="14410">
+	public void update(Collection<Snake> snakes) throws Exception {
+		synchronized (this.monitor) {
+			Location nextLocation = this.head.getAdjacentLocation(this.direction);
+			if (nextLocation.x >= SnakeUtils.PLAYFIELD_WIDTH) {
+				nextLocation.x = 0;
+			}
+			if (nextLocation.y >= SnakeUtils.PLAYFIELD_HEIGHT) {
+				nextLocation.y = 0;
+			}
+			if (nextLocation.x < 0) {
+				nextLocation.x = SnakeUtils.PLAYFIELD_WIDTH;
+			}
+			if (nextLocation.y < 0) {
+				nextLocation.y = SnakeUtils.PLAYFIELD_HEIGHT;
+			}
+			if (this.direction != Direction.NONE) {
+				this.tail.addFirst(this.head);
+				if (this.tail.size() > this.length) {
+					this.tail.removeLast();
+				}
+				this.head = nextLocation;
+			}
+
+			handleCollisions(snakes);
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-tomcat/src/main/java/samples/websocket/tomcat/snake/Snake.java" startline="78" endline="103" pcid="14337">
+	public void update(Collection<Snake> snakes) throws Exception {
+		synchronized (this.monitor) {
+			Location nextLocation = this.head.getAdjacentLocation(this.direction);
+			if (nextLocation.x >= SnakeUtils.PLAYFIELD_WIDTH) {
+				nextLocation.x = 0;
+			}
+			if (nextLocation.y >= SnakeUtils.PLAYFIELD_HEIGHT) {
+				nextLocation.y = 0;
+			}
+			if (nextLocation.x < 0) {
+				nextLocation.x = SnakeUtils.PLAYFIELD_WIDTH;
+			}
+			if (nextLocation.y < 0) {
+				nextLocation.y = SnakeUtils.PLAYFIELD_HEIGHT;
+			}
+			if (this.direction != Direction.NONE) {
+				this.tail.addFirst(this.head);
+				if (this.tail.size() > this.length) {
+					this.tail.removeLast();
+				}
+				this.head = nextLocation;
+			}
+
+			handleCollisions(snakes);
+		}
+	}
+</source>
+</class>
+
+<class classid="69" nclones="3" nlines="12" similarity="100">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-jetty/src/main/java/samples/websocket/jetty/snake/Snake.java" startline="105" endline="117" pcid="14265">
+	private void handleCollisions(Collection<Snake> snakes) throws Exception {
+		for (Snake snake : snakes) {
+			boolean headCollision = this.id != snake.id
+					&& snake.getHead().equals(this.head);
+			boolean tailCollision = snake.getTail().contains(this.head);
+			if (headCollision || tailCollision) {
+				kill();
+				if (this.id != snake.id) {
+					snake.reward();
+				}
+			}
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-undertow/src/main/java/samples/websocket/undertow/snake/Snake.java" startline="105" endline="117" pcid="14411">
+	private void handleCollisions(Collection<Snake> snakes) throws Exception {
+		for (Snake snake : snakes) {
+			boolean headCollision = this.id != snake.id
+					&& snake.getHead().equals(this.head);
+			boolean tailCollision = snake.getTail().contains(this.head);
+			if (headCollision || tailCollision) {
+				kill();
+				if (this.id != snake.id) {
+					snake.reward();
+				}
+			}
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-tomcat/src/main/java/samples/websocket/tomcat/snake/Snake.java" startline="105" endline="117" pcid="14338">
+	private void handleCollisions(Collection<Snake> snakes) throws Exception {
+		for (Snake snake : snakes) {
+			boolean headCollision = this.id != snake.id
+					&& snake.getHead().equals(this.head);
+			boolean tailCollision = snake.getTail().contains(this.head);
+			if (headCollision || tailCollision) {
+				kill();
+				if (this.id != snake.id) {
+					snake.reward();
+				}
+			}
+		}
+	}
+</source>
+</class>
+
+<class classid="70" nclones="3" nlines="11" similarity="100">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-jetty/src/main/java/samples/websocket/jetty/snake/Snake.java" startline="137" endline="150" pcid="14269">
+	public String getLocationsJson() {
+		synchronized (this.monitor) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(this.head.x),
+					Integer.valueOf(this.head.y)));
+			for (Location location : this.tail) {
+				sb.append(',');
+				sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(location.x),
+						Integer.valueOf(location.y)));
+			}
+			return String.format("{'id':%d,'body':[%s]}", Integer.valueOf(this.id),
+					sb.toString());
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-tomcat/src/main/java/samples/websocket/tomcat/snake/Snake.java" startline="137" endline="150" pcid="14342">
+	public String getLocationsJson() {
+		synchronized (this.monitor) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(this.head.x),
+					Integer.valueOf(this.head.y)));
+			for (Location location : this.tail) {
+				sb.append(',');
+				sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(location.x),
+						Integer.valueOf(location.y)));
+			}
+			return String.format("{'id':%d,'body':[%s]}", Integer.valueOf(this.id),
+					sb.toString());
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-undertow/src/main/java/samples/websocket/undertow/snake/Snake.java" startline="137" endline="150" pcid="14415">
+	public String getLocationsJson() {
+		synchronized (this.monitor) {
+			StringBuilder sb = new StringBuilder();
+			sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(this.head.x),
+					Integer.valueOf(this.head.y)));
+			for (Location location : this.tail) {
+				sb.append(',');
+				sb.append(String.format("{x: %d, y: %d}", Integer.valueOf(location.x),
+						Integer.valueOf(location.y)));
+			}
+			return String.format("{'id':%d,'body':[%s]}", Integer.valueOf(this.id),
+					sb.toString());
+		}
+	}
+</source>
+</class>
+
+<class classid="71" nclones="3" nlines="13" similarity="100">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-jetty/src/main/java/samples/websocket/jetty/snake/SnakeTimer.java" startline="70" endline="82" pcid="14276">
+	public static void tick() throws Exception {
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<Snake> iterator = SnakeTimer.getSnakes().iterator(); iterator
+				.hasNext();) {
+			Snake snake = iterator.next();
+			snake.update(SnakeTimer.getSnakes());
+			sb.append(snake.getLocationsJson());
+			if (iterator.hasNext()) {
+				sb.append(',');
+			}
+		}
+		broadcast(String.format("{'type': 'update', 'data' : [%s]}", sb.toString()));
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-undertow/src/main/java/samples/websocket/undertow/snake/SnakeTimer.java" startline="70" endline="82" pcid="14422">
+	public static void tick() throws Exception {
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<Snake> iterator = SnakeTimer.getSnakes().iterator(); iterator
+				.hasNext();) {
+			Snake snake = iterator.next();
+			snake.update(SnakeTimer.getSnakes());
+			sb.append(snake.getLocationsJson());
+			if (iterator.hasNext()) {
+				sb.append(',');
+			}
+		}
+		broadcast(String.format("{'type': 'update', 'data' : [%s]}", sb.toString()));
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-tomcat/src/main/java/samples/websocket/tomcat/snake/SnakeTimer.java" startline="70" endline="82" pcid="14349">
+	public static void tick() throws Exception {
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<Snake> iterator = SnakeTimer.getSnakes().iterator(); iterator
+				.hasNext();) {
+			Snake snake = iterator.next();
+			snake.update(SnakeTimer.getSnakes());
+			sb.append(snake.getLocationsJson());
+			if (iterator.hasNext()) {
+				sb.append(',');
+			}
+		}
+		broadcast(String.format("{'type': 'update', 'data' : [%s]}", sb.toString()));
+	}
+</source>
+</class>
+
+<class classid="72" nclones="3" nlines="10" similarity="100">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-jetty/src/main/java/samples/websocket/jetty/snake/SnakeTimer.java" startline="84" endline="95" pcid="14277">
+	public static void broadcast(String message) throws Exception {
+		Collection<Snake> snakes = new CopyOnWriteArrayList<>(SnakeTimer.getSnakes());
+		for (Snake snake : snakes) {
+			try {
+				snake.sendMessage(message);
+			}
+			catch (Throwable ex) {
+				// if Snake#sendMessage fails the client is removed
+				removeSnake(snake);
+			}
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-tomcat/src/main/java/samples/websocket/tomcat/snake/SnakeTimer.java" startline="84" endline="95" pcid="14350">
+	public static void broadcast(String message) throws Exception {
+		Collection<Snake> snakes = new CopyOnWriteArrayList<>(SnakeTimer.getSnakes());
+		for (Snake snake : snakes) {
+			try {
+				snake.sendMessage(message);
+			}
+			catch (Throwable ex) {
+				// if Snake#sendMessage fails the client is removed
+				removeSnake(snake);
+			}
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-undertow/src/main/java/samples/websocket/undertow/snake/SnakeTimer.java" startline="84" endline="95" pcid="14423">
+	public static void broadcast(String message) throws Exception {
+		Collection<Snake> snakes = new CopyOnWriteArrayList<>(SnakeTimer.getSnakes());
+		for (Snake snake : snakes) {
+			try {
+				snake.sendMessage(message);
+			}
+			catch (Throwable ex) {
+				// if Snake#sendMessage fails the client is removed
+				removeSnake(snake);
+			}
+		}
+	}
+</source>
+</class>
+
+<class classid="73" nclones="3" nlines="13" similarity="100">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-jetty/src/main/java/samples/websocket/jetty/snake/SnakeTimer.java" startline="97" endline="110" pcid="14278">
+	public static void startTimer() {
+		gameTimer = new Timer(SnakeTimer.class.getSimpleName() + " Timer");
+		gameTimer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				try {
+					tick();
+				}
+				catch (Throwable ex) {
+					log.error("Caught to prevent timer from shutting down", ex);
+				}
+			}
+		}, TICK_DELAY, TICK_DELAY);
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-tomcat/src/main/java/samples/websocket/tomcat/snake/SnakeTimer.java" startline="97" endline="110" pcid="14351">
+	public static void startTimer() {
+		gameTimer = new Timer(SnakeTimer.class.getSimpleName() + " Timer");
+		gameTimer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				try {
+					tick();
+				}
+				catch (Throwable ex) {
+					log.error("Caught to prevent timer from shutting down", ex);
+				}
+			}
+		}, TICK_DELAY, TICK_DELAY);
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-undertow/src/main/java/samples/websocket/undertow/snake/SnakeTimer.java" startline="97" endline="110" pcid="14424">
+	public static void startTimer() {
+		gameTimer = new Timer(SnakeTimer.class.getSimpleName() + " Timer");
+		gameTimer.scheduleAtFixedRate(new TimerTask() {
+			@Override
+			public void run() {
+				try {
+					tick();
+				}
+				catch (Throwable ex) {
+					log.error("Caught to prevent timer from shutting down", ex);
+				}
+			}
+		}, TICK_DELAY, TICK_DELAY);
+	}
+</source>
+</class>
+
+<class classid="74" nclones="3" nlines="14" similarity="100">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-jetty/src/main/java/samples/websocket/jetty/snake/SnakeWebSocketHandler.java" startline="67" endline="82" pcid="14289">
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		this.snake = new Snake(this.id, session);
+		SnakeTimer.addSnake(this.snake);
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<Snake> iterator = SnakeTimer.getSnakes().iterator(); iterator
+				.hasNext();) {
+			Snake snake = iterator.next();
+			sb.append(String.format("{id: %d, color: '%s'}",
+					Integer.valueOf(snake.getId()), snake.getHexColor()));
+			if (iterator.hasNext()) {
+				sb.append(',');
+			}
+		}
+		SnakeTimer
+				.broadcast(String.format("{'type': 'join','data':[%s]}", sb.toString()));
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-undertow/src/main/java/samples/websocket/undertow/snake/SnakeWebSocketHandler.java" startline="67" endline="82" pcid="14435">
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		this.snake = new Snake(this.id, session);
+		SnakeTimer.addSnake(this.snake);
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<Snake> iterator = SnakeTimer.getSnakes().iterator(); iterator
+				.hasNext();) {
+			Snake snake = iterator.next();
+			sb.append(String.format("{id: %d, color: '%s'}",
+					Integer.valueOf(snake.getId()), snake.getHexColor()));
+			if (iterator.hasNext()) {
+				sb.append(',');
+			}
+		}
+		SnakeTimer
+				.broadcast(String.format("{'type': 'join','data':[%s]}", sb.toString()));
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-tomcat/src/main/java/samples/websocket/tomcat/snake/SnakeWebSocketHandler.java" startline="67" endline="82" pcid="14362">
+	public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+		this.snake = new Snake(this.id, session);
+		SnakeTimer.addSnake(this.snake);
+		StringBuilder sb = new StringBuilder();
+		for (Iterator<Snake> iterator = SnakeTimer.getSnakes().iterator(); iterator
+				.hasNext();) {
+			Snake snake = iterator.next();
+			sb.append(String.format("{id: %d, color: '%s'}",
+					Integer.valueOf(snake.getId()), snake.getHexColor()));
+			if (iterator.hasNext()) {
+				sb.append(',');
+			}
+		}
+		SnakeTimer
+				.broadcast(String.format("{'type': 'join','data':[%s]}", sb.toString()));
+	}
+</source>
+</class>
+
+<class classid="75" nclones="3" nlines="12" similarity="100">
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-jetty/src/main/java/samples/websocket/jetty/snake/SnakeWebSocketHandler.java" startline="85" endline="100" pcid="14290">
+	protected void handleTextMessage(WebSocketSession session, TextMessage message)
+			throws Exception {
+		String payload = message.getPayload();
+		if ("west".equals(payload)) {
+			this.snake.setDirection(Direction.WEST);
+		}
+		else if ("north".equals(payload)) {
+			this.snake.setDirection(Direction.NORTH);
+		}
+		else if ("east".equals(payload)) {
+			this.snake.setDirection(Direction.EAST);
+		}
+		else if ("south".equals(payload)) {
+			this.snake.setDirection(Direction.SOUTH);
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-tomcat/src/main/java/samples/websocket/tomcat/snake/SnakeWebSocketHandler.java" startline="85" endline="100" pcid="14363">
+	protected void handleTextMessage(WebSocketSession session, TextMessage message)
+			throws Exception {
+		String payload = message.getPayload();
+		if ("west".equals(payload)) {
+			this.snake.setDirection(Direction.WEST);
+		}
+		else if ("north".equals(payload)) {
+			this.snake.setDirection(Direction.NORTH);
+		}
+		else if ("east".equals(payload)) {
+			this.snake.setDirection(Direction.EAST);
+		}
+		else if ("south".equals(payload)) {
+			this.snake.setDirection(Direction.SOUTH);
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-samples/spring-boot-sample-websocket-undertow/src/main/java/samples/websocket/undertow/snake/SnakeWebSocketHandler.java" startline="85" endline="100" pcid="14436">
+	protected void handleTextMessage(WebSocketSession session, TextMessage message)
+			throws Exception {
+		String payload = message.getPayload();
+		if ("west".equals(payload)) {
+			this.snake.setDirection(Direction.WEST);
+		}
+		else if ("north".equals(payload)) {
+			this.snake.setDirection(Direction.NORTH);
+		}
+		else if ("east".equals(payload)) {
+			this.snake.setDirection(Direction.EAST);
+		}
+		else if ("south".equals(payload)) {
+			this.snake.setDirection(Direction.SOUTH);
+		}
+	}
+</source>
+</class>
+
+<class classid="76" nclones="2" nlines="12" similarity="100">
+<source file="spring-boot/spring-boot-tests/spring-boot-integration-tests/spring-boot-devtools-tests/src/test/java/org/springframework/boot/devtools/tests/ExplodedRemoteApplicationLauncher.java" startline="35" endline="47" pcid="14502">
+	protected String createApplicationClassPath() throws Exception {
+		File appDirectory = new File("target/app");
+		FileSystemUtils.deleteRecursively(appDirectory);
+		appDirectory.mkdirs();
+		FileSystemUtils.copyRecursively(new File("target/test-classes/com"),
+				new File("target/app/com"));
+		List<String> entries = new ArrayList<>();
+		entries.add("target/app");
+		for (File jar : new File("target/dependencies").listFiles()) {
+			entries.add(jar.getAbsolutePath());
+		}
+		return StringUtils.collectionToDelimitedString(entries, File.pathSeparator);
+	}
+</source>
+<source file="spring-boot/spring-boot-tests/spring-boot-integration-tests/spring-boot-devtools-tests/src/test/java/org/springframework/boot/devtools/tests/LocalApplicationLauncher.java" startline="43" endline="55" pcid="14516">
+	protected String createApplicationClassPath() throws Exception {
+		File appDirectory = new File("target/app");
+		FileSystemUtils.deleteRecursively(appDirectory);
+		appDirectory.mkdirs();
+		FileSystemUtils.copyRecursively(new File("target/test-classes/com"),
+				new File("target/app/com"));
+		List<String> entries = new ArrayList<>();
+		entries.add("target/app");
+		for (File jar : new File("target/dependencies").listFiles()) {
+			entries.add(jar.getAbsolutePath());
+		}
+		return StringUtils.collectionToDelimitedString(entries, File.pathSeparator);
+	}
+</source>
+</class>
+
+<class classid="77" nclones="2" nlines="20" similarity="85">
+<source file="spring-boot/spring-boot-tests/spring-boot-integration-tests/spring-boot-server-tests/src/test/java/org/springframework/boot/context/embedded/BootRunApplicationLauncher.java" startline="50" endline="72" pcid="14544">
+	protected List<String> getArguments(File archive) {
+		try {
+			explodeArchive(archive);
+			deleteLauncherClasses();
+			File targetClasses = populateTargetClasses(archive);
+			File dependencies = populateDependencies(archive);
+			if (archive.getName().endsWith(".war")) {
+				populateSrcMainWebapp();
+			}
+			List<String> classpath = new ArrayList<>();
+			classpath.add(targetClasses.getAbsolutePath());
+			for (File dependency : dependencies.listFiles()) {
+				classpath.add(dependency.getAbsolutePath());
+			}
+			return Arrays.asList("-cp",
+					StringUtils.collectionToDelimitedString(classpath,
+							File.pathSeparator),
+					"com.example.ResourceHandlingApplication");
+		}
+		catch (IOException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+</source>
+<source file="spring-boot/spring-boot-tests/spring-boot-integration-tests/spring-boot-server-tests/src/test/java/org/springframework/boot/context/embedded/IdeApplicationLauncher.java" startline="60" endline="84" pcid="14586">
+	protected List<String> getArguments(File archive) {
+		try {
+			explodeArchive(archive, this.exploded);
+			deleteLauncherClasses();
+			File targetClasses = populateTargetClasses(archive);
+			File dependencies = populateDependencies(archive);
+			File resourcesProject = explodedResourcesProject(dependencies);
+			if (archive.getName().endsWith(".war")) {
+				populateSrcMainWebapp();
+			}
+			List<String> classpath = new ArrayList<>();
+			classpath.add(targetClasses.getAbsolutePath());
+			for (File dependency : dependencies.listFiles()) {
+				classpath.add(dependency.getAbsolutePath());
+			}
+			classpath.add(resourcesProject.getAbsolutePath());
+			return Arrays.asList("-cp",
+					StringUtils.collectionToDelimitedString(classpath,
+							File.pathSeparator),
+					"com.example.ResourceHandlingApplication");
+		}
+		catch (IOException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+</source>
+</class>
+
+<class classid="78" nclones="2" nlines="13" similarity="100">
+<source file="spring-boot/spring-boot-tests/spring-boot-integration-tests/spring-boot-server-tests/src/test/java/org/springframework/boot/context/embedded/BootRunApplicationLauncher.java" startline="87" endline="99" pcid="14547">
+	private File populateDependencies(File archive) throws IOException {
+		File dependencies = new File(this.exploded, "dependencies");
+		dependencies.mkdirs();
+		List<String> libPaths = getLibPaths(archive);
+		for (String libPath : libPaths) {
+			File libDirectory = new File(this.exploded, libPath);
+			for (File jar : libDirectory.listFiles()) {
+				FileCopyUtils.copy(jar, new File(dependencies, jar.getName()));
+			}
+			FileSystemUtils.deleteRecursively(libDirectory);
+		}
+		return dependencies;
+	}
+</source>
+<source file="spring-boot/spring-boot-tests/spring-boot-integration-tests/spring-boot-server-tests/src/test/java/org/springframework/boot/context/embedded/IdeApplicationLauncher.java" startline="95" endline="107" pcid="14588">
+	private File populateDependencies(File archive) throws IOException {
+		File dependencies = new File(this.exploded, "dependencies");
+		dependencies.mkdirs();
+		List<String> libPaths = getLibPaths(archive);
+		for (String libPath : libPaths) {
+			File libDirectory = new File(this.exploded, libPath);
+			for (File jar : libDirectory.listFiles()) {
+				FileCopyUtils.copy(jar, new File(dependencies, jar.getName()));
+			}
+			FileSystemUtils.deleteRecursively(libDirectory);
+		}
+		return dependencies;
+	}
+</source>
+</class>
+
+<class classid="79" nclones="3" nlines="17" similarity="82">
+<source file="spring-boot/spring-boot-tests/spring-boot-integration-tests/spring-boot-server-tests/src/test/java/org/springframework/boot/context/embedded/BootRunApplicationLauncher.java" startline="120" endline="137" pcid="14551">
+	private void explodeArchive(File archive) throws IOException {
+		FileSystemUtils.deleteRecursively(this.exploded);
+		JarFile jarFile = new JarFile(archive);
+		Enumeration<JarEntry> entries = jarFile.entries();
+		while (entries.hasMoreElements()) {
+			JarEntry jarEntry = entries.nextElement();
+			File extracted = new File(this.exploded, jarEntry.getName());
+			if (jarEntry.isDirectory()) {
+				extracted.mkdirs();
+			}
+			else {
+				FileOutputStream extractedOutputStream = new FileOutputStream(extracted);
+				StreamUtils.copy(jarFile.getInputStream(jarEntry), extractedOutputStream);
+				extractedOutputStream.close();
+			}
+		}
+		jarFile.close();
+	}
+</source>
+<source file="spring-boot/spring-boot-tests/spring-boot-integration-tests/spring-boot-server-tests/src/test/java/org/springframework/boot/context/embedded/ExplodedApplicationLauncher.java" startline="69" endline="86" pcid="14582">
+	private void explodeArchive(File archive) throws IOException {
+		FileSystemUtils.deleteRecursively(this.exploded);
+		JarFile jarFile = new JarFile(archive);
+		Enumeration<JarEntry> entries = jarFile.entries();
+		while (entries.hasMoreElements()) {
+			JarEntry jarEntry = entries.nextElement();
+			File extracted = new File(this.exploded, jarEntry.getName());
+			if (jarEntry.isDirectory()) {
+				extracted.mkdirs();
+			}
+			else {
+				FileOutputStream extractedOutputStream = new FileOutputStream(extracted);
+				StreamUtils.copy(jarFile.getInputStream(jarEntry), extractedOutputStream);
+				extractedOutputStream.close();
+			}
+		}
+		jarFile.close();
+	}
+</source>
+<source file="spring-boot/spring-boot-tests/spring-boot-integration-tests/spring-boot-server-tests/src/test/java/org/springframework/boot/context/embedded/IdeApplicationLauncher.java" startline="141" endline="158" pcid="14594">
+	private void explodeArchive(File archive, File destination) throws IOException {
+		FileSystemUtils.deleteRecursively(destination);
+		JarFile jarFile = new JarFile(archive);
+		Enumeration<JarEntry> entries = jarFile.entries();
+		while (entries.hasMoreElements()) {
+			JarEntry jarEntry = entries.nextElement();
+			File extracted = new File(destination, jarEntry.getName());
+			if (jarEntry.isDirectory()) {
+				extracted.mkdirs();
+			}
+			else {
+				FileOutputStream extractedOutputStream = new FileOutputStream(extracted);
+				StreamUtils.copy(jarFile.getInputStream(jarEntry), extractedOutputStream);
+				extractedOutputStream.close();
+			}
+		}
+		jarFile.close();
+	}
+</source>
+</class>
+
+</clones>
