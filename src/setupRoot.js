@@ -5,7 +5,7 @@ import loaderTemplate from './template/loader.html';
 
 export default function() {
 
-    var serverLink = "https://cloneswarm.serveo.net/processRepository"
+    var serverLink = "https://cloneswarm.serveo.net"
 
     // load the documentation and loader template files
     d3.select('#doc-root').html(documentationTemplate);
