@@ -22,6 +22,17 @@ export default function(cloneData) {
         .append('div')
         .attr('class', 'rootContainer');
 
+
+    rootContainer
+        .append('div').attr("class", 's12 center-align')
+        .selectAll('.subInfoTitle')
+        .data(Object.keys(cloneData.information))
+        .enter()
+        .append('h6')
+        .attr('class', 'subInfoTitle red-text text-lighten-2')
+        .text((d) => d + " : " + cloneData.information[d]);
+
+
     // Create root svg 
     let svg = rootContainer.append('svg')
         .attr('width', 750)
