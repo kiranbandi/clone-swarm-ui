@@ -12,14 +12,10 @@ body {
     text-transform: capitalize;
 }
 
-.darkPlot {
-    background: #000000;
-}
-
 .blockViewRoot {
     margin: 20px auto 40px auto;
     display: block;
-    border-radius: 1em;
+    border-radius: 5em;
     border: 2px solid black;
 }
 
@@ -69,6 +65,7 @@ body {
 
 .node circle {
     fill: #999;
+    cursor: pointer;
 }
 
 .node text {

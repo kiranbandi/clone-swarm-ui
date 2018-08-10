@@ -49,7 +49,11 @@ export default function(cloneInfoXML) {
         iterator += 1;
     }
 
-    cloneInfo.uniqueSourceKeyStore = processSources(cloneInfo.sources);
+    // Store sorted data
+    cloneInfo.uniqueSourceKeyStore = processSources(cloneInfo.sources).sort(function(a, b) { return b.length - a.length; });
+
+    debugger;
+
     return cloneInfo;
 };
 

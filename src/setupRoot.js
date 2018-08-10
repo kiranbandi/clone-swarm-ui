@@ -5,7 +5,7 @@ import loaderTemplate from './template/loader.html';
 
 export default function() {
 
-    var serverLink = "https://cloneswarm.serveo.net"
+    var serverLink = "https://localhost:8080";
 
     // load the documentation and loader template files
     d3.select('#doc-root').html(documentationTemplate);
@@ -19,7 +19,6 @@ export default function() {
 
     var elems = document.querySelectorAll('select');
     var instances = M.FormSelect.init(elems, {});
-
 
     d3.selectAll('.nav-link')
         .on('click', function() {
