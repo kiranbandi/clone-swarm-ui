@@ -1,6 +1,17 @@
 import * as d3 from 'd3';
-
 export default function(cloneData) {
+
+    var cloneInformation = cloneData;
+
+    var colorScale = d3.scaleLinear()
+        .domain([1, cloneInformation.maxSourceCloneClassesPerFile.count])
+        .range(['#555', 'red'])
+        .interpolate(d3.interpolateRgb);
+
+
+    function displayCloneClasses(filePath) {
+        console.log(cloneInformation.uniqueSourceCollection["'" + filePath + "'"]);
+    };
 
     // clear previous dom elements if any
     if (d3.select('.rootContainer').node()) {
@@ -13,8 +24,8 @@ export default function(cloneData) {
 
     // Create root svg 
     let svg = rootContainer.append('svg')
-        .attr('width', 980)
-        .attr('height', 980)
+        .attr('width', 750)
+        .attr('height', 750)
         .attr('class', 'blockViewRoot');
 
     // create and translate inner g container 
@@ -38,13 +49,17 @@ export default function(cloneData) {
         .parentId(function(d) { return d.substring(0, d.lastIndexOf("/")); });
 
     var tree = d3.tree()
-        .size([2 * Math.PI, 400])
+        .size([2 * Math.PI, 325])
         .separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
 
     var root = tree(customStratify(cloneData.uniqueSourceArray));
 
+    var links = root.links();
+    var descendants = root.descendants();
+    var bigNodeGraph = descendants.length > 1000;
+
     var link = g.selectAll(".link")
-        .data(root.links())
+        .data(links)
         .enter().append("path")
         .attr("class", "link")
         .attr("d", d3.linkRadial()
@@ -52,20 +67,35 @@ export default function(cloneData) {
             .radius(function(d) { return d.y; }));
 
     var node = g.selectAll(".node")
-        .data(root.descendants())
+        .data(descendants)
         .enter().append("g")
         .attr("class", function(d) { return "node" + (d.children ? " node--internal" : " node--leaf"); })
         .attr("transform", function(d) { return "translate(" + radialPoint(d.x, d.y) + ")"; });
 
+
     node.append("circle")
-        .attr("r", 2.5);
+        .attr("r", 2.5)
+        .attr("fill", '#999')
+        .filter(function(d) {
+            var name = d.id.substring(d.id.lastIndexOf("/") + 1);
+            // matches only files ending with .cs or .py or .java or .cs
+            return /^.+\.(cs|java|c|py)$/.test(name);
+        })
+        .attr('fill', function(d) {
+            return colorScale(cloneInformation.uniqueSourceCollection["'" + d.id + "'"].length);
+        });
 
     node.append("title")
         .text(function(d) { return d.id.substring(d.id.lastIndexOf("/") + 1); });
 
+
     node.filter(function(d) {
             var name = d.id.substring(d.id.lastIndexOf("/") + 1);
-            return name.indexOf(".cs") > -1 || name.indexOf(".java") > -1 || name.indexOf(".c") > -1 || name.indexOf(".py") > -1;
+            // matches only files ending with .cs or .py or .java or .cs
+            return /^.+\.(cs|java|c|py)$/.test(name) && !bigNodeGraph;
+        })
+        .on('dblclick', function(d) {
+            displayCloneClasses(d.id);
         })
         .append("text")
         .attr("dy", "0.31em")

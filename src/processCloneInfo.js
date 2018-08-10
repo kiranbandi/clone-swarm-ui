@@ -73,10 +73,17 @@ export default function(cloneInfoXML) {
     // Store stratified data
     cloneInfo.uniqueSourceArray = uniqueSourceArray.sort(function(a, b) { return b.length - a.length; });
     cloneInfo.uniqueSourceCollection = uniqueSourceCollection;
-
+    cloneInfo.maxSourceCloneClassesPerFile = _.reduce(uniqueSourceArray, function(max, filePath) {
+        if (/^.+\.(cs|java|c|py)$/.test(filePath) && uniqueSourceCollection["'" + filePath + "'"].length > max.count) {
+            return {
+                'path': filePath,
+                'count': uniqueSourceCollection["'" + filePath + "'"].length
+            };
+        } else {
+            return max;
+        }
+    }, { 'count': uniqueSourceCollection["'" + uniqueSourceArray[0] + "'"].length, 'path': uniqueSourceArray[0] });
     return cloneInfo;
-
-
 };
 
 

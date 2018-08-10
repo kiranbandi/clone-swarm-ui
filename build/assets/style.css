@@ -13,10 +13,10 @@ body {
 }
 
 .blockViewRoot {
-    margin: 20px auto 40px auto;
+    margin: 40px;
     display: block;
     border-radius: 5em;
-    border: 2px solid black;
+    border: 2px solid #e0e0e0;
 }
 
 .footer-link {
@@ -64,16 +64,11 @@ body {
 /* New Style Code */
 
 .node circle {
-    fill: #999;
     cursor: pointer;
 }
 
 .node text {
     font: 10px sans-serif;
-}
-
-.node--internal circle {
-    fill: #555;
 }
 
 .node--internal text {
