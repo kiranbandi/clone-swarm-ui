@@ -41,7 +41,7 @@ export default function(cloneData) {
         .size([2 * Math.PI, 400])
         .separation(function(a, b) { return (a.parent == b.parent ? 1 : 2) / a.depth; });
 
-    var root = tree(customStratify(cloneData.uniqueSourceKeyStore));
+    var root = tree(customStratify(cloneData.uniqueSourceArray));
 
     var link = g.selectAll(".link")
         .data(root.links())
@@ -72,13 +72,7 @@ export default function(cloneData) {
         .attr("x", function(d) { return d.x < Math.PI === !d.children ? 6 : -6; })
         .attr("text-anchor", function(d) { return d.x < Math.PI === !d.children ? "start" : "end"; })
         .attr("transform", function(d) { return "rotate(" + (d.x < Math.PI ? d.x - Math.PI / 2 : d.x + Math.PI / 2) * 180 / Math.PI + ")"; })
-        .text(function(d) {
-            var name = d.id.substring(d.id.lastIndexOf("/") + 1);
-            if (name.indexOf(".ifdefed") > -1) {
-                name = name.slice(0, -8);
-            }
-            return name;
-        });
+        .text(function(d) { return d.id.substring(d.id.lastIndexOf("/") + 1); });
 
     // reset button 
     svg

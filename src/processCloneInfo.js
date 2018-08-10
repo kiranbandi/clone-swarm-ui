@@ -8,13 +8,30 @@ export default function(cloneInfoXML) {
         classes: [],
         sources: []
     };
+    var uniqueSourceArray = [];
+    var uniqueSourceCollection = {};
+
+    // Local function with access to cloneInfo 
+    function stratifySource(sourcePath, classId) {
+        _.reduce(sourcePath.split("/"), function(previousPath, pathSnippet) {
+            previousPath += previousPath ? "/" + pathSnippet : pathSnippet;
+            if (!(uniqueSourceArray.indexOf(previousPath) > -1)) {
+                uniqueSourceArray.push(previousPath);
+                uniqueSourceCollection["'" + previousPath + "'"] = [classId];
+            } else {
+                uniqueSourceCollection["'" + previousPath + "'"].push(classId);
+            }
+            return previousPath;
+        }, '');
+    }
 
     // Start processing Line by Line 
-    var iterator = 0;
     var tempClassStore = {};
     var tempSourceStore = {};
     var buffer = [];
     var shouldStoreInBuffer = false;
+    var iterator = 0;
+    var classIterator = 0;
 
     while (iterator < XMLLineArray.length) {
         var line = XMLLineArray[iterator];
@@ -36,12 +53,16 @@ export default function(cloneInfoXML) {
             // by reference only , the push returns the length of the array , subtracting 1 from which gives the index of the element
             // that was added 
             var sourceIndex = cloneInfo.sources.push(_.clone(tempSourceStore)) - 1;
+
+            stratifySource(tempSourceStore.id, classIterator);
+
             tempClassStore.sources.push(sourceIndex);
             buffer = [];
         }
         // For end of class tag push the classStore into the array and clear it
         else if (line == '</class>') {
             cloneInfo.classes.push(_.clone(tempClassStore));
+            classIterator += 1;
         } else if (shouldStoreInBuffer) {
             buffer.push(line);
         }
@@ -49,12 +70,13 @@ export default function(cloneInfoXML) {
         iterator += 1;
     }
 
-    // Store sorted data
-    cloneInfo.uniqueSourceKeyStore = processSources(cloneInfo.sources).sort(function(a, b) { return b.length - a.length; });
-
-    debugger;
+    // Store stratified data
+    cloneInfo.uniqueSourceArray = uniqueSourceArray.sort(function(a, b) { return b.length - a.length; });
+    cloneInfo.uniqueSourceCollection = uniqueSourceCollection;
 
     return cloneInfo;
+
+
 };
 
 
@@ -71,34 +93,17 @@ function processCloneClassInfo(cloneClassInfo) {
 
 function processCloneSourceInfo(cloneSourceInfo) {
     var sourceInfoArray = cloneSourceInfo.slice(8, -1).split(" ");
+
+    // For C and C# files have an extra addition to the name that must be sliced out 
+    var filePath = sourceInfoArray[0].slice(6, -1);
+    if (filePath.indexOf(".ifdefed") > -1) {
+        filePath = filePath.slice(0, -8);
+    }
+
     return {
-        'id': sourceInfoArray[0].slice(6, -1),
+        'id': filePath,
         'startLine': sourceInfoArray[1].slice(11, -1),
         'endLine': sourceInfoArray[2].slice(9, -1),
         'pcid': sourceInfoArray[3].slice(6, -1)
     };
-}
-
-function processSources(sources) {
-
-    var sourcesUniqueStore = [];
-    _.each(sources, function(source, index) {
-        var pathStore = source.id.split("/");
-        var pathIterator = 0;
-        var key;
-        var store = '';
-        var length = pathStore.length;
-
-        while (pathIterator < length) {
-            key = pathStore.shift();
-            store += (store == '') ? key : "/" + key;
-            if (!(sourcesUniqueStore.indexOf(store) > -1)) {
-                sourcesUniqueStore.push(store);
-            }
-            pathIterator += 1;
-        }
-    });
-
-    return sourcesUniqueStore;
-
 }
