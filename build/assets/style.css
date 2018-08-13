@@ -15,10 +15,19 @@ body {
 }
 
 .blockViewRoot {
-    margin-top: 15px;
-    display: block;
+    display: inline-block;
     border-radius: 2em;
-    border: 2px solid #e0e0e0;
+    background: #dbdbdb;
+}
+
+#cloneInfoContainer {
+    display: inline-block;
+    vertical-align: top;
+    padding-left: 15px;
+}
+
+.chromosomeViewReset {
+    fill: #dbdbdb;
 }
 
 .footer-link {
@@ -36,6 +45,10 @@ body {
 #doc-root p,
 #doc-root ul {
     font-size: 1.2em;
+}
+
+.rootContainer {
+    width: 100%;
 }
 
 #doc-root ul {
@@ -82,4 +95,34 @@ body {
     stroke: #555;
     stroke-opacity: 0.4;
     stroke-width: 1.5px;
+}
+
+p.clone-info-p {
+    margin: 5px 0px;
+    font-size: 1.1em;
+}
+
+.classes-container {
+    margin-top: 20px;
+}
+
+p.class-box-p {
+    display: inline;
+    padding-right: 25px;
+}
+
+div.class-box {
+    margin: 10px 0px;
+    display: inline-block;
+    border: 2px solid #c35050;
+    border-radius: 1em;
+    padding: 10px;
+    background: white;
+}
+
+div.class-box:hover,
+div.class-box.active-box {
+    cursor: pointer;
+    background-color: #c35050;
+    color: white;
 }

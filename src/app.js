@@ -4,6 +4,7 @@ import setupRoot from './setupRoot';
 import processCloneInfo from './processCloneInfo';
 import processQueryParams from './processQueryParams';
 import cloneSwarm from './cloneSwarm/cloneSwarm';
+import displayInformation from './displayInformation';
 
 //initialise root ,navbar and homepage form
 setupRoot();
@@ -20,6 +21,7 @@ if (['powershell', 'sentinel', 'jhotdraw', 'curl', 'springboot'].indexOf(sourceN
 axios.get(sourceLink).then(function(cloneInfo) {
     //hide loader once file loading and processing is complete
     d3.select('#loader-container').classed('hide', true);
-    var cloneInformation = processCloneInfo(cloneInfo.data);
-    cloneSwarm(cloneInformation);
+    var cloneData = processCloneInfo(cloneInfo.data);
+    displayInformation(cloneData.information);
+    cloneSwarm(cloneData);
 });
