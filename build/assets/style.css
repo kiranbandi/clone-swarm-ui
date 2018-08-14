@@ -145,3 +145,13 @@ span#modal-code {
     display: block;
     background: wheat;
 }
+
+.source-marker>label>span.clickbox {
+    height: 20px;
+    vertical-align: middle;
+    margin-left: 15px;
+}
+
+.compare-button {
+    margin-top: 10px;
+}
