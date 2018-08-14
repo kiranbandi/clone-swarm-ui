@@ -8,19 +8,26 @@ body {
 }
 
 .subInfoTitle {
-    font-weight: bold;
     text-transform: capitalize;
-}
-
-.darkPlot {
-    background: #000000;
+    display: inline-block;
+    padding-right: 25px;
+    font-size: 1.5em;
 }
 
 .blockViewRoot {
-    margin: 20px auto 40px auto;
-    display: block;
-    border-radius: 1em;
-    border: 2px solid black;
+    display: inline-block;
+    border-radius: 2em;
+    background: #dbdbdb;
+}
+
+#cloneInfoContainer {
+    display: inline-block;
+    vertical-align: top;
+    padding-left: 15px;
+}
+
+.chromosomeViewReset {
+    fill: #dbdbdb;
 }
 
 .footer-link {
@@ -38,6 +45,10 @@ body {
 #doc-root p,
 #doc-root ul {
     font-size: 1.2em;
+}
+
+.rootContainer {
+    width: 100%;
 }
 
 #doc-root ul {
@@ -68,15 +79,11 @@ body {
 /* New Style Code */
 
 .node circle {
-    fill: #999;
+    cursor: pointer;
 }
 
 .node text {
     font: 10px sans-serif;
-}
-
-.node--internal circle {
-    fill: #555;
 }
 
 .node--internal text {
@@ -88,4 +95,53 @@ body {
     stroke: #555;
     stroke-opacity: 0.4;
     stroke-width: 1.5px;
+}
+
+p.clone-info-p {
+    margin: 5px 0px;
+    font-size: 1.1em;
+}
+
+.classes-container {
+    margin-top: 20px;
+}
+
+p.class-box-p {
+    padding-right: 25px;
+    margin: 0px;
+}
+
+span.source-marker {
+    display: block;
+    margin-bottom: 2px;
+    cursor: pointer;
+}
+
+p.class-box-p>span {
+    font-weight: bold;
+}
+
+.source-collapsible.collapsible-body {
+    padding: 1em;
+}
+
+.modal-content>p {
+    margin: 5px 0px;
+    font-weight: bold;
+}
+
+p#modal-file-path {
+    margin-top: 30px;
+}
+
+p#modal-end-line {
+    margin-bottom: 30px;
+}
+
+span#modal-code {
+    white-space: pre-wrap;
+    overflow-y: scroll;
+    height: 300px;
+    display: block;
+    background: wheat;
 }
