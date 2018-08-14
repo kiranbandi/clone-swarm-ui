@@ -111,6 +111,37 @@ p.class-box-p {
     margin: 0px;
 }
 
+span.source-marker {
+    display: block;
+    margin-bottom: 2px;
+    cursor: pointer;
+}
+
 p.class-box-p>span {
     font-weight: bold;
+}
+
+.source-collapsible.collapsible-body {
+    padding: 1em;
+}
+
+.modal-content>p {
+    margin: 5px 0px;
+    font-weight: bold;
+}
+
+p#modal-file-path {
+    margin-top: 30px;
+}
+
+p#modal-end-line {
+    margin-bottom: 30px;
+}
+
+span#modal-code {
+    white-space: pre-wrap;
+    overflow-y: scroll;
+    height: 300px;
+    display: block;
+    background: wheat;
 }

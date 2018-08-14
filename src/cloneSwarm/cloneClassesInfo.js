@@ -1,6 +1,5 @@
 import * as d3 from 'd3';
 import _ from 'lodash';
-import cloneSource from './cloneSource';
 
 export default function(filePath, cloneData, selected) {
 
@@ -32,7 +31,7 @@ export default function(filePath, cloneData, selected) {
         .append('p')
         .attr('class', 'clone-info-p')
         .text("File Path : ")
-        .append('span').attr('class', "blue-text text-lighten-1").text(filePath);
+        .append('span').attr('class', "blue-text text-lighten-1 truncate").text(filePath);
     // Display Number of Clone sets 
     cloneInfoContainer
         .append('p')
@@ -59,11 +58,29 @@ export default function(filePath, cloneData, selected) {
     cloneHeaders.append('p').attr('class', 'class-box-p').text("No of Lines: ").append('span').text(function(d) { return d.nLines; });
     cloneHeaders.append('p').attr('class', 'class-box-p').text("Clone Class ID: ").append('span').text(function(d) { return d.classId; });
 
+
+
     var cloneBodyElements = cloneClassBoxes
         .append('div')
-        .attr('class', 'collapsible-body')
-        .append('span').text('Lorem Ipsum');
+        .attr('class', 'collapsible-body source-collapsible')
+        .selectAll('.source-link-box')
+        .data(function(d) {
+            return _.map(d.sources, function(source) { return cloneData.sources[source]; });
+        })
+        .enter()
+        .append('span')
+        .attr('class', 'source-marker blue-text text-lighten-2')
+        .text(function(d) { return d.id; });
 
-    var elems = document.querySelectorAll('.collapsible');
-    var instances = M.Collapsible.init(elems, {});
+    var collapsibleInstances = M.Collapsible.init(document.querySelectorAll('.collapsible'), {});
+    var modalInstance = M.Modal.init(document.getElementById('cloneswarm-modal'), {});
+
+    cloneBodyElements.on('click', function(d) {
+        d3.select('#modal-file-path').text("File Path: ").append('span').text(d.id);
+        d3.select('#modal-start-line').text("Start Line Number: ").append('span').text(d.startLine);
+        d3.select('#modal-end-line').text("End Line Number: ").append('span').text(d.endLine);
+        d3.select('#modal-code').text(d.code).style('white-space', 'pre-wrap');
+        modalInstance.open();
+    })
+
 }

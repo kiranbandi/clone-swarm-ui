@@ -1,7 +1,6 @@
 import * as d3 from 'd3';
 import cloneClassesInfo from "./cloneClassesInfo";
 
-
 export default function(cloneData) {
 
     var cloneInformation = cloneData;
