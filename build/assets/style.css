@@ -130,12 +130,15 @@ p.class-box-p>span {
     font-weight: bold;
 }
 
-p#modal-file-path {
+p#modal-file-path,
+.path-box {
     margin-top: 30px;
+    margin-bottom: 30px;
+    font-weight: bold;
 }
 
-p#modal-end-line {
-    margin-bottom: 30px;
+div#target-modal-box {
+    margin: 1%;
 }
 
 .source-marker>label>span.clickbox {

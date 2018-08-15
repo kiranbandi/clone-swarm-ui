@@ -94,17 +94,15 @@ export default function(filePath, cloneData, selected) {
         .attr('class', 'source-marker blue-text text-lighten-2')
         .text(function(d) { return d.id; })
         .on('click', function(d) {
+            var language = getLanguage(d.id);
             d3.select('#modal-file-path').text("File Path: ").append('span').text(d.id);
-            d3.select('#modal-start-line').text("Start Line Number: ").append('span').text(d.startLine);
-            d3.select('#modal-end-line').text("End Line Number: ").append('span').text(d.endLine);
             d3.select('#modal-code')
                 .html('')
                 .append('pre')
-                .attr('class', "line-numbers " + " language-" + getLanguage(d.id))
-                .append('code').html(Prism.highlight(d.code, Prism.languages['csharp'], 'csharp'));
-
-
-
+                .attr('class', "line-numbers " + " language-" + language)
+                .attr('data-start', d.startLine)
+                .append('code').html(Prism.highlight(d.code, Prism.languages[language], language));
+            Prism.highlightAll();
             modalInstance.open();
         })
 
@@ -156,6 +154,27 @@ export default function(filePath, cloneData, selected) {
                 d3.select('#source-path').text("File Path: ").append('span').text(d.id);
                 d3.select('#target-modal-box > span').text(sources[1].code);
                 d3.select('#target-path').text("File Path: ").append('span').text(d.id);
+
+                var sourceLang = getLanguage(sources[0].id);
+                d3.select('#source-modal-box > p.path-box').text("File Path: ").append('span').text(sources[0].id);
+                d3.select('#source-modal-box div.code-block > pre')
+                    .html('')
+                    .attr('class', "line-numbers " + " language-" + sourceLang)
+                    .attr('data-start', sources[0].startLine)
+                    .append('code').html(Prism.highlight(sources[0].code, Prism.languages[sourceLang], sourceLang));
+
+
+                var targetLang = getLanguage(sources[1].id);
+                d3.select('#target-modal-box > p.path-box').text("File Path: ").append('span').text(sources[1].id);
+                d3.select('#target-modal-box div.code-block > pre')
+                    .html('')
+                    .attr('class', "line-numbers " + " language-" + targetLang)
+                    .attr('data-start', sources[1].startLine)
+                    .append('code').html(Prism.highlight(sources[1].code, Prism.languages[targetLang], targetLang));
+
+
+                Prism.highlightAll();
+
                 compareModalInstance.open();
             }
 

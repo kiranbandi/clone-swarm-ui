@@ -94,11 +94,12 @@ export default function(cloneData) {
     node.filter(function(d) {
             var name = d.id.substring(d.id.lastIndexOf("/") + 1);
             // matches only files ending with .cs or .py or .java or .cs
-            return /^.+\.(cs|java|c|py)$/.test(name) && !bigNodeGraph;
+            return /^.+\.(cs|java|c|py)$/.test(name);
         })
         .on('dblclick', function(d) {
             displayCloneClasses(d.id);
         })
+        .filter((d) => { return !bigNodeGraph; })
         .append("text")
         .attr("dy", "0.31em")
         .attr("x", function(d) { return d.x < Math.PI === !d.children ? 6 : -6; })
