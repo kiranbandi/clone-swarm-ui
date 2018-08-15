@@ -39,14 +39,32 @@
         <div id='tool-root' class='root-container'></div>
     </main>
 
-    <!-- Empty Modal Place Holder -->
+    <!-- Empty Modal Place Holder for Clone Fragment -->
     <div id="cloneswarm-modal" class="modal">
         <div class="modal-content">
             <h5>Code Clone Fragment</h5>
             <p id='modal-file-path'></p>
             <p id='modal-start-line'></p>
             <p id='modal-end-line'></p>
-            <span id='modal-code'></span>
+            <div id='modal-code'></div>
+        </div>
+        <div class="modal-footer">
+            <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+        </div>
+    </div>
+
+    <!-- Empty Modal Place Holder for Comparing Files side by side  -->
+    <div id="compare-modal" class="modal">
+        <div class="modal-content">
+            <h5>Clone Fragments Compare Panel</h5>
+            <div class='compare-box' id='source-modal-box'>
+                <p id='source-path'></p>
+                <span class='code-block'></span>
+            </div>
+            <div class='compare-box' id='target-modal-box'>
+                <p id='target-path'></p>
+                <span class='code-block'></span>
+            </div>
         </div>
         <div class="modal-footer">
             <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>

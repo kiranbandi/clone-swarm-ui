@@ -9,11 +9,7 @@ module.exports = {
     devServer: {
         inline: true,
         contentBase: './build',
-        port: 8080,
-        disableHostCheck: true
-    },
-    node: {
-        child_process: 'empty'
+        port: 8080
     },
     module: {
         rules: require("./rules.config")

@@ -138,14 +138,6 @@ p#modal-end-line {
     margin-bottom: 30px;
 }
 
-span#modal-code {
-    white-space: pre-wrap;
-    overflow-y: scroll;
-    height: 300px;
-    display: block;
-    background: wheat;
-}
-
 .source-marker>label>span.clickbox {
     height: 20px;
     vertical-align: middle;
@@ -154,4 +146,15 @@ span#modal-code {
 
 .compare-button {
     margin-top: 10px;
+}
+
+.modal-content>div.compare-box {
+    width: 48%;
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 20px;
+}
+
+div#compare-modal {
+    width: 95%;
 }

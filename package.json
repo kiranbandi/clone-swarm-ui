@@ -29,6 +29,7 @@
         "babel-core": "^6.26.0",
         "babel-loader": "^7.1.2",
         "babel-minify-webpack-plugin": "^0.2.0",
+        "babel-plugin-prismjs": "^1.0.2",
         "babel-plugin-transform-object-rest-spread": "^6.26.0",
         "babel-polyfill": "^6.26.0",
         "gh-pages": "^0.12.0",
@@ -39,7 +40,10 @@
     },
     "dependencies": {
         "axios": "^0.17.1",
+        "css-loader": "^1.0.0",
         "d3": "^4.12.2",
-        "lodash": "^4.17.10"
+        "lodash": "^4.17.10",
+        "prismjs": "^1.15.0",
+        "style-loader": "^0.22.1"
     }
 }

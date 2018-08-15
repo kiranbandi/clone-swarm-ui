@@ -1,3 +1,11 @@
 {
-    "plugins": ["transform-object-rest-spread"]
+    "plugins": [
+        ["prismjs", {
+            "languages": ["clike", "java", "markup", "jsx", "reason"],
+            "plugins": ["line-numbers"],
+            "theme": "okaidia",
+            "css": true
+        }],
+        "transform-object-rest-spread"
+    ]
 }

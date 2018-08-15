@@ -1,8 +1,16 @@
 import * as d3 from 'd3';
 import _ from 'lodash';
+import Prism from 'prismjs';
+import 'prismjs/themes/prism-okaidia.css';
+import 'prismjs/components/prism-csharp.min.js';
+import 'prismjs/components/prism-c.min.js';
+import 'prismjs/components/prism-java.min.js';
+import 'prismjs/components/prism-python.min.js';
+import 'prismjs/components/prism-clike.min.js';
+import 'prismjs/plugins/line-numbers/prism-line-numbers.js';
+import 'prismjs/plugins/line-numbers/prism-line-numbers.css';
 
 export default function(filePath, cloneData, selected) {
-
 
     var compareSelectedSources = {};
 
@@ -70,7 +78,9 @@ export default function(filePath, cloneData, selected) {
             currentlyActiveClassData = d3.select(element).datum();
         }
     });
+
     var modalInstance = M.Modal.init(document.getElementById('cloneswarm-modal'), {});
+    var compareModalInstance = M.Modal.init(document.getElementById('compare-modal'), {});
 
     var collapsibleBody = cloneClassBoxes
         .append('div')
@@ -87,7 +97,14 @@ export default function(filePath, cloneData, selected) {
             d3.select('#modal-file-path').text("File Path: ").append('span').text(d.id);
             d3.select('#modal-start-line').text("Start Line Number: ").append('span').text(d.startLine);
             d3.select('#modal-end-line').text("End Line Number: ").append('span').text(d.endLine);
-            d3.select('#modal-code').text(d.code).style('white-space', 'pre-wrap');
+            d3.select('#modal-code')
+                .html('')
+                .append('pre')
+                .attr('class', "line-numbers " + " language-" + getLanguage(d.id))
+                .append('code').html(Prism.highlight(d.code, Prism.languages['csharp'], 'csharp'));
+
+
+
             modalInstance.open();
         })
 
@@ -126,6 +143,22 @@ export default function(filePath, cloneData, selected) {
         .attr('class', 'waves-effect waves-light btn-small red compare-button')
         .on('click', function(d) {
             d3.event.stopPropagation();
+            var allSourcesForClass = _.map(currentlyActiveClassData.sources, function(source) { return cloneData.sources[source]; });
+            var selectedSources = compareSelectedSources[currentlyActiveClassData.classId];
+
+            if (!selectedSources || selectedSources.length < 2) {
+                alert('select 2 sources to compare');
+            } else if (selectedSources.length > 2) {
+                alert('You can compare only 2 sources at a time');
+            } else {
+                var sources = _.filter(allSourcesForClass, function(o) { return selectedSources.indexOf(o.pcid) > -1; });
+                d3.select('#source-modal-box > span').text(sources[0].code);
+                d3.select('#source-path').text("File Path: ").append('span').text(d.id);
+                d3.select('#target-modal-box > span').text(sources[1].code);
+                d3.select('#target-path').text("File Path: ").append('span').text(d.id);
+                compareModalInstance.open();
+            }
+
         })
         .text('COMPARE')
         .append('i')
@@ -133,4 +166,19 @@ export default function(filePath, cloneData, selected) {
         .text('call_split');
 
 
+}
+
+function getLanguage(filePath) {
+
+    if (/^.+\.c$/.test(filePath)) {
+        return 'c';
+    } else if (/^.+\.cs$/.test(filePath)) {
+        return 'csharp';
+    } else if (/^.+\.java$/.test(filePath)) {
+        return 'java';
+    } else if (/^.+\.py$/.test(filePath)) {
+        return 'python';
+    } else {
+        return 'clike';
+    }
 }

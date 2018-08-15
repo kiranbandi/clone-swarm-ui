@@ -17,6 +17,7 @@ if (['powershell', 'sentinel', 'jhotdraw', 'curl', 'springboot'].indexOf(sourceN
 } else {
     sourceLink = "https://s3.ca-central-1.amazonaws.com/cloneswarm-store/clone-data/clone-xml-info/" + sourceName + "-clone-info.xml";
 }
+
 // Loading the clone info file 
 axios.get(sourceLink).then(function(cloneInfo) {
     //hide loader once file loading and processing is complete
