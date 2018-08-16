@@ -2,10 +2,11 @@ import * as d3 from 'd3';
 import axios from 'axios';
 import documentationTemplate from './template/documentation.html';
 import loaderTemplate from './template/loader.html';
+import toastr from './toastr';
 
 export default function() {
 
-    var serverLink = "https://localhost:8080";
+    var serverLink = "http://localhost:8081";
 
     // load the documentation and loader template files
     d3.select('#doc-root').html(documentationTemplate);
@@ -38,18 +39,27 @@ export default function() {
             var githubLink = document.getElementById("github-link").value;
             var email = document.getElementById("email").value;
             var language = document.getElementById("prog-language").value;
+            var granularity = document.getElementById("granularity").value;
 
             if (!(githubLink.indexOf('.git') > -1)) {
-                alert("Please enter a valid github link");
-            } else if (email && language) {
+                toastr["error"]("Please enter a valid git link", "ERROR");
+            } else if (email && language && granularity) {
 
-                axios.get(serverLink + "/processRepository", { params: { 'githubLink': githubLink, 'email': email, 'language': language } })
+                // 
+                if (language == 'python' && granularity == 'functions') {
+                    toastr["info"]("Python doesnt support function level clone detection , defaulting to block level", "GRANULARITY");
+                    granularity = 'blocks';
+                };
+
+                axios.get(serverLink + "/processRepository", { params: { 'githubLink': githubLink, 'email': email, 'language': language, 'granularity': granularity } })
                     .then(() => {
-                        alert("Your project is being analyzed , We will send you a mail once the results are ready.");
+                        toastr["success"]("Your project is being analyzed , We will send you a mail once the results are ready.", "STATUS");
                     })
                     .catch((err) => {
-                        alert("Servers are Down Currently, Please try later");
+                        toastr["error"]("Servers are Down Currently, Please try later", "ERROR");
                     })
+            } else {
+                toastr["error"]("Please fill all the values before submitting", "ERROR");
             }
 
         })

@@ -33,11 +33,22 @@
             </div>
             <div class='row'>
                 <div class="input-field col s12">
+                    <select id="granularity">
+                      <option value="" disabled selected>Select</option>
+                      <option value="functions">Function</option>
+                      <option value="blocks">Block</option>
+                    </select>
+                    <label>Granularity Level</label>
+                </div>
+            </div>
+            <div class='row'>
+                <div class="input-field col s12">
                     <select id="prog-language">
                       <option value="" disabled selected>Select</option>
                       <option value="java">Java</option>
                       <option value="c">C</option>
                       <option value="cs">C#</option>
+                      <option value="py">Python</option>
                     </select>
                     <label>Programming Language</label>
                 </div>

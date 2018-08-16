@@ -1,11 +1,11 @@
 <clones>
-<systeminfo processor="nicad3" system="Sentinel" granularity="functions" threshold="30%" minlines="10" maxlines="2500"/>
-<cloneinfo npcs="1472" npairs="68"/>
-<runinfo ncompares="22263" cputime="46"/>
-<classinfo nclasses="21"/>
+<systeminfo processor="nicad3" system="Sentinel" granularity="blocks" threshold="30%" minlines="10" maxlines="2500"/>
+<cloneinfo npcs="3155" npairs="125"/>
+<runinfo ncompares="61620" cputime="109"/>
+<classinfo nclasses="31"/>
 
-<class classid="1" nclones="2" nlines="25" similarity="76">
-<source file="Sentinel/sentinel-adapter/sentinel-dubbo-adapter/src/main/java/com/alibaba/csp/sentinel/adapter/dubbo/SentinelDubboConsumerFilter.java" startline="51" endline="74" pcid="6">
+<class classid="1" nclones="2" nlines="32" similarity="78">
+<source file="Sentinel/sentinel-adapter/sentinel-dubbo-adapter/src/main/java/com/alibaba/csp/sentinel/adapter/dubbo/SentinelDubboConsumerFilter.java" startline="52" endline="81" pcid="16">
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         Entry interfaceEntry = null;
         Entry methodEntry = null;
@@ -14,9 +14,15 @@
             ContextUtil.enter(resourceName);
             interfaceEntry = SphU.entry(invoker.getInterface().getName(), EntryType.OUT);
             methodEntry = SphU.entry(resourceName, EntryType.OUT);
-            return invoker.invoke(invocation);
+
+            Result result = invoker.invoke(invocation);
+            if (result.hasException()) {
+                // Record common exception.
+                Tracer.trace(result.getException());
+            }
+            return result;
         } catch (BlockException e) {
-            throw new SentinelRpcException(e);
+            return DubboFallbackRegistry.getConsumerFallback().handle(invoker, invocation, e);
         } catch (RpcException e) {
             Tracer.trace(e);
             throw e;
@@ -31,7 +37,7 @@
         }
     }
 </source>
-<source file="Sentinel/sentinel-adapter/sentinel-dubbo-adapter/src/main/java/com/alibaba/csp/sentinel/adapter/dubbo/SentinelDubboProviderFilter.java" startline="51" endline="79" pcid="8">
+<source file="Sentinel/sentinel-adapter/sentinel-dubbo-adapter/src/main/java/com/alibaba/csp/sentinel/adapter/dubbo/SentinelDubboProviderFilter.java" startline="53" endline="85" pcid="25">
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         // Get origin caller.
         String application = DubboUtils.getApplication(invocation, "");
@@ -45,9 +51,13 @@
             interfaceEntry = SphU.entry(interfaceName, EntryType.IN);
             methodEntry = SphU.entry(resourceName, EntryType.IN, 1, invocation.getArguments());
 
-            return invoker.invoke(invocation);
+            Result result = invoker.invoke(invocation);
+            if (result.hasException()) {
+                Tracer.trace(result.getException());
+            }
+            return result;
         } catch (BlockException e) {
-            throw new SentinelRpcException(e);
+            return DubboFallbackRegistry.getProviderFallback().handle(invoker, invocation, e);
         } catch (RpcException e) {
             Tracer.trace(e);
             throw e;
@@ -64,8 +74,8 @@
 </source>
 </class>
 
-<class classid="2" nclones="2" nlines="22" similarity="77">
-<source file="Sentinel/sentinel-adapter/sentinel-grpc-adapter/src/test/java/com/alibaba/csp/sentinel/adapter/grpc/SentinelGrpcClientInterceptorTest.java" startline="60" endline="85" pcid="32">
+<class classid="2" nclones="2" nlines="22" similarity="81">
+<source file="Sentinel/sentinel-adapter/sentinel-grpc-adapter/src/test/java/com/alibaba/csp/sentinel/adapter/grpc/SentinelGrpcClientInterceptorTest.java" startline="60" endline="85" pcid="71">
     public void testGrpcClientInterceptor() throws Exception {
         final int port = 19328;
 
@@ -93,7 +103,7 @@
         stopServer();
     }
 </source>
-<source file="Sentinel/sentinel-adapter/sentinel-grpc-adapter/src/test/java/com/alibaba/csp/sentinel/adapter/grpc/SentinelGrpcServerInterceptorTest.java" startline="61" endline="86" pcid="37">
+<source file="Sentinel/sentinel-adapter/sentinel-grpc-adapter/src/test/java/com/alibaba/csp/sentinel/adapter/grpc/SentinelGrpcServerInterceptorTest.java" startline="61" endline="86" pcid="81">
     public void testGrpcServerInterceptor() throws Exception {
         final int port = 19329;
         client = new FooServiceClient("localhost", port);
@@ -123,9 +133,8 @@
 </source>
 </class>
 
-<class classid="3" nclones="2" nlines="28" similarity="89">
-<source file="Sentinel/sentinel-adapter/sentinel-web-servlet/src/main/java/com/alibaba/csp/sentinel/adapter/servlet/CommonFilter.java" startline="51" endline="82" pcid="66">
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+<class classid="3" nclones="2" nlines="33" similarity="90">
+<source file="Sentinel/sentinel-adapter/sentinel-web-servlet/src/main/java/com/alibaba/csp/sentinel/adapter/servlet/CommonFilter.java" startline="52" endline="82" pcid="97">
         throws IOException, ServletException {
         HttpServletRequest sRequest = (HttpServletRequest)request;
         Entry entry = null;
@@ -158,8 +167,7 @@
         }
     }
 </source>
-<source file="Sentinel/sentinel-adapter/sentinel-web-servlet/src/main/java/com/alibaba/csp/sentinel/adapter/servlet/CommonTotalFilter.java" startline="52" endline="81" pcid="69">
-    public void doFilter(ServletRequest request, ServletResponse response,
+<source file="Sentinel/sentinel-adapter/sentinel-web-servlet/src/main/java/com/alibaba/csp/sentinel/adapter/servlet/CommonTotalFilter.java" startline="53" endline="81" pcid="107">
                          FilterChain chain) throws IOException, ServletException {
         HttpServletRequest sRequest = (HttpServletRequest)request;
         String target = FilterUtil.filterTarget(sRequest);
@@ -192,8 +200,8 @@
 </source>
 </class>
 
-<class classid="4" nclones="2" nlines="11" similarity="72">
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/eagleeye/EagleEye.java" startline="98" endline="108" pcid="148">
+<class classid="4" nclones="2" nlines="12" similarity="83">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/eagleeye/EagleEye.java" startline="98" endline="108" pcid="281">
     private static String locateBaseLogPath() {
         String tmpPath = EagleEyeCoreUtils.getSystemProperty("JM.LOG.PATH");
         if (EagleEyeCoreUtils.isNotBlank(tmpPath)) {
@@ -206,7 +214,7 @@
         return tmpPath;
     }
 </source>
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/eagleeye/EagleEye.java" startline="110" endline="120" pcid="149">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/eagleeye/EagleEye.java" startline="110" endline="120" pcid="285">
     private static String locateEagleEyeLogPath() {
         String tmpPath = EagleEyeCoreUtils.getSystemProperty("EAGLEEYE.LOG.PATH");
         if (EagleEyeCoreUtils.isNotBlank(tmpPath)) {
@@ -222,7 +230,7 @@
 </class>
 
 <class classid="5" nclones="2" nlines="13" similarity="100">
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/eagleeye/EagleEyeCoreUtils.java" startline="30" endline="41" pcid="167">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/eagleeye/EagleEyeCoreUtils.java" startline="30" endline="41" pcid="326">
     public static boolean isBlank(String str) {
         int strLen;
         if (str == null || (strLen = str.length()) == 0) {
@@ -236,7 +244,7 @@
         return true;
     }
 </source>
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/util/StringUtil.java" startline="43" endline="54" pcid="759">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/util/StringUtil.java" startline="43" endline="54" pcid="1609">
     public static boolean isBlank(String str) {
         int strLen;
         if (str == null || (strLen = str.length()) == 0) {
@@ -252,8 +260,90 @@
 </source>
 </class>
 
-<class classid="6" nclones="2" nlines="23" similarity="82">
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/node/metric/MetricSearcher.java" startline="92" endline="114" pcid="396">
+<class classid="6" nclones="2" nlines="15" similarity="80">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/eagleeye/EagleEyeLogDaemon.java" startline="58" endline="71" pcid="388">
+    private void cleanupFiles() {
+        for (EagleEyeAppender watchedAppender : watchedAppenders) {
+            try {
+                watchedAppender.cleanup();
+            } catch (Exception e) {
+                EagleEye.selfLog("[ERROR] fail to cleanup: " + watchedAppender, e);
+            }
+        }
+        try {
+            EagleEye.selfAppender.cleanup();
+        } catch (Exception e) {
+            // quietly
+        }
+    }
+</source>
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/eagleeye/EagleEyeLogDaemon.java" startline="73" endline="86" pcid="394">
+    private void flushAndReload() {
+        for (EagleEyeAppender watchedAppender : watchedAppenders) {
+            try {
+                watchedAppender.reload();
+            } catch (Exception e) {
+                EagleEye.selfLog("[ERROR] fail to reload: " + watchedAppender, e);
+            }
+        }
+        try {
+            EagleEye.selfAppender.reload();
+        } catch (Exception e) {
+            // quietly
+        }
+    }
+</source>
+</class>
+
+<class classid="7" nclones="4" nlines="10" similarity="70">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/eagleeye/EagleEyeLogDaemon.java" startline="119" endline="127" pcid="409">
+    private static void closeAppenders() {
+        for (EagleEyeAppender watchedAppender : watchedAppenders) {
+            try {
+                watchedAppender.close();
+            } catch (Exception e) {
+                EagleEye.selfLog("[ERROR] fail to close: " + watchedAppender, e);
+            }
+        }
+    }
+</source>
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/node/metric/MetricTimerListener.java" startline="56" endline="64" pcid="862">
+        if (!maps.isEmpty()) {
+            for (Entry<Long, List<MetricNode>> entry : maps.entrySet()) {
+                try {
+                    metricWriter.write(entry.getKey(), entry.getValue());
+                } catch (Exception e) {
+                    RecordLog.info("write metric error: ", e);
+                }
+            }
+        }
+</source>
+<source file="Sentinel/sentinel-transport/sentinel-transport-simple-http/src/main/java/com/alibaba/csp/sentinel/transport/command/http/HttpEventTask.java" startline="122" endline="130" pcid="2992">
+    private void closeResource(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                CommandCenterLog.info("CommandCenter close resource failed", e);
+            }
+        }
+    }
+</source>
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/eagleeye/EagleEyeLogDaemon.java" startline="129" endline="137" pcid="413">
+    static void flushAndWait() {
+        for (EagleEyeAppender watchedAppender : watchedAppenders) {
+            try {
+                watchedAppender.flush();
+            } catch (Exception e) {
+                EagleEye.selfLog("[ERROR] fail to flush: " + watchedAppender, e);
+            }
+        }
+    }
+</source>
+</class>
+
+<class classid="8" nclones="2" nlines="24" similarity="84">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/node/metric/MetricSearcher.java" startline="92" endline="114" pcid="805">
     public synchronized List<MetricNode> find(long beginTimeMs, int recommendLines) throws Exception {
         List<String> fileNames = MetricWriter.listMetricFiles(baseDir, baseFileName);
         int i = 0;
@@ -278,8 +368,7 @@
         return null;
     }
 </source>
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/node/metric/MetricSearcher.java" startline="121" endline="149" pcid="397">
-    public synchronized List<MetricNode> findByTimeAndResource(long beginTimeMs, long endTimeMs, String identity)
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/node/metric/MetricSearcher.java" startline="122" endline="149" pcid="811">
         throws Exception {
         List<String> fileNames = MetricWriter.listMetricFiles(baseDir, baseFileName);
         //RecordLog.info("pid=" + pid + ", findByTimeAndResource([" + beginTimeMs + ", " + endTimeMs
@@ -311,59 +400,146 @@
 </source>
 </class>
 
-<class classid="7" nclones="2" nlines="19" similarity="73">
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/block/authority/AuthorityRuleManager.java" startline="120" endline="141" pcid="504">
-        private Map<String, List<AuthorityRule>> loadAuthorityConf(List<AuthorityRule> list) {
-            if (list == null) {
-                return null;
-            }
-            Map<String, List<AuthorityRule>> newRuleMap = new ConcurrentHashMap<String, List<AuthorityRule>>();
-            for (AuthorityRule rule : list) {
-                if (StringUtil.isBlank(rule.getLimitApp())) {
-                    rule.setLimitApp(FlowRule.LIMIT_APP_DEFAULT);
+<class classid="9" nclones="2" nlines="33" similarity="70">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/node/metric/MetricSearcher.java" startline="205" endline="236" pcid="828">
+                                                  long offset, long endTimeMs, String identity) throws Exception {
+        FileInputStream in = null;
+        long endSecond = endTimeMs / 1000;
+        try {
+            in = new FileInputStream(fileName);
+            in.getChannel().position(offset);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, charset));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                MetricNode node = MetricNode.fromFatString(line);
+                long currentSecond = node.getTimestamp() / 1000;
+                if (currentSecond <= endSecond) {
+                    // read all
+                    if (identity == null) {
+                        list.add(node);
+                    } else if (node.getResource().equals(identity)) {
+                        list.add(node);
+                    }
+                } else {
+                    return false;
                 }
-
-                String identity = rule.getResource();
-                List<AuthorityRule> ruleM = newRuleMap.get(identity);
-                if (ruleM == null) {
-                    ruleM = new ArrayList<AuthorityRule>();
-                    newRuleMap.put(identity, ruleM);
+                if (list.size() >= maxLinesReturn) {
+                    return false;
                 }
-                ruleM.add(rule);
-
             }
-
-            return newRuleMap;
+        } finally {
+            if (in != null) {
+                in.close();
+            }
         }
+        return true;
+    }
 </source>
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/block/degrade/DegradeRuleManager.java" startline="138" endline="159" pcid="541">
-        private Map<String, List<DegradeRule>> loadDegradeConf(List<DegradeRule> list) {
-            if (list == null) {
-                return null;
-            }
-            Map<String, List<DegradeRule>> newRuleMap = new ConcurrentHashMap<String, List<DegradeRule>>();
-
-            for (DegradeRule rule : list) {
-                if (StringUtil.isBlank(rule.getLimitApp())) {
-                    rule.setLimitApp(FlowRule.LIMIT_APP_DEFAULT);
-                }
-
-                String identity = rule.getResource();
-                List<DegradeRule> ruleM = newRuleMap.get(identity);
-                if (ruleM == null) {
-                    ruleM = new ArrayList<DegradeRule>();
-                    newRuleMap.put(identity, ruleM);
-                }
-                ruleM.add(rule);
-            }
-
-            return newRuleMap;
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/node/metric/MetricSearcher.java" startline="239" endline="271" pcid="838">
+                                      long offset, int recommendLines) throws Exception {
+        //if(list.size() >= recommendLines){
+        //    return;
+        //}
+        long lastSecond = -1;
+        if (list.size() > 0) {
+            lastSecond = list.get(list.size() - 1).getTimestamp() / 1000;
         }
+        FileInputStream in = null;
+        try {
+            in = new FileInputStream(fileName);
+            in.getChannel().position(offset);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(in, charset));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                MetricNode node = MetricNode.fromFatString(line);
+                long currentSecond = node.getTimestamp() / 1000;
+
+                if (list.size() < recommendLines) {
+                    list.add(node);
+                } else if (currentSecond == lastSecond) {
+                    list.add(node);
+                } else {
+                    break;
+                }
+                lastSecond = currentSecond;
+            }
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+        }
+    }
 </source>
 </class>
 
-<class classid="8" nclones="2" nlines="22" similarity="72">
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/block/degrade/DegradeRule.java" startline="120" endline="143" pcid="528">
+<class classid="10" nclones="2" nlines="14" similarity="71">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/block/authority/AuthorityRuleManager.java" startline="75" endline="90" pcid="1034">
+        throws BlockException {
+        if (authorityRules == null) {
+            return;
+        }
+
+        List<AuthorityRule> rules = authorityRules.get(resource.getName());
+        if (rules == null) {
+            return;
+        }
+
+        for (AuthorityRule rule : rules) {
+            if (!rule.passCheck(context, node, count)) {
+                throw new AuthorityException(context.getOrigin());
+            }
+        }
+    }
+</source>
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/block/degrade/DegradeRuleManager.java" startline="66" endline="81" pcid="1105">
+        throws BlockException {
+        if (degradeRules == null) {
+            return;
+        }
+
+        List<DegradeRule> rules = degradeRules.get(resource.getName());
+        if (rules == null) {
+            return;
+        }
+
+        for (DegradeRule rule : rules) {
+            if (!rule.passCheck(context, node, count)) {
+                throw new DegradeException(rule.getLimitApp());
+            }
+        }
+    }
+</source>
+</class>
+
+<class classid="11" nclones="2" nlines="10" similarity="70">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/block/authority/AuthorityRuleManager.java" startline="101" endline="110" pcid="1040">
+    public static List<AuthorityRule> getRules() {
+        List<AuthorityRule> rules = new ArrayList<AuthorityRule>();
+        if (authorityRules == null) {
+            return rules;
+        }
+        for (Map.Entry<String, List<AuthorityRule>> entry : authorityRules.entrySet()) {
+            rules.addAll(entry.getValue());
+        }
+        return rules;
+    }
+</source>
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/block/degrade/DegradeRuleManager.java" startline="92" endline="101" pcid="1111">
+    public static List<DegradeRule> getRules() {
+        List<DegradeRule> rules = new ArrayList<DegradeRule>();
+        if (degradeRules == null) {
+            return rules;
+        }
+        for (Map.Entry<String, List<DegradeRule>> entry : degradeRules.entrySet()) {
+            rules.addAll(entry.getValue());
+        }
+        return rules;
+    }
+</source>
+</class>
+
+<class classid="12" nclones="2" nlines="22" similarity="72">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/block/degrade/DegradeRule.java" startline="120" endline="143" pcid="1079">
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -389,7 +565,7 @@
         return true;
     }
 </source>
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/system/SystemRule.java" startline="119" endline="144" pcid="694">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/system/SystemRule.java" startline="119" endline="144" pcid="1473">
     public boolean equals(Object o) {
         if (this == o) {
             return true;
@@ -419,14 +595,88 @@
 </source>
 </class>
 
-<class classid="9" nclones="2" nlines="12" similarity="75">
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/statistic/base/LeapArray.java" startline="87" endline="99" pcid="612">
+<class classid="13" nclones="3" nlines="18" similarity="90">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/block/flow/FlowRule.java" startline="178" endline="199" pcid="1189">
+        if (limitApp.equals(origin)) {
+            if (strategy == RuleConstant.STRATEGY_DIRECT) {
+                return context.getOriginNode();
+            }
+
+            String refResource = this.getRefResource();
+            if (StringUtil.isEmpty(refResource)) {
+                return null;
+            }
+
+            if (strategy == RuleConstant.STRATEGY_RELATE) {
+                return ClusterBuilderSlot.getClusterNode(refResource);
+            }
+
+            if (strategy == RuleConstant.STRATEGY_CHAIN) {
+                if (!refResource.equals(context.getName())) {
+                    return null;
+                }
+                return node;
+            }
+
+        } else if (LIMIT_APP_DEFAULT.equals(limitApp)) {
+</source>
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/block/flow/FlowRule.java" startline="219" endline="240" pcid="1201">
+        } else if (LIMIT_APP_OTHER.equals(limitApp) && FlowRuleManager.isOtherOrigin(origin, getResource())) {
+            if (strategy == RuleConstant.STRATEGY_DIRECT) {
+                return context.getOriginNode();
+            }
+
+            String refResource = this.getRefResource();
+            if (StringUtil.isEmpty(refResource)) {
+                return null;
+            }
+            if (strategy == RuleConstant.STRATEGY_RELATE) {
+                return ClusterBuilderSlot.getClusterNode(refResource);
+            }
+
+            if (strategy == RuleConstant.STRATEGY_CHAIN) {
+                if (!refResource.equals(context.getName())) {
+                    return null;
+                }
+                if (node != null) {
+                    return node;
+                }
+            }
+        }
+</source>
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/block/flow/FlowRule.java" startline="199" endline="219" pcid="1195">
+        } else if (LIMIT_APP_DEFAULT.equals(limitApp)) {
+            if (strategy == RuleConstant.STRATEGY_DIRECT) {
+                return node.getClusterNode();
+            }
+            String refResource = this.getRefResource();
+            if (StringUtil.isEmpty(refResource)) {
+                return null;
+            }
+
+            if (strategy == RuleConstant.STRATEGY_RELATE) {
+                return ClusterBuilderSlot.getClusterNode(refResource);
+            }
+
+            if (strategy == RuleConstant.STRATEGY_CHAIN) {
+                if (!refResource.equals(context.getName())) {
+                    return null;
+                }
+                return node;
+            }
+
+        } else if (LIMIT_APP_OTHER.equals(limitApp) && FlowRuleManager.isOtherOrigin(origin, getResource())) {
+</source>
+</class>
+
+<class classid="14" nclones="2" nlines="12" similarity="83">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/statistic/base/LeapArray.java" startline="98" endline="110" pcid="1295">
     public List<WindowWrap<T>> list() {
         ArrayList<WindowWrap<T>> result = new ArrayList<WindowWrap<T>>();
 
         for (int i = 0; i < array.length(); i++) {
             WindowWrap<T> windowWrap = array.get(i);
-            if (windowWrap == null) {
+            if (windowWrap == null || isWindowDeprecated(windowWrap)) {
                 continue;
             }
             result.add(windowWrap);
@@ -435,13 +685,13 @@
         return result;
     }
 </source>
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/statistic/base/LeapArray.java" startline="101" endline="112" pcid="613">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/statistic/base/LeapArray.java" startline="112" endline="123" pcid="1298">
     public List<T> values() {
         ArrayList<T> result = new ArrayList<T>();
 
         for (int i = 0; i < array.length(); i++) {
             WindowWrap<T> windowWrap = array.get(i);
-            if (windowWrap == null) {
+            if (windowWrap == null || isWindowDeprecated(windowWrap)) {
                 continue;
             }
             result.add(windowWrap.value());
@@ -451,8 +701,8 @@
 </source>
 </class>
 
-<class classid="10" nclones="3" nlines="15" similarity="73">
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/statistic/base/LongAdder.java" startline="100" endline="111" pcid="619">
+<class classid="15" nclones="3" nlines="15" similarity="80">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/statistic/base/LongAdder.java" startline="100" endline="111" pcid="1308">
     public long sum() {
         long sum = base;
         Cell[] as = cells;
@@ -466,7 +716,7 @@
         return sum;
     }
 </source>
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/statistic/base/Stripe64.java" startline="288" endline="298" pcid="637">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/statistic/base/Stripe64.java" startline="288" endline="298" pcid="1359">
     final void internalReset(long initialValue) {
         Cell[] as = cells;
         base = initialValue;
@@ -479,7 +729,7 @@
         }
     }
 </source>
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/statistic/base/LongAdder.java" startline="134" endline="149" pcid="621">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/statistic/base/LongAdder.java" startline="134" endline="149" pcid="1313">
     public long sumThenReset() {
         long sum = base;
         Cell[] as = cells;
@@ -499,8 +749,73 @@
 </source>
 </class>
 
-<class classid="11" nclones="2" nlines="11" similarity="81">
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/SphO.java" startline="179" endline="189" pcid="724">
+<class classid="16" nclones="2" nlines="11" similarity="72">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/statistic/base/Stripe64.java" startline="108" endline="117" pcid="1326">
+        static {
+            try {
+                UNSAFE = getUnsafe();
+                Class<?> ak = Cell.class;
+                valueOffset = UNSAFE.objectFieldOffset
+                    (ak.getDeclaredField("value"));
+            } catch (Exception e) {
+                throw new Error(e);
+            }
+        }
+</source>
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/statistic/base/Stripe64.java" startline="305" endline="316" pcid="1363">
+    static {
+        try {
+            UNSAFE = getUnsafe();
+            Class<?> sk = Striped64.class;
+            baseOffset = UNSAFE.objectFieldOffset
+                (sk.getDeclaredField("base"));
+            busyOffset = UNSAFE.objectFieldOffset
+                (sk.getDeclaredField("busy"));
+        } catch (Exception e) {
+            throw new Error(e);
+        }
+    }
+</source>
+</class>
+
+<class classid="17" nclones="2" nlines="11" similarity="72">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/statistic/StatisticSlot.java" startline="64" endline="78" pcid="1447">
+        } catch (BlockException e) {
+            context.getCurEntry().setError(e);
+
+            // Add block count.
+            node.increaseBlockedQps();
+            if (context.getCurEntry().getOriginNode() != null) {
+                context.getCurEntry().getOriginNode().increaseBlockedQps();
+            }
+
+            if (resourceWrapper.getType() == EntryType.IN) {
+                Constants.ENTRY_NODE.increaseBlockedQps();
+            }
+
+            throw e;
+        } catch (Throwable e) {
+</source>
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/slots/statistic/StatisticSlot.java" startline="78" endline="91" pcid="1450">
+        } catch (Throwable e) {
+            context.getCurEntry().setError(e);
+
+            // Should not happen
+            node.increaseExceptionQps();
+            if (context.getCurEntry().getOriginNode() != null) {
+                context.getCurEntry().getOriginNode().increaseExceptionQps();
+            }
+
+            if (resourceWrapper.getType() == EntryType.IN) {
+                Constants.ENTRY_NODE.increaseExceptionQps();
+            }
+            throw e;
+        }
+</source>
+</class>
+
+<class classid="18" nclones="2" nlines="13" similarity="92">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/SphO.java" startline="179" endline="189" pcid="1534">
     public static boolean entry(String name, EntryType type, int count, Object... args) {
         try {
             Env.sph.entry(name, type, count, args);
@@ -513,7 +828,7 @@
         return true;
     }
 </source>
-<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/SphO.java" startline="202" endline="212" pcid="725">
+<source file="Sentinel/sentinel-core/src/main/java/com/alibaba/csp/sentinel/SphO.java" startline="202" endline="212" pcid="1538">
     public static boolean entry(Method method, EntryType type, int count, Object... args) {
         try {
             Env.sph.entry(method, type, count, args);
@@ -528,47 +843,77 @@
 </source>
 </class>
 
-<class classid="12" nclones="4" nlines="10" similarity="70">
-<source file="Sentinel/sentinel-core/src/test/java/com/alibaba/csp/sentinel/SphOTest.java" startline="61" endline="71" pcid="809">
-    public void testStringEntryCount() {
-        if (SphO.entry("resourceName", 2)) {
+<class classid="19" nclones="2" nlines="17" similarity="82">
+<source file="Sentinel/sentinel-core/src/test/java/com/alibaba/csp/sentinel/base/metric/WindowLeapArrayTest.java" startline="163" endline="187" pcid="1648">
+    public void testListWindowsResetOld() throws Exception {
+        final int windowLengthInMs = 100;
+        final int intervalInSec = 1;
+        final int intervalInMs = intervalInSec * 1000;
+
+        WindowLeapArray leapArray = new WindowLeapArray(windowLengthInMs, intervalInSec);
+        long time = TimeUtil.currentTimeMillis();
+
+        Set<WindowWrap<Window>> windowWraps = new HashSet<WindowWrap<Window>>();
+
+        windowWraps.add(leapArray.currentWindow(time));
+        windowWraps.add(leapArray.currentWindow(time + windowLengthInMs));
+
+        List<WindowWrap<Window>> list = leapArray.list();
+        for (WindowWrap<Window> wrap : list) {
+            assertTrue(windowWraps.contains(wrap));
+        }
+
+        Thread.sleep(windowLengthInMs + intervalInMs);
+
+        // This will replace the deprecated bucket, so all deprecated buckets will be reset.
+        leapArray.currentWindow(time + windowLengthInMs + intervalInMs).value().addPass();
+
+        assertEquals(1, leapArray.list().size());
+    }
+</source>
+<source file="Sentinel/sentinel-core/src/test/java/com/alibaba/csp/sentinel/base/metric/WindowLeapArrayTest.java" startline="190" endline="214" pcid="1650">
+    public void testListWindowsNewBucket() throws Exception {
+        final int windowLengthInMs = 100;
+        final int intervalInSec = 1;
+
+        WindowLeapArray leapArray = new WindowLeapArray(windowLengthInMs, intervalInSec);
+        long time = TimeUtil.currentTimeMillis();
+
+        Set<WindowWrap<Window>> windowWraps = new HashSet<WindowWrap<Window>>();
+
+        windowWraps.add(leapArray.currentWindow(time));
+        windowWraps.add(leapArray.currentWindow(time + windowLengthInMs));
+
+        Thread.sleep(intervalInSec * 1000 + windowLengthInMs * 3);
+
+        List<WindowWrap<Window>> list = leapArray.list();
+        for (WindowWrap<Window> wrap : list) {
+            assertTrue(windowWraps.contains(wrap));
+        }
+
+        // This won't hit deprecated bucket, so no deprecated buckets will be reset.
+        // But deprecated buckets can be filtered when collecting list.
+        leapArray.currentWindow(TimeUtil.currentTimeMillis()).value().addPass();
+
+        assertEquals(1, leapArray.list().size());
+    }
+</source>
+</class>
+
+<class classid="20" nclones="10" nlines="11" similarity="72">
+<source file="Sentinel/sentinel-core/src/test/java/com/alibaba/csp/sentinel/SphOTest.java" startline="35" endline="44" pcid="1738">
+    public void testStringEntryNormal() {
+        if (SphO.entry("resourceName")) {
             try {
                 assertTrue(StringUtil.equalsIgnoreCase(
                     ContextUtil.getContext().getCurEntry().getResourceWrapper().getName(), "resourceName"));
-                assertSame(ContextUtil.getContext().getCurEntry().getResourceWrapper().getType(), EntryType.OUT);
             } finally {
-                SphO.exit(2);
+                SphO.exit();
             }
         }
     }
 </source>
-<source file="Sentinel/sentinel-core/src/test/java/com/alibaba/csp/sentinel/SphOTest.java" startline="117" endline="127" pcid="813">
-    public void testStringEntryTypeCount() {
-        if (SphO.entry("resourceName", EntryType.IN, 2)) {
-            try {
-                assertTrue(StringUtil.equalsIgnoreCase(
-                    ContextUtil.getContext().getCurEntry().getResourceWrapper().getName(), "resourceName"));
-                assertSame(ContextUtil.getContext().getCurEntry().getResourceWrapper().getType(), EntryType.IN);
-            } finally {
-                SphO.exit(2);
-            }
-        }
-    }
-</source>
-<source file="Sentinel/sentinel-core/src/test/java/com/alibaba/csp/sentinel/SphOTest.java" startline="145" endline="155" pcid="815">
-    public void testStringEntryAll() {
-        if (SphO.entry("resourceName", EntryType.IN, 2, "hello1", "hello2")) {
-            try {
-                assertTrue(StringUtil.equalsIgnoreCase(
-                    ContextUtil.getContext().getCurEntry().getResourceWrapper().getName(), "resourceName"));
-                assertSame(ContextUtil.getContext().getCurEntry().getResourceWrapper().getType(), EntryType.IN);
-            } finally {
-                SphO.exit(2, "hello1", "hello2");
-            }
-        }
-    }
-</source>
-<source file="Sentinel/sentinel-core/src/test/java/com/alibaba/csp/sentinel/SphOTest.java" startline="89" endline="99" pcid="811">
+<source file="Sentinel/sentinel-core/src/test/java/com/alibaba/csp/sentinel/SphOTest.java" startline="89" endline="99" pcid="1754">
     public void testStringEntryType() {
         if (SphO.entry("resourceName", EntryType.IN)) {
             try {
@@ -581,10 +926,123 @@
         }
     }
 </source>
+<source file="Sentinel/sentinel-core/src/test/java/com/alibaba/csp/sentinel/SphOTest.java" startline="47" endline="58" pcid="1742">
+    public void testMethodEntryNormal() throws NoSuchMethodException, SecurityException {
+        Method method = SphOTest.class.getMethod("testMethodEntryNormal");
+        if (SphO.entry(method)) {
+            try {
+                assertTrue(StringUtil.equalsIgnoreCase(
+                    ContextUtil.getContext().getCurEntry().getResourceWrapper().getName(),
+                    "com.alibaba.csp.sentinel.SphOTest:testMethodEntryNormal()"));
+            } finally {
+                SphO.exit();
+            }
+        }
+    }
+</source>
+<source file="Sentinel/sentinel-core/src/test/java/com/alibaba/csp/sentinel/SphOTest.java" startline="145" endline="155" pcid="1770">
+    public void testStringEntryAll() {
+        if (SphO.entry("resourceName", EntryType.IN, 2, "hello1", "hello2")) {
+            try {
+                assertTrue(StringUtil.equalsIgnoreCase(
+                    ContextUtil.getContext().getCurEntry().getResourceWrapper().getName(), "resourceName"));
+                assertSame(ContextUtil.getContext().getCurEntry().getResourceWrapper().getType(), EntryType.IN);
+            } finally {
+                SphO.exit(2, "hello1", "hello2");
+            }
+        }
+    }
+</source>
+<source file="Sentinel/sentinel-core/src/test/java/com/alibaba/csp/sentinel/SphOTest.java" startline="61" endline="71" pcid="1746">
+    public void testStringEntryCount() {
+        if (SphO.entry("resourceName", 2)) {
+            try {
+                assertTrue(StringUtil.equalsIgnoreCase(
+                    ContextUtil.getContext().getCurEntry().getResourceWrapper().getName(), "resourceName"));
+                assertSame(ContextUtil.getContext().getCurEntry().getResourceWrapper().getType(), EntryType.OUT);
+            } finally {
+                SphO.exit(2);
+            }
+        }
+    }
+</source>
+<source file="Sentinel/sentinel-core/src/test/java/com/alibaba/csp/sentinel/SphOTest.java" startline="117" endline="127" pcid="1762">
+    public void testStringEntryTypeCount() {
+        if (SphO.entry("resourceName", EntryType.IN, 2)) {
+            try {
+                assertTrue(StringUtil.equalsIgnoreCase(
+                    ContextUtil.getContext().getCurEntry().getResourceWrapper().getName(), "resourceName"));
+                assertSame(ContextUtil.getContext().getCurEntry().getResourceWrapper().getType(), EntryType.IN);
+            } finally {
+                SphO.exit(2);
+            }
+        }
+    }
+</source>
+<source file="Sentinel/sentinel-core/src/test/java/com/alibaba/csp/sentinel/SphOTest.java" startline="102" endline="114" pcid="1758">
+    public void testMethodEntryType() throws NoSuchMethodException, SecurityException {
+        Method method = SphOTest.class.getMethod("testMethodEntryType");
+        if (SphO.entry(method, EntryType.IN)) {
+            try {
+                assertTrue(StringUtil.equalsIgnoreCase(
+                    ContextUtil.getContext().getCurEntry().getResourceWrapper().getName(),
+                    "com.alibaba.csp.sentinel.SphOTest:testMethodEntryType()"));
+                assertSame(ContextUtil.getContext().getCurEntry().getResourceWrapper().getType(), EntryType.IN);
+            } finally {
+                SphO.exit();
+            }
+        }
+    }
+</source>
+<source file="Sentinel/sentinel-core/src/test/java/com/alibaba/csp/sentinel/SphOTest.java" startline="158" endline="170" pcid="1774">
+    public void testMethodEntryAll() throws NoSuchMethodException, SecurityException {
+        Method method = SphOTest.class.getMethod("testMethodEntryAll");
+        if (SphO.entry(method, EntryType.IN, 2, "hello1", "hello2")) {
+            try {
+                assertTrue(StringUtil.equalsIgnoreCase(
+                    ContextUtil.getContext().getCurEntry().getResourceWrapper().getName(),
+                    "com.alibaba.csp.sentinel.SphOTest:testMethodEntryAll()"));
+                assertSame(ContextUtil.getContext().getCurEntry().getResourceWrapper().getType(), EntryType.IN);
+            } finally {
+                SphO.exit(2, "hello1", "hello2");
+            }
+        }
+    }
+</source>
+<source file="Sentinel/sentinel-core/src/test/java/com/alibaba/csp/sentinel/SphOTest.java" startline="74" endline="86" pcid="1750">
+    public void testMethodEntryCount() throws NoSuchMethodException, SecurityException {
+        Method method = SphOTest.class.getMethod("testMethodEntryCount");
+        if (SphO.entry(method, 2)) {
+            try {
+                assertTrue(StringUtil.equalsIgnoreCase(
+                    ContextUtil.getContext().getCurEntry().getResourceWrapper().getName(),
+                    "com.alibaba.csp.sentinel.SphOTest:testMethodEntryCount()"));
+                assertSame(ContextUtil.getContext().getCurEntry().getResourceWrapper().getType(), EntryType.OUT);
+            } finally {
+                SphO.exit(2);
+            }
+        }
+    }
+</source>
+<source file="Sentinel/sentinel-core/src/test/java/com/alibaba/csp/sentinel/SphOTest.java" startline="130" endline="142" pcid="1766">
+    public void testMethodEntryTypeCount() throws NoSuchMethodException, SecurityException {
+        Method method = SphOTest.class.getMethod("testMethodEntryTypeCount");
+        if (SphO.entry(method, EntryType.IN, 2)) {
+            try {
+                assertTrue(StringUtil.equalsIgnoreCase(
+                    ContextUtil.getContext().getCurEntry().getResourceWrapper().getName(),
+                    "com.alibaba.csp.sentinel.SphOTest:testMethodEntryTypeCount()"));
+                assertSame(ContextUtil.getContext().getCurEntry().getResourceWrapper().getType(), EntryType.IN);
+            } finally {
+                SphO.exit(2);
+            }
+        }
+    }
+</source>
 </class>
 
-<class classid="13" nclones="3" nlines="19" similarity="89">
-<source file="Sentinel/sentinel-dashboard/src/main/java/com/taobao/csp/sentinel/dashboard/view/DegradeController.java" startline="49" endline="67" pcid="1059">
+<class classid="21" nclones="3" nlines="20" similarity="95">
+<source file="Sentinel/sentinel-dashboard/src/main/java/com/taobao/csp/sentinel/dashboard/view/DegradeController.java" startline="49" endline="67" pcid="2040">
     Result<List<DegradeRuleEntity>> queryMachineRules(String app, String ip, Integer port) {
         if (StringUtil.isEmpty(app)) {
             return Result.ofFail(-1, "app can't be null or empty");
@@ -605,28 +1063,7 @@
         }
     }
 </source>
-<source file="Sentinel/sentinel-dashboard/src/main/java/com/taobao/csp/sentinel/dashboard/view/FlowController.java" startline="52" endline="70" pcid="1070">
-    Result<List<FlowRuleEntity>> queryMachineRules(String app, String ip, Integer port) {
-        if (StringUtil.isEmpty(app)) {
-            return Result.ofFail(-1, "app can't be null or empty");
-        }
-        if (StringUtil.isEmpty(ip)) {
-            return Result.ofFail(-1, "ip can't be null or empty");
-        }
-        if (port == null) {
-            return Result.ofFail(-1, "port can't be null");
-        }
-        try {
-            List<FlowRuleEntity> rules = httpHelper.fetchFlowRuleOfMachine(app, ip, port);
-            rules = repository.saveAll(rules);
-            return Result.ofSuccess(rules);
-        } catch (Throwable throwable) {
-            logger.error("queryApps error:", throwable);
-            return Result.ofThrowable(-1, throwable);
-        }
-    }
-</source>
-<source file="Sentinel/sentinel-dashboard/src/main/java/com/taobao/csp/sentinel/dashboard/view/SystemController.java" startline="50" endline="68" pcid="1090">
+<source file="Sentinel/sentinel-dashboard/src/main/java/com/taobao/csp/sentinel/dashboard/view/SystemController.java" startline="50" endline="68" pcid="2197">
     Result<List<SystemRuleEntity>> queryMachineRules(String app, String ip, Integer port) {
         if (StringUtil.isEmpty(app)) {
             return Result.ofFail(-1, "app can't be null or empty");
@@ -647,10 +1084,31 @@
         }
     }
 </source>
+<source file="Sentinel/sentinel-dashboard/src/main/java/com/taobao/csp/sentinel/dashboard/view/FlowController.java" startline="52" endline="70" pcid="2097">
+    Result<List<FlowRuleEntity>> queryMachineRules(String app, String ip, Integer port) {
+        if (StringUtil.isEmpty(app)) {
+            return Result.ofFail(-1, "app can't be null or empty");
+        }
+        if (StringUtil.isEmpty(ip)) {
+            return Result.ofFail(-1, "ip can't be null or empty");
+        }
+        if (port == null) {
+            return Result.ofFail(-1, "port can't be null");
+        }
+        try {
+            List<FlowRuleEntity> rules = httpHelper.fetchFlowRuleOfMachine(app, ip, port);
+            rules = repository.saveAll(rules);
+            return Result.ofSuccess(rules);
+        } catch (Throwable throwable) {
+            logger.error("queryApps error:", throwable);
+            return Result.ofThrowable(-1, throwable);
+        }
+    }
+</source>
 </class>
 
-<class classid="14" nclones="3" nlines="19" similarity="73">
-<source file="Sentinel/sentinel-dashboard/src/main/java/com/taobao/csp/sentinel/dashboard/view/DegradeController.java" startline="175" endline="194" pcid="1062">
+<class classid="22" nclones="3" nlines="20" similarity="75">
+<source file="Sentinel/sentinel-dashboard/src/main/java/com/taobao/csp/sentinel/dashboard/view/DegradeController.java" startline="175" endline="194" pcid="2073">
     Result<?> delete(Long id) {
         if (id == null) {
             return Result.ofFail(-1, "id can't be null");
@@ -672,27 +1130,7 @@
         return Result.ofSuccess(id);
     }
 </source>
-<source file="Sentinel/sentinel-dashboard/src/main/java/com/taobao/csp/sentinel/dashboard/view/FlowController.java" startline="226" endline="243" pcid="1073">
-    Result<?> delete(Long id) {
-        if (id == null) {
-            return Result.ofFail(-1, "id can't be null");
-        }
-        FlowRuleEntity oldEntity = repository.findById(id);
-        if (oldEntity == null) {
-            return Result.ofSuccess(null);
-        }
-        try {
-            repository.delete(id);
-        } catch (Exception e) {
-            return Result.ofFail(-1, e.getMessage());
-        }
-        if (!publishRules(oldEntity.getApp(), oldEntity.getIp(), oldEntity.getPort())) {
-            logger.info("publish flow rules fail after rule delete");
-        }
-        return Result.ofSuccess(id);
-    }
-</source>
-<source file="Sentinel/sentinel-dashboard/src/main/java/com/taobao/csp/sentinel/dashboard/view/SystemController.java" startline="190" endline="208" pcid="1094">
+<source file="Sentinel/sentinel-dashboard/src/main/java/com/taobao/csp/sentinel/dashboard/view/SystemController.java" startline="190" endline="208" pcid="2237">
     Result<?> delete(Long id) {
         if (id == null) {
             return Result.ofFail(-1, "id can't be null");
@@ -713,39 +1151,275 @@
         return Result.ofSuccess(id);
     }
 </source>
-</class>
-
-<class classid="15" nclones="2" nlines="10" similarity="80">
-<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/degrade/ExceptionRatioDegradeDemo.java" startline="107" endline="117" pcid="1174">
-    private static void initDegradeRule() {
-        List<DegradeRule> rules = new ArrayList<DegradeRule>();
-        DegradeRule rule = new DegradeRule();
-        rule.setResource(KEY);
-        // set limit exception ratio to 0.1
-        rule.setCount(0.1);
-        rule.setGrade(RuleConstant.DEGRADE_GRADE_EXCEPTION);
-        rule.setTimeWindow(10);
-        rules.add(rule);
-        DegradeRuleManager.loadRules(rules);
-    }
-</source>
-<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/degrade/RtDegradeDemo.java" startline="122" endline="132" pcid="1179">
-    private static void initDegradeRule() {
-        List<DegradeRule> rules = new ArrayList<DegradeRule>();
-        DegradeRule rule = new DegradeRule();
-        rule.setResource(KEY);
-        // set threshold rt, 10 ms
-        rule.setCount(10);
-        rule.setGrade(RuleConstant.DEGRADE_GRADE_RT);
-        rule.setTimeWindow(10);
-        rules.add(rule);
-        DegradeRuleManager.loadRules(rules);
+<source file="Sentinel/sentinel-dashboard/src/main/java/com/taobao/csp/sentinel/dashboard/view/FlowController.java" startline="226" endline="243" pcid="2144">
+    Result<?> delete(Long id) {
+        if (id == null) {
+            return Result.ofFail(-1, "id can't be null");
+        }
+        FlowRuleEntity oldEntity = repository.findById(id);
+        if (oldEntity == null) {
+            return Result.ofSuccess(null);
+        }
+        try {
+            repository.delete(id);
+        } catch (Exception e) {
+            return Result.ofFail(-1, e.getMessage());
+        }
+        if (!publishRules(oldEntity.getApp(), oldEntity.getIp(), oldEntity.getPort())) {
+            logger.info("publish flow rules fail after rule delete");
+        }
+        return Result.ofSuccess(id);
     }
 </source>
 </class>
 
-<class classid="16" nclones="8" nlines="32" similarity="73">
-<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/degrade/ExceptionRatioDegradeDemo.java" startline="127" endline="168" pcid="1176">
+<class classid="23" nclones="7" nlines="26" similarity="71">
+<source file="Sentinel/sentinel-demo/sentinel-demo-apollo-datasource/src/main/java/com/alibaba/csp/sentinel/demo/datasource/apollo/FlowQpsRunner.java" startline="67" endline="93" pcid="2346">
+        public void run() {
+            while (!stop) {
+                Entry entry = null;
+
+                try {
+                    entry = SphU.entry(resourceName);
+                    // token acquired, means pass
+                    pass.addAndGet(1);
+                } catch (BlockException e1) {
+                    block.incrementAndGet();
+                } catch (Exception e2) {
+                    // biz exception
+                } finally {
+                    total.incrementAndGet();
+                    if (entry != null) {
+                        entry.exit();
+                    }
+                }
+
+                Random random2 = new Random();
+                try {
+                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(50));
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+            }
+        }
+</source>
+<source file="Sentinel/sentinel-demo/sentinel-demo-nacos-datasource/src/main/java/com/alibaba/csp/sentinel/demo/datasource/nacos/FlowQpsRunner.java" startline="67" endline="93" pcid="2551">
+        public void run() {
+            while (!stop) {
+                Entry entry = null;
+
+                try {
+                    entry = SphU.entry(resourceName);
+                    // token acquired, means pass
+                    pass.addAndGet(1);
+                } catch (BlockException e1) {
+                    block.incrementAndGet();
+                } catch (Exception e2) {
+                    // biz exception
+                } finally {
+                    total.incrementAndGet();
+                    if (entry != null) {
+                        entry.exit();
+                    }
+                }
+
+                Random random2 = new Random();
+                try {
+                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(50));
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+            }
+        }
+</source>
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/WarmUpFlowDemo.java" startline="127" endline="151" pcid="2458">
+        public void run() {
+            while (!stop) {
+                Entry entry = null;
+                try {
+                    entry = SphU.entry(KEY);
+                    // token acquired, means pass
+                    pass.addAndGet(1);
+                } catch (BlockException e1) {
+                    block.incrementAndGet();
+                } catch (Exception e2) {
+                    // biz exception
+                } finally {
+                    total.incrementAndGet();
+                    if (entry != null) {
+                        entry.exit();
+                    }
+                }
+                Random random2 = new Random();
+                try {
+                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(2000));
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+            }
+        }
+</source>
+<source file="Sentinel/sentinel-demo/sentinel-demo-dynamic-file-rule/src/main/java/com/alibaba/csp/sentinel/demo/file/rule/FlowQpsRunner.java" startline="60" endline="86" pcid="2530">
+        public void run() {
+            while (!stop) {
+                Entry entry = null;
+
+                try {
+                    entry = SphU.entry(KEY);
+                    // token acquired, means pass
+                    pass.addAndGet(1);
+                } catch (BlockException e1) {
+                    block.incrementAndGet();
+                } catch (Exception e2) {
+                    // biz exception
+                } finally {
+                    total.incrementAndGet();
+                    if (entry != null) {
+                        entry.exit();
+                    }
+                }
+
+                Random random2 = new Random();
+                try {
+                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(50));
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+            }
+        }
+</source>
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/WarmUpFlowDemo.java" startline="156" endline="179" pcid="2467">
+        public void run() {
+            while (!stop) {
+                Entry entry = null;
+                try {
+                    entry = SphU.entry(KEY);
+                    pass.addAndGet(1);
+                } catch (BlockException e1) {
+                    block.incrementAndGet();
+                } catch (Exception e2) {
+                    // biz exception
+                } finally {
+                    total.incrementAndGet();
+                    if (entry != null) {
+                        entry.exit();
+                    }
+                }
+                Random random2 = new Random();
+                try {
+                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(50));
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+            }
+        }
+</source>
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/FlowQpsDemo.java" startline="134" endline="160" pcid="2410">
+        public void run() {
+            while (!stop) {
+                Entry entry = null;
+
+                try {
+                    entry = SphU.entry(KEY);
+                    // token acquired, means pass
+                    pass.addAndGet(1);
+                } catch (BlockException e1) {
+                    block.incrementAndGet();
+                } catch (Exception e2) {
+                    // biz exception
+                } finally {
+                    total.incrementAndGet();
+                    if (entry != null) {
+                        entry.exit();
+                    }
+                }
+
+                Random random2 = new Random();
+                try {
+                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(50));
+                } catch (InterruptedException e) {
+                    // ignore
+                }
+            }
+        }
+</source>
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/PaceFlowDemo.java" startline="171" endline="199" pcid="2441">
+                public void run() {
+                    long startTime = TimeUtil.currentTimeMillis();
+                    Entry entry = null;
+                    try {
+                        entry = SphU.entry(KEY);
+                    } catch (BlockException e1) {
+                        block.incrementAndGet();
+                    } catch (Exception e2) {
+                        // biz exception
+                    } finally {
+                        if (entry != null) {
+                            entry.exit();
+                            pass.incrementAndGet();
+                            long cost = TimeUtil.currentTimeMillis() - startTime;
+                            System.out.println(
+                                TimeUtil.currentTimeMillis() + " one request pass, cost " + cost + " ms");
+                        }
+                    }
+
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(5);
+                    } catch (InterruptedException e1) {
+                        // ignore
+                    }
+
+                    if (done.incrementAndGet() >= requestQps) {
+                        countDown.countDown();
+                    }
+                }
+</source>
+</class>
+
+<class classid="24" nclones="9" nlines="32" similarity="81">
+<source file="Sentinel/sentinel-demo/sentinel-demo-apollo-datasource/src/main/java/com/alibaba/csp/sentinel/demo/datasource/apollo/FlowQpsRunner.java" startline="98" endline="137" pcid="2355">
+        public void run() {
+            long start = System.currentTimeMillis();
+            System.out.println("begin to statistic!!!");
+
+            long oldTotal = 0;
+            long oldPass = 0;
+            long oldBlock = 0;
+            while (!stop) {
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                }
+                long globalTotal = total.get();
+                long oneSecondTotal = globalTotal - oldTotal;
+                oldTotal = globalTotal;
+
+                long globalPass = pass.get();
+                long oneSecondPass = globalPass - oldPass;
+                oldPass = globalPass;
+
+                long globalBlock = block.get();
+                long oneSecondBlock = globalBlock - oldBlock;
+                oldBlock = globalBlock;
+
+                System.out.println(seconds + " send qps is: " + oneSecondTotal);
+                System.out.println(TimeUtil.currentTimeMillis() + ", total:" + oneSecondTotal
+                    + ", pass:" + oneSecondPass
+                    + ", block:" + oneSecondBlock);
+
+                if (seconds-- <= 0) {
+                    stop = true;
+                }
+            }
+
+            long cost = System.currentTimeMillis() - start;
+            System.out.println("time cost: " + cost + " ms");
+            System.out.println("total:" + total.get() + ", pass:" + pass.get()
+                + ", block:" + block.get());
+            System.exit(0);
+        }
+</source>
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/degrade/ExceptionRatioDegradeDemo.java" startline="127" endline="168" pcid="2380">
         public void run() {
             long start = System.currentTimeMillis();
             System.out.println("begin to statistic!!!");
@@ -789,81 +1463,7 @@
             System.exit(0);
         }
 </source>
-<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/degrade/RtDegradeDemo.java" startline="143" endline="181" pcid="1181">
-        public void run() {
-            long start = System.currentTimeMillis();
-            System.out.println("begin to statistic!!!");
-            long oldTotal = 0;
-            long oldPass = 0;
-            long oldBlock = 0;
-
-            while (!stop) {
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                } catch (InterruptedException e) {
-                }
-
-                long globalTotal = total.get();
-                long oneSecondTotal = globalTotal - oldTotal;
-                oldTotal = globalTotal;
-
-                long globalPass = pass.get();
-                long oneSecondPass = globalPass - oldPass;
-                oldPass = globalPass;
-
-                long globalBlock = block.get();
-                long oneSecondBlock = globalBlock - oldBlock;
-                oldBlock = globalBlock;
-
-                System.out.println(TimeUtil.currentTimeMillis() + ", total:" + oneSecondTotal
-                    + ", pass:" + oneSecondPass + ", block:" + oneSecondBlock);
-
-                if (seconds-- <= 0) {
-                    stop = true;
-                }
-            }
-
-            long cost = System.currentTimeMillis() - start;
-            System.out.println("time cost: " + cost + " ms");
-            System.out.println("total:" + total.get() + ", pass:" + pass.get()
-                + ", block:" + block.get());
-            System.exit(0);
-        }
-</source>
-<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/system/SystemGuardDemo.java" startline="113" endline="143" pcid="1207">
-        public void run() {
-            System.out.println("begin to statistic!!!");
-            long oldTotal = 0;
-            long oldPass = 0;
-            long oldBlock = 0;
-            while (!stop) {
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                } catch (InterruptedException e) {
-                }
-                long globalTotal = total.get();
-                long oneSecondTotal = globalTotal - oldTotal;
-                oldTotal = globalTotal;
-
-                long globalPass = pass.get();
-                long oneSecondPass = globalPass - oldPass;
-                oldPass = globalPass;
-
-                long globalBlock = block.get();
-                long oneSecondBlock = globalBlock - oldBlock;
-                oldBlock = globalBlock;
-
-                System.out.println(seconds + ", " + TimeUtil.currentTimeMillis() + ", total:"
-                    + oneSecondTotal + ", pass:"
-                    + oneSecondPass + ", block:" + oneSecondBlock);
-                if (seconds-- <= 0) {
-                    stop = true;
-                }
-            }
-            System.exit(0);
-        }
-</source>
-<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/FlowThreadDemo.java" startline="109" endline="153" pcid="1192">
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/FlowThreadDemo.java" startline="109" endline="153" pcid="2430">
         public void run() {
             long start = System.currentTimeMillis();
             System.out.println("begin to statistic!!!");
@@ -910,7 +1510,48 @@
             System.exit(0);
         }
 </source>
-<source file="Sentinel/sentinel-demo/sentinel-demo-nacos-datasource/src/main/java/com/alibaba/csp/sentinel/demo/datasource/nacos/FlowQpsRunner.java" startline="98" endline="137" pcid="1241">
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/degrade/RtDegradeDemo.java" startline="143" endline="181" pcid="2395">
+        public void run() {
+            long start = System.currentTimeMillis();
+            System.out.println("begin to statistic!!!");
+            long oldTotal = 0;
+            long oldPass = 0;
+            long oldBlock = 0;
+
+            while (!stop) {
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                }
+
+                long globalTotal = total.get();
+                long oneSecondTotal = globalTotal - oldTotal;
+                oldTotal = globalTotal;
+
+                long globalPass = pass.get();
+                long oneSecondPass = globalPass - oldPass;
+                oldPass = globalPass;
+
+                long globalBlock = block.get();
+                long oneSecondBlock = globalBlock - oldBlock;
+                oldBlock = globalBlock;
+
+                System.out.println(TimeUtil.currentTimeMillis() + ", total:" + oneSecondTotal
+                    + ", pass:" + oneSecondPass + ", block:" + oneSecondBlock);
+
+                if (seconds-- <= 0) {
+                    stop = true;
+                }
+            }
+
+            long cost = System.currentTimeMillis() - start;
+            System.out.println("time cost: " + cost + " ms");
+            System.out.println("total:" + total.get() + ", pass:" + pass.get()
+                + ", block:" + block.get());
+            System.exit(0);
+        }
+</source>
+<source file="Sentinel/sentinel-demo/sentinel-demo-dynamic-file-rule/src/main/java/com/alibaba/csp/sentinel/demo/file/rule/FlowQpsRunner.java" startline="91" endline="130" pcid="2539">
         public void run() {
             long start = System.currentTimeMillis();
             System.out.println("begin to statistic!!!");
@@ -952,47 +1593,7 @@
             System.exit(0);
         }
 </source>
-<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/WarmUpFlowDemo.java" startline="185" endline="222" pcid="1202">
-        public void run() {
-            long start = System.currentTimeMillis();
-            System.out.println("begin to statistic!!!");
-            long oldTotal = 0;
-            long oldPass = 0;
-            long oldBlock = 0;
-            while (!stop) {
-                try {
-                    TimeUnit.SECONDS.sleep(1);
-                } catch (InterruptedException e) {
-                }
-
-                long globalTotal = total.get();
-                long oneSecondTotal = globalTotal - oldTotal;
-                oldTotal = globalTotal;
-
-                long globalPass = pass.get();
-                long oneSecondPass = globalPass - oldPass;
-                oldPass = globalPass;
-
-                long globalBlock = block.get();
-                long oneSecondBlock = globalBlock - oldBlock;
-                oldBlock = globalBlock;
-
-                System.out.println(TimeUtil.currentTimeMillis() + ", total:" + oneSecondTotal
-                    + ", pass:" + oneSecondPass
-                    + ", block:" + oneSecondBlock);
-                if (seconds-- <= 0) {
-                    stop = true;
-                }
-            }
-
-            long cost = System.currentTimeMillis() - start;
-            System.out.println("time cost: " + cost + " ms");
-            System.out.println("total:" + total.get() + ", pass:" + pass.get()
-                + ", block:" + block.get());
-            System.exit(0);
-        }
-</source>
-<source file="Sentinel/sentinel-demo/sentinel-demo-dynamic-file-rule/src/main/java/com/alibaba/csp/sentinel/demo/file/rule/FlowQpsRunner.java" startline="91" endline="130" pcid="1233">
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/FlowQpsDemo.java" startline="90" endline="129" pcid="2405">
         public void run() {
             long start = System.currentTimeMillis();
             System.out.println("begin to statistic!!!");
@@ -1034,7 +1635,80 @@
             System.exit(0);
         }
 </source>
-<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/FlowQpsDemo.java" startline="89" endline="128" pcid="1186">
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/system/SystemGuardDemo.java" startline="113" endline="143" pcid="2496">
+        public void run() {
+            System.out.println("begin to statistic!!!");
+            long oldTotal = 0;
+            long oldPass = 0;
+            long oldBlock = 0;
+            while (!stop) {
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                }
+                long globalTotal = total.get();
+                long oneSecondTotal = globalTotal - oldTotal;
+                oldTotal = globalTotal;
+
+                long globalPass = pass.get();
+                long oneSecondPass = globalPass - oldPass;
+                oldPass = globalPass;
+
+                long globalBlock = block.get();
+                long oneSecondBlock = globalBlock - oldBlock;
+                oldBlock = globalBlock;
+
+                System.out.println(seconds + ", " + TimeUtil.currentTimeMillis() + ", total:"
+                    + oneSecondTotal + ", pass:"
+                    + oneSecondPass + ", block:" + oneSecondBlock);
+                if (seconds-- <= 0) {
+                    stop = true;
+                }
+            }
+            System.exit(0);
+        }
+</source>
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/WarmUpFlowDemo.java" startline="185" endline="222" pcid="2476">
+        public void run() {
+            long start = System.currentTimeMillis();
+            System.out.println("begin to statistic!!!");
+            long oldTotal = 0;
+            long oldPass = 0;
+            long oldBlock = 0;
+            while (!stop) {
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (InterruptedException e) {
+                }
+
+                long globalTotal = total.get();
+                long oneSecondTotal = globalTotal - oldTotal;
+                oldTotal = globalTotal;
+
+                long globalPass = pass.get();
+                long oneSecondPass = globalPass - oldPass;
+                oldPass = globalPass;
+
+                long globalBlock = block.get();
+                long oneSecondBlock = globalBlock - oldBlock;
+                oldBlock = globalBlock;
+
+                System.out.println(TimeUtil.currentTimeMillis() + ", total:" + oneSecondTotal
+                    + ", pass:" + oneSecondPass
+                    + ", block:" + oneSecondBlock);
+                if (seconds-- <= 0) {
+                    stop = true;
+                }
+            }
+
+            long cost = System.currentTimeMillis() - start;
+            System.out.println("time cost: " + cost + " ms");
+            System.out.println("total:" + total.get() + ", pass:" + pass.get()
+                + ", block:" + block.get());
+            System.exit(0);
+        }
+</source>
+<source file="Sentinel/sentinel-demo/sentinel-demo-nacos-datasource/src/main/java/com/alibaba/csp/sentinel/demo/datasource/nacos/FlowQpsRunner.java" startline="98" endline="137" pcid="2560">
         public void run() {
             long start = System.currentTimeMillis();
             System.out.println("begin to statistic!!!");
@@ -1078,8 +1752,37 @@
 </source>
 </class>
 
-<class classid="17" nclones="5" nlines="10" similarity="70">
-<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/FlowQpsDemo.java" startline="60" endline="70" pcid="1183">
+<class classid="25" nclones="2" nlines="10" similarity="80">
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/degrade/ExceptionRatioDegradeDemo.java" startline="107" endline="117" pcid="2378">
+    private static void initDegradeRule() {
+        List<DegradeRule> rules = new ArrayList<DegradeRule>();
+        DegradeRule rule = new DegradeRule();
+        rule.setResource(KEY);
+        // set limit exception ratio to 0.1
+        rule.setCount(0.1);
+        rule.setGrade(RuleConstant.DEGRADE_GRADE_EXCEPTION);
+        rule.setTimeWindow(10);
+        rules.add(rule);
+        DegradeRuleManager.loadRules(rules);
+    }
+</source>
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/degrade/RtDegradeDemo.java" startline="122" endline="132" pcid="2393">
+    private static void initDegradeRule() {
+        List<DegradeRule> rules = new ArrayList<DegradeRule>();
+        DegradeRule rule = new DegradeRule();
+        rule.setResource(KEY);
+        // set threshold rt, 10 ms
+        rule.setCount(10);
+        rule.setGrade(RuleConstant.DEGRADE_GRADE_RT);
+        rule.setTimeWindow(10);
+        rules.add(rule);
+        DegradeRuleManager.loadRules(rules);
+    }
+</source>
+</class>
+
+<class classid="26" nclones="5" nlines="10" similarity="75">
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/FlowQpsDemo.java" startline="61" endline="71" pcid="2401">
     private static void initFlowQpsRule() {
         List<FlowRule> rules = new ArrayList<FlowRule>();
         FlowRule rule1 = new FlowRule();
@@ -1092,51 +1795,7 @@
         FlowRuleManager.loadRules(rules);
     }
 </source>
-<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/FlowThreadDemo.java" startline="87" endline="98" pcid="1190">
-    private static void initFlowRule() {
-        List<FlowRule> rules = new ArrayList<FlowRule>();
-        FlowRule rule1 = new FlowRule();
-        rule1.setResource("methodA");
-        // set limit concurrent thread for 'methodA' to 20
-        rule1.setCount(20);
-        rule1.setGrade(RuleConstant.FLOW_GRADE_THREAD);
-        rule1.setLimitApp("default");
-
-        rules.add(rule1);
-        FlowRuleManager.loadRules(rules);
-    }
-</source>
-<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/PaceFlowDemo.java" startline="153" endline="165" pcid="1195">
-    private static void initDefaultFlowRule() {
-        List<FlowRule> rules = new ArrayList<FlowRule>();
-        FlowRule rule1 = new FlowRule();
-        rule1.setResource(KEY);
-        rule1.setCount(count);
-        rule1.setGrade(RuleConstant.FLOW_GRADE_QPS);
-        rule1.setLimitApp("default");
-        // CONTROL_BEHAVIOR_DEFAULT means requests more than threshold will be rejected immediately.
-        rule1.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT);
-
-        rules.add(rule1);
-        FlowRuleManager.loadRules(rules);
-    }
-</source>
-<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/WarmUpFlowDemo.java" startline="111" endline="123" pcid="1199">
-    private static void initFlowRule() {
-        List<FlowRule> rules = new ArrayList<FlowRule>();
-        FlowRule rule1 = new FlowRule();
-        rule1.setResource(KEY);
-        rule1.setCount(20);
-        rule1.setGrade(RuleConstant.FLOW_GRADE_QPS);
-        rule1.setLimitApp("default");
-        rule1.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_WARM_UP);
-        rule1.setWarmUpPeriodSec(10);
-
-        rules.add(rule1);
-        FlowRuleManager.loadRules(rules);
-    }
-</source>
-<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/PaceFlowDemo.java" startline="135" endline="151" pcid="1194">
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/PaceFlowDemo.java" startline="135" endline="151" pcid="2437">
     private static void initPaceFlowRule() {
         List<FlowRule> rules = new ArrayList<FlowRule>();
         FlowRule rule1 = new FlowRule();
@@ -1155,166 +1814,67 @@
         FlowRuleManager.loadRules(rules);
     }
 </source>
-</class>
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/WarmUpFlowDemo.java" startline="111" endline="123" pcid="2457">
+    private static void initFlowRule() {
+        List<FlowRule> rules = new ArrayList<FlowRule>();
+        FlowRule rule1 = new FlowRule();
+        rule1.setResource(KEY);
+        rule1.setCount(20);
+        rule1.setGrade(RuleConstant.FLOW_GRADE_QPS);
+        rule1.setLimitApp("default");
+        rule1.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_WARM_UP);
+        rule1.setWarmUpPeriodSec(10);
 
-<class classid="18" nclones="5" nlines="22" similarity="95">
-<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/FlowQpsDemo.java" startline="133" endline="159" pcid="1187">
-        public void run() {
-            while (!stop) {
-                Entry entry = null;
-
-                try {
-                    entry = SphU.entry(KEY);
-                    // token acquired, means pass
-                    pass.addAndGet(1);
-                } catch (BlockException e1) {
-                    block.incrementAndGet();
-                } catch (Exception e2) {
-                    // biz exception
-                } finally {
-                    total.incrementAndGet();
-                    if (entry != null) {
-                        entry.exit();
-                    }
-                }
-
-                Random random2 = new Random();
-                try {
-                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(50));
-                } catch (InterruptedException e) {
-                    // ignore
-                }
-            }
-        }
-</source>
-<source file="Sentinel/sentinel-demo/sentinel-demo-dynamic-file-rule/src/main/java/com/alibaba/csp/sentinel/demo/file/rule/FlowQpsRunner.java" startline="60" endline="86" pcid="1232">
-        public void run() {
-            while (!stop) {
-                Entry entry = null;
-
-                try {
-                    entry = SphU.entry(KEY);
-                    // token acquired, means pass
-                    pass.addAndGet(1);
-                } catch (BlockException e1) {
-                    block.incrementAndGet();
-                } catch (Exception e2) {
-                    // biz exception
-                } finally {
-                    total.incrementAndGet();
-                    if (entry != null) {
-                        entry.exit();
-                    }
-                }
-
-                Random random2 = new Random();
-                try {
-                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(50));
-                } catch (InterruptedException e) {
-                    // ignore
-                }
-            }
-        }
-</source>
-<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/WarmUpFlowDemo.java" startline="156" endline="179" pcid="1201">
-        public void run() {
-            while (!stop) {
-                Entry entry = null;
-                try {
-                    entry = SphU.entry(KEY);
-                    pass.addAndGet(1);
-                } catch (BlockException e1) {
-                    block.incrementAndGet();
-                } catch (Exception e2) {
-                    // biz exception
-                } finally {
-                    total.incrementAndGet();
-                    if (entry != null) {
-                        entry.exit();
-                    }
-                }
-                Random random2 = new Random();
-                try {
-                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(50));
-                } catch (InterruptedException e) {
-                    // ignore
-                }
-            }
-        }
-</source>
-<source file="Sentinel/sentinel-demo/sentinel-demo-nacos-datasource/src/main/java/com/alibaba/csp/sentinel/demo/datasource/nacos/FlowQpsRunner.java" startline="67" endline="93" pcid="1240">
-        public void run() {
-            while (!stop) {
-                Entry entry = null;
-
-                try {
-                    entry = SphU.entry(resourceName);
-                    // token acquired, means pass
-                    pass.addAndGet(1);
-                } catch (BlockException e1) {
-                    block.incrementAndGet();
-                } catch (Exception e2) {
-                    // biz exception
-                } finally {
-                    total.incrementAndGet();
-                    if (entry != null) {
-                        entry.exit();
-                    }
-                }
-
-                Random random2 = new Random();
-                try {
-                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(50));
-                } catch (InterruptedException e) {
-                    // ignore
-                }
-            }
-        }
-</source>
-<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/WarmUpFlowDemo.java" startline="127" endline="151" pcid="1200">
-        public void run() {
-            while (!stop) {
-                Entry entry = null;
-                try {
-                    entry = SphU.entry(KEY);
-                    // token acquired, means pass
-                    pass.addAndGet(1);
-                } catch (BlockException e1) {
-                    block.incrementAndGet();
-                } catch (Exception e2) {
-                    // biz exception
-                } finally {
-                    total.incrementAndGet();
-                    if (entry != null) {
-                        entry.exit();
-                    }
-                }
-                Random random2 = new Random();
-                try {
-                    TimeUnit.MILLISECONDS.sleep(random2.nextInt(2000));
-                } catch (InterruptedException e) {
-                    // ignore
-                }
-            }
-        }
-</source>
-</class>
-
-<class classid="19" nclones="2" nlines="11" similarity="81">
-<source file="Sentinel/sentinel-extension/sentinel-datasource-nacos/src/main/java/com/alibaba/csp/sentinel/datasource/nacos/NacosDataSource.java" startline="96" endline="106" pcid="1275">
-    private void loadInitialConfig() {
-        try {
-            T newValue = loadConfig();
-            if (newValue == null) {
-                RecordLog.info("[NacosDataSource] WARN: initial config is null, you may have to check your data source");
-            }
-            getProperty().updateValue(newValue);
-        } catch (Exception ex) {
-            RecordLog.info("[NacosDataSource] Error when loading initial config", ex);
-        }
+        rules.add(rule1);
+        FlowRuleManager.loadRules(rules);
     }
 </source>
-<source file="Sentinel/sentinel-extension/sentinel-datasource-zookeeper/src/main/java/com/alibaba/csp/sentinel/datasource/zookeeper/ZookeeperDataSource.java" startline="72" endline="82" pcid="1282">
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/PaceFlowDemo.java" startline="153" endline="165" pcid="2438">
+    private static void initDefaultFlowRule() {
+        List<FlowRule> rules = new ArrayList<FlowRule>();
+        FlowRule rule1 = new FlowRule();
+        rule1.setResource(KEY);
+        rule1.setCount(count);
+        rule1.setGrade(RuleConstant.FLOW_GRADE_QPS);
+        rule1.setLimitApp("default");
+        // CONTROL_BEHAVIOR_DEFAULT means requests more than threshold will be rejected immediately.
+        rule1.setControlBehavior(RuleConstant.CONTROL_BEHAVIOR_DEFAULT);
+
+        rules.add(rule1);
+        FlowRuleManager.loadRules(rules);
+    }
+</source>
+<source file="Sentinel/sentinel-demo/sentinel-demo-basic/src/main/java/com/alibaba/csp/sentinel/demo/flow/FlowThreadDemo.java" startline="87" endline="98" pcid="2428">
+    private static void initFlowRule() {
+        List<FlowRule> rules = new ArrayList<FlowRule>();
+        FlowRule rule1 = new FlowRule();
+        rule1.setResource("methodA");
+        // set limit concurrent thread for 'methodA' to 20
+        rule1.setCount(20);
+        rule1.setGrade(RuleConstant.FLOW_GRADE_THREAD);
+        rule1.setLimitApp("default");
+
+        rules.add(rule1);
+        FlowRuleManager.loadRules(rules);
+    }
+</source>
+</class>
+
+<class classid="27" nclones="3" nlines="12" similarity="75">
+<source file="Sentinel/sentinel-extension/sentinel-datasource-apollo/src/main/java/com/alibaba/csp/sentinel/datasource/apollo/ApolloDataSource.java" startline="59" endline="69" pcid="2626">
+  private void loadAndUpdateRules() {
+    try {
+      T newValue = loadConfig();
+      if (newValue == null) {
+        RecordLog.warn("[ApolloDataSource] WARN: rule config is null, you may have to check your data source");
+      }
+      getProperty().updateValue(newValue);
+    } catch (Throwable ex) {
+      RecordLog.warn("[ApolloDataSource] Error when loading rule config", ex);
+    }
+  }
+</source>
+<source file="Sentinel/sentinel-extension/sentinel-datasource-zookeeper/src/main/java/com/alibaba/csp/sentinel/datasource/zookeeper/ZookeeperDataSource.java" startline="72" endline="82" pcid="2696">
     private void loadInitialConfig() {
         try {
             T newValue = loadConfig();
@@ -1327,10 +1887,134 @@
         }
     }
 </source>
+<source file="Sentinel/sentinel-extension/sentinel-datasource-nacos/src/main/java/com/alibaba/csp/sentinel/datasource/nacos/NacosDataSource.java" startline="96" endline="106" pcid="2680">
+    private void loadInitialConfig() {
+        try {
+            T newValue = loadConfig();
+            if (newValue == null) {
+                RecordLog.info("[NacosDataSource] WARN: initial config is null, you may have to check your data source");
+            }
+            getProperty().updateValue(newValue);
+        } catch (Exception ex) {
+            RecordLog.info("[NacosDataSource] Error when loading initial config", ex);
+        }
+    }
+</source>
 </class>
 
-<class classid="20" nclones="2" nlines="21" similarity="81">
-<source file="Sentinel/sentinel-transport/sentinel-transport-common/src/main/java/com/alibaba/csp/sentinel/command/vo/NodeVo.java" startline="57" endline="78" pcid="1331">
+<class classid="28" nclones="2" nlines="16" similarity="75">
+<source file="Sentinel/sentinel-transport/sentinel-transport-common/src/main/java/com/alibaba/csp/sentinel/command/handler/FetchClusterNodeHumanCommandHandler.java" startline="68" endline="87" pcid="2763">
+            if (e.getKey().getName().contains(name)) {
+                ClusterNode node = e.getValue();
+                String id = e.getKey().getShowName();
+                int lenNum = (int)Math.ceil((double)id.length() / nameLength) - 1;
+
+                sb.append(String.format(format, i + 1, lenNum == 0 ? id : id.substring(0, nameLength),
+                    node.curThreadNum(), node.passQps(), node.blockedQps(), node.successQps(), node.totalQps(),
+                    node.avgRt(), node.totalRequest() - node.blockedRequest(), node.blockedRequest(),
+                    node.totalRequest(), node.exceptionQps())).append("\n");
+                for (int j = 1; j <= lenNum; ++j) {
+                    int start = nameLength * j;
+                    int end = j == lenNum ? id.length() : nameLength * (j + 1);
+                    sb.append(String.format(format, "", id.substring(start, end), "", "", "", "", "", "", "", "", "",
+                        "", "", "")).append("\n");
+                }
+
+                if (++i == 30) {
+                    break;
+                }
+            }
+</source>
+<source file="Sentinel/sentinel-transport/sentinel-transport-common/src/main/java/com/alibaba/csp/sentinel/command/handler/FetchOriginCommandHandler.java" startline="88" endline="108" pcid="2779">
+        for (Entry<String, StatisticNode> e : cNode.getOriginCountMap().entrySet()) {
+            StatisticNode node = e.getValue();
+            String id = e.getKey();
+            int lenNum = (int)Math.ceil((double)id.length() / nameLength) - 1;
+            sb.append(String
+                .format(format, i + 1, lenNum == 0 ? id : id.substring(0, nameLength), node.curThreadNum(),
+                    node.passQps(), node.blockedQps(), node.totalQps(), node.avgRt(),
+                    node.totalRequest() - node.blockedRequest(), node.blockedRequest(), node.totalRequest()))
+                .append("\n");
+            for (int j = 1; j <= lenNum; ++j) {
+                int start = nameLength * j;
+                int end = j == lenNum ? id.length() : nameLength * (j + 1);
+                sb.append(String
+                    .format(format, "", id.substring(start, end), "", "", "", "", "", "", "", "", "", "", "", ""))
+                    .append("\n");
+            }
+            if (++i == 30) {
+                break;
+            }
+
+        }
+</source>
+</class>
+
+<class classid="29" nclones="4" nlines="14" similarity="71">
+<source file="Sentinel/sentinel-transport/sentinel-transport-common/src/main/java/com/alibaba/csp/sentinel/command/handler/ModifyRulesCommandHandler.java" startline="84" endline="96" pcid="2810">
+        if ("flow".equalsIgnoreCase(type)) {
+            List<FlowRule> flowRules = JSONArray.parseArray(data, FlowRule.class);
+            FlowRuleManager.loadRules(flowRules);
+            if (flowDataSource != null) {
+                try {
+                    flowDataSource.writeDataSource(flowRules);
+                } catch (Exception e) {
+                    result = "partial success";
+                    RecordLog.info(e.getMessage(), e);
+                }
+            }
+            return CommandResponse.ofSuccess(result);
+        } else if ("authority".equalsIgnoreCase(type)) {
+</source>
+<source file="Sentinel/sentinel-transport/sentinel-transport-common/src/main/java/com/alibaba/csp/sentinel/command/handler/ModifyRulesCommandHandler.java" startline="120" endline="132" pcid="2822">
+        } else if ("system".equalsIgnoreCase(type)) {
+            List<SystemRule> rules = JSONArray.parseArray(data, SystemRule.class);
+            SystemRuleManager.loadRules(rules);
+            if (systemSource != null) {
+                try {
+                    systemSource.writeDataSource(rules);
+                } catch (Exception e) {
+                    result = "partial success";
+                    RecordLog.info(e.getMessage(), e);
+                }
+            }
+            return CommandResponse.ofSuccess(result);
+        }
+</source>
+<source file="Sentinel/sentinel-transport/sentinel-transport-common/src/main/java/com/alibaba/csp/sentinel/command/handler/ModifyRulesCommandHandler.java" startline="96" endline="108" pcid="2814">
+        } else if ("authority".equalsIgnoreCase(type)) {
+            List<AuthorityRule> rules = JSONArray.parseArray(data, AuthorityRule.class);
+            AuthorityRuleManager.loadRules(rules);
+            if (authorityDataSource != null) {
+                try {
+                    authorityDataSource.writeDataSource(rules);
+                } catch (Exception e) {
+                    result = "partial success";
+                    RecordLog.info(e.getMessage(), e);
+                }
+            }
+            return CommandResponse.ofSuccess(result);
+        } else if ("degrade".equalsIgnoreCase(type)) {
+</source>
+<source file="Sentinel/sentinel-transport/sentinel-transport-common/src/main/java/com/alibaba/csp/sentinel/command/handler/ModifyRulesCommandHandler.java" startline="108" endline="120" pcid="2818">
+        } else if ("degrade".equalsIgnoreCase(type)) {
+            List<DegradeRule> rules = JSONArray.parseArray(data, DegradeRule.class);
+            DegradeRuleManager.loadRules(rules);
+            if (degradeDataSource != null) {
+                try {
+                    degradeDataSource.writeDataSource(rules);
+                } catch (Exception e) {
+                    result = "partial success";
+                    RecordLog.info(e.getMessage(), e);
+                }
+            }
+            return CommandResponse.ofSuccess(result);
+        } else if ("system".equalsIgnoreCase(type)) {
+</source>
+</class>
+
+<class classid="30" nclones="2" nlines="21" similarity="86">
+<source file="Sentinel/sentinel-transport/sentinel-transport-common/src/main/java/com/alibaba/csp/sentinel/command/vo/NodeVo.java" startline="57" endline="78" pcid="2845">
     public static NodeVo fromDefaultNode(DefaultNode node, String parentId) {
         if (node == null) {
             return null;
@@ -1354,7 +2038,7 @@
         return vo;
     }
 </source>
-<source file="Sentinel/sentinel-transport/sentinel-transport-common/src/main/java/com/alibaba/csp/sentinel/command/vo/NodeVo.java" startline="98" endline="117" pcid="1333">
+<source file="Sentinel/sentinel-transport/sentinel-transport-common/src/main/java/com/alibaba/csp/sentinel/command/vo/NodeVo.java" startline="98" endline="117" pcid="2848">
     public static NodeVo fromClusterNode(String name, ClusterNode node) {
         if (node == null) {
             return null;
@@ -1378,8 +2062,8 @@
 </source>
 </class>
 
-<class classid="21" nclones="2" nlines="10" similarity="80">
-<source file="Sentinel/sentinel-transport/sentinel-transport-netty-http/src/main/java/com/alibaba/csp/sentinel/transport/command/netty/HttpServer.java" startline="75" endline="86" pcid="1389">
+<class classid="31" nclones="2" nlines="10" similarity="90">
+<source file="Sentinel/sentinel-transport/sentinel-transport-netty-http/src/main/java/com/alibaba/csp/sentinel/transport/command/netty/HttpServer.java" startline="75" endline="86" pcid="2925">
     public void registerCommand(String commandName, CommandHandler handler) {
         if (StringUtil.isEmpty(commandName) || handler == null) {
             return;
@@ -1393,7 +2077,7 @@
         handlerMap.put(commandName, handler);
     }
 </source>
-<source file="Sentinel/sentinel-transport/sentinel-transport-simple-http/src/main/java/com/alibaba/csp/sentinel/transport/command/SimpleHttpCommandCenter.java" startline="219" endline="230" pcid="1429">
+<source file="Sentinel/sentinel-transport/sentinel-transport-simple-http/src/main/java/com/alibaba/csp/sentinel/transport/command/SimpleHttpCommandCenter.java" startline="219" endline="230" pcid="3046">
     public static void registerCommand(String commandName, CommandHandler handler) {
         if (StringUtil.isEmpty(commandName)) {
             return;

@@ -108,6 +108,8 @@ function processCloneSourceInfo(cloneSourceInfo) {
     var filePath = sourceInfoArray[0].slice(6, -1);
     if (filePath.indexOf(".ifdefed") > -1) {
         filePath = filePath.slice(0, -8);
+    } else if (filePath.indexOf('.pyindent') > -1) {
+        filePath = filePath.slice(0, -9);
     }
 
     return {

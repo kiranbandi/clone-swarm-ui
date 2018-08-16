@@ -9,6 +9,7 @@ import 'prismjs/components/prism-python.min.js';
 import 'prismjs/components/prism-clike.min.js';
 import 'prismjs/plugins/line-numbers/prism-line-numbers.js';
 import 'prismjs/plugins/line-numbers/prism-line-numbers.css';
+import toastr from '../toastr';
 
 export default function(filePath, cloneData, selected) {
 
@@ -145,9 +146,9 @@ export default function(filePath, cloneData, selected) {
             var selectedSources = compareSelectedSources[currentlyActiveClassData.classId];
 
             if (!selectedSources || selectedSources.length < 2) {
-                alert('select 2 sources to compare');
+                toastr["error"]('select 2 sources to compare', "ERROR");
             } else if (selectedSources.length > 2) {
-                alert('You can compare only 2 sources at a time');
+                toastr["error"]('You can compare only 2 sources at a time', "ERROR");
             } else {
                 var sources = _.filter(allSourcesForClass, function(o) { return selectedSources.indexOf(o.pcid) > -1; });
                 d3.select('#source-modal-box > span').text(sources[0].code);
