@@ -5,6 +5,7 @@ import processCloneInfo from './processCloneInfo';
 import processQueryParams from './processQueryParams';
 import cloneSwarm from './cloneSwarm/cloneSwarm';
 import displayInformation from './displayInformation';
+import toastr from './toastr';
 
 //initialise root ,navbar and homepage form
 setupRoot();
@@ -24,5 +25,14 @@ axios.get(sourceLink).then(function(cloneInfo) {
     d3.select('#loader-container').classed('hide', true);
     var cloneData = processCloneInfo(cloneInfo.data);
     displayInformation(cloneData.information);
-    cloneSwarm(cloneData);
+    if (cloneData.classes.length == 0) {
+        d3.select('#info-header').text("No code clones were indentified in the " + cloneData.information.system + " project");
+    } else {
+        cloneSwarm(cloneData);
+    }
+}).catch(function(error) {
+    console.log(error);
+    d3.select('#loader-container').classed('hide', true);
+    toastr["error"]('Could fetch clone information files', "ERROR");
+    d3.select('#info-header').text("Couldnt fetch clone information for the given source.");
 });

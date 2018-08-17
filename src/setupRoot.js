@@ -6,7 +6,7 @@ import toastr from './toastr';
 
 export default function() {
 
-    var serverLink = "http://localhost:8081";
+    var serverLink = "https://cloneswarm.serveo.net";
 
     // load the documentation and loader template files
     d3.select('#doc-root').html(documentationTemplate);

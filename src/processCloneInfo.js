@@ -72,19 +72,23 @@ export default function(cloneInfoXML) {
         iterator += 1;
     }
 
-    // Sort the unique sourceArray based on the file path length
-    cloneData.uniqueSourceArray = uniqueSourceArray.sort(function(a, b) { return b.length - a.length; });
-    // Remove duplicates for each entry 
-    cloneData.uniqueSourceCollection = _.each(uniqueSourceCollection, function(path, key) { uniqueSourceCollection[key] = _.uniq(path); });
-    // Find the file that has the maximum no of clone classes attached to it 
-    cloneData.maxSourceCloneClassesPerFile = _.reduce(uniqueSourceArray, function(max, filePath) {
-        if (/^.+\.(cs|java|c|py)$/.test(filePath) && uniqueSourceCollection["'" + filePath + "'"].length > max.count) {
-            return {
-                'path': filePath,
-                'count': uniqueSourceCollection["'" + filePath + "'"].length
-            };
-        } else { return max; }
-    }, { 'count': uniqueSourceCollection["'" + uniqueSourceArray[0] + "'"].length, 'path': uniqueSourceArray[0] });
+
+    if (cloneData.classes.length > 0) {
+        // Sort the unique sourceArray based on the file path length
+        cloneData.uniqueSourceArray = uniqueSourceArray.sort(function(a, b) { return b.length - a.length; });
+        // Remove duplicates for each entry 
+        cloneData.uniqueSourceCollection = _.each(uniqueSourceCollection, function(path, key) { uniqueSourceCollection[key] = _.uniq(path); });
+        // Find the file that has the maximum no of clone classes attached to it 
+        cloneData.maxSourceCloneClassesPerFile = _.reduce(uniqueSourceArray, function(max, filePath) {
+            if (/^.+\.(cs|java|c|py)$/.test(filePath) && uniqueSourceCollection["'" + filePath + "'"].length > max.count) {
+                return {
+                    'path': filePath,
+                    'count': uniqueSourceCollection["'" + filePath + "'"].length
+                };
+            } else { return max; }
+        }, { 'count': uniqueSourceCollection["'" + uniqueSourceArray[0] + "'"].length, 'path': uniqueSourceArray[0] });
+
+    }
 
     return cloneData;
 };

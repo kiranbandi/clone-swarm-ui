@@ -161,3 +161,7 @@ div#target-modal-box {
 div#compare-modal {
     width: 95%;
 }
+
+h5#info-header {
+    margin-top: 50px;
+}
