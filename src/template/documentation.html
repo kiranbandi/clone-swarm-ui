@@ -1,24 +1,31 @@
-<div class='section'>
+<div class='banner-top'>
     <p>Cloneswarm lets users interactively explore code clones in open source projects.It detects clones using <a href='https://www.txl.ca/nicaddownload.html'>NiCad</a> a popular clone detection system.</p>
     <p>
-        Cloneswarm visualizes the project structure in a radial layout and uses heatmap style color variations to indicate the amount of cloning.Submit your github link along with the project details using the form below.We will send you a mail once the processing
-        is complete with a link to view your results.
+        Cloneswarm visualizes the project structure in a radial layout and uses heatmap style color variations to indicate the amount of cloning.
     </p>
 </div>
 
 <div>
     <p>Use the links below to load up results of popular projects that have been already processed by our tool - </p>
     <ul>
-        <li> <a href="http://kiranbandi.github.io/clone-swarm-ui/?source=curl">Curl</a> Command Line Tool written in C.</li>
-        <li> <a href="http://kiranbandi.github.io/clone-swarm-ui/?source=jhotdraw">JHotDraw</a> 2D Drawing Library written in Java.</li>
-        <li> <a href="http://kiranbandi.github.io/clone-swarm-ui/?source=powershell">PowerShell</a> Microsoft Powershell written in C#.</li>
-        <li> <a href="http://kiranbandi.github.io/clone-swarm-ui/?source=springboot">Spring-Boot</a> Boot support for Spring Applications written in Java.</li>
+        <li> <a href="https://clone-swarm.usask.ca/?source=curl">Curl</a> Command Line Tool written in C.</li>
+        <li> <a href="https://clone-swarm.usask.ca/?source=git">Git</a> Distributed version control system written in C.</li>
+        <li> <a href="https://clone-swarm.usask.ca/?source=jhotdraw">JHotDraw</a> 2D Drawing Library written in Java.</li>
+        <li> <a href="https://clone-swarm.usask.ca/?source=guava">Guava</a> Google core libraries for Java.</li>
+        <li> <a href="https://clone-swarm.usask.ca/?source=springboot">Spring-Boot</a> Boot support for Spring Applications written in Java.</li>
+        <li> <a href="https://clone-swarm.usask.ca/?source=powershell">PowerShell</a> Microsoft Powershell written in C#.</li>
+        <li> <a href="https://clone-swarm.usask.ca/?source=django">Django</a> Web Framework written in Python.</li>
+        <li> <a href="https://clone-swarm.usask.ca/?source=keras">Keras</a> High level nueral networks API written in Python.</li>
+        <li> <a href="https://clone-swarm.usask.ca/?source=scikitlearn">Scikit-Learn</a> Machine learning module written in Python.</li>
+        <li> <a href="https://clone-swarm.usask.ca/?source=pandas">Pandas</a> Data analysis toolkit written in Python.</li>
+        <li> <a href="https://clone-swarm.usask.ca/?source=tensorflow">Tensorflow</a> Scalable Machine Learning library written in C++ and Python.</li>
     </ul>
 </div>
 
 <div class='section'>
     <div class="row">
-        <form class="col s4">
+        <p>Submit your github link along with the project details using the form below.We will send you a mail once the processing is complete with a link to view your results - </p>
+        <form class="col s4" id='submit-job-form'>
             <div class="row">
                 <div class="input-field col s12">
                     <input id="github-link" type="text" class="validate">
@@ -35,8 +42,8 @@
                 <div class="input-field col s12">
                     <select id="granularity">
                       <option value="" disabled selected>Select</option>
-                      <option value="functions">Function</option>
                       <option value="blocks">Block</option>
+                      <option value="functions">Function</option>
                     </select>
                     <label>Granularity Level</label>
                 </div>
@@ -45,9 +52,9 @@
                 <div class="input-field col s12">
                     <select id="prog-language">
                       <option value="" disabled selected>Select</option>
-                      <option value="java">Java</option>
                       <option value="c">C</option>
                       <option value="cs">C#</option>
+                      <option value="java">Java</option>
                       <option value="py">Python</option>
                     </select>
                     <label>Programming Language</label>
@@ -59,5 +66,12 @@
             </button>
 
         </form>
+
+        <div id='submit-job-complete' class='hide'>
+            <a href="https://clone-swarm.usask.ca/" id="submit-job" class="btn waves-effect waves-light" type="button">Submit another Job
+                    <i class="material-icons right">send</i>
+                </a>
+        </div>
+
     </div>
 </div>

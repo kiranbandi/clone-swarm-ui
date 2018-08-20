@@ -1,0 +1,2154 @@
+<clones>
+<systeminfo processor="nicad3" system="git" granularity="functions" threshold="30%" minlines="10" maxlines="2500"/>
+<cloneinfo npcs="7520" npairs="42"/>
+<runinfo ncompares="3258585" cputime="1686"/>
+<classinfo nclasses="42"/>
+
+<class classid="1" nclones="2" nlines="11" similarity="81">
+<source file="git/builtin/checkout.c.ifdefed" startline="129" endline="141" pcid="592">
+static int check_stage(int stage, const struct cache_entry *ce, int pos)
+{
+	while (pos < active_nr &&
+	       !strcmp(active_cache[pos]->name, ce->name)) {
+		if (ce_stage(active_cache[pos]) == stage)
+			return 0;
+		pos++;
+	}
+	if (stage == 2)
+		return error(_("path '%s' does not have our version"), ce->name);
+	else
+		return error(_("path '%s' does not have their version"), ce->name);
+}
+</source>
+<source file="git/builtin/checkout.c.ifdefed" startline="161" endline="174" pcid="594">
+static int checkout_stage(int stage, const struct cache_entry *ce, int pos,
+			  const struct checkout *state)
+{
+	while (pos < active_nr &&
+	       !strcmp(active_cache[pos]->name, ce->name)) {
+		if (ce_stage(active_cache[pos]) == stage)
+			return checkout_entry(active_cache[pos], state, NULL);
+		pos++;
+	}
+	if (stage == 2)
+		return error(_("path '%s' does not have our version"), ce->name);
+	else
+		return error(_("path '%s' does not have their version"), ce->name);
+}
+</source>
+</class>
+
+<class classid="2" nclones="2" nlines="11" similarity="81">
+<source file="git/builtin/clone.c.ifdefed" startline="627" endline="645" pcid="651">
+static int iterate_ref_map(void *cb_data, struct object_id *oid)
+{
+	struct ref **rm = cb_data;
+	struct ref *ref = *rm;
+
+	/*
+	 * Skip anything missing a peer_ref, which we are not
+	 * actually going to write a ref for.
+	 */
+	while (ref && !ref->peer_ref)
+		ref = ref->next;
+	/* Returning -1 notes "end of list" to the caller. */
+	if (!ref)
+		return -1;
+
+	oidcpy(oid, &ref->old_oid);
+	*rm = ref->next;
+	return 0;
+}
+</source>
+<source file="git/builtin/fetch.c.ifdefed" startline="750" endline="762" pcid="838">
+static int iterate_ref_map(void *cb_data, struct object_id *oid)
+{
+	struct ref **rm = cb_data;
+	struct ref *ref = *rm;
+
+	while (ref && ref->status == REF_STATUS_REJECT_SHALLOW)
+		ref = ref->next;
+	if (!ref)
+		return -1; /* end of the list */
+	*rm = ref->next;
+	oidcpy(oid, &ref->old_oid);
+	return 0;
+}
+</source>
+</class>
+
+<class classid="3" nclones="2" nlines="17" similarity="76">
+<source file="git/builtin/index-pack.c.ifdefed" startline="633" endline="653" pcid="1018">
+static int find_ofs_delta(const off_t offset, enum object_type type)
+{
+	int first = 0, last = nr_ofs_deltas;
+
+	while (first < last) {
+		int next = first + (last - first) / 2;
+		struct ofs_delta_entry *delta = &ofs_deltas[next];
+		int cmp;
+
+		cmp = compare_ofs_delta_bases(offset, delta->offset,
+					      type, objects[delta->obj_no].type);
+		if (!cmp)
+			return next;
+		if (cmp < 0) {
+			last = next;
+			continue;
+		}
+		first = next+1;
+	}
+	return -first-1;
+}
+</source>
+<source file="git/builtin/index-pack.c.ifdefed" startline="687" endline="707" pcid="1021">
+static int find_ref_delta(const struct object_id *oid, enum object_type type)
+{
+	int first = 0, last = nr_ref_deltas;
+
+	while (first < last) {
+		int next = first + (last - first) / 2;
+		struct ref_delta_entry *delta = &ref_deltas[next];
+		int cmp;
+
+		cmp = compare_ref_delta_bases(oid, &delta->oid,
+					      type, objects[delta->obj_no].type);
+		if (!cmp)
+			return next;
+		if (cmp < 0) {
+			last = next;
+			continue;
+		}
+		first = next+1;
+	}
+	return -first-1;
+}
+</source>
+</class>
+
+<class classid="4" nclones="2" nlines="11" similarity="81">
+<source file="git/builtin/log.c.ifdefed" startline="1197" endline="1208" pcid="1113">
+static int attach_callback(const struct option *opt, const char *arg, int unset)
+{
+	struct rev_info *rev = (struct rev_info *)opt->value;
+	if (unset)
+		rev->mime_boundary = NULL;
+	else if (arg)
+		rev->mime_boundary = arg;
+	else
+		rev->mime_boundary = git_version_string;
+	rev->no_inline = unset ? 0 : 1;
+	return 0;
+}
+</source>
+<source file="git/builtin/log.c.ifdefed" startline="1210" endline="1221" pcid="1114">
+static int inline_callback(const struct option *opt, const char *arg, int unset)
+{
+	struct rev_info *rev = (struct rev_info *)opt->value;
+	if (unset)
+		rev->mime_boundary = NULL;
+	else if (arg)
+		rev->mime_boundary = arg;
+	else
+		rev->mime_boundary = git_version_string;
+	rev->no_inline = 0;
+	return 0;
+}
+</source>
+</class>
+
+<class classid="5" nclones="2" nlines="14" similarity="71">
+<source file="git/builtin/merge.c.ifdefed" startline="317" endline="333" pcid="1207">
+static void read_empty(const struct object_id *oid, int verbose)
+{
+	int i = 0;
+	const char *args[7];
+
+	args[i++] = "read-tree";
+	if (verbose)
+		args[i++] = "-v";
+	args[i++] = "-m";
+	args[i++] = "-u";
+	args[i++] = empty_tree_oid_hex();
+	args[i++] = oid_to_hex(oid);
+	args[i] = NULL;
+
+	if (run_command_v_opt(args, RUN_GIT_CMD))
+		die(_("read-tree failed"));
+}
+</source>
+<source file="git/builtin/merge.c.ifdefed" startline="335" endline="350" pcid="1208">
+static void reset_hard(const struct object_id *oid, int verbose)
+{
+	int i = 0;
+	const char *args[6];
+
+	args[i++] = "read-tree";
+	if (verbose)
+		args[i++] = "-v";
+	args[i++] = "--reset";
+	args[i++] = "-u";
+	args[i++] = oid_to_hex(oid);
+	args[i] = NULL;
+
+	if (run_command_v_opt(args, RUN_GIT_CMD))
+		die(_("read-tree failed"));
+}
+</source>
+</class>
+
+<class classid="6" nclones="2" nlines="28" similarity="75">
+<source file="git/builtin/remote-ext.c.ifdefed" startline="166" endline="194" pcid="1548">
+static int command_loop(const char *child)
+{
+	char buffer[MAXCOMMAND];
+
+	while (1) {
+		size_t i;
+		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			if (ferror(stdin))
+				die("Command input error");
+			exit(0);
+		}
+		/* Strip end of line characters. */
+		i = strlen(buffer);
+		while (i > 0 && isspace(buffer[i - 1]))
+			buffer[--i] = 0;
+
+		if (!strcmp(buffer, "capabilities")) {
+			printf("*connect\n\n");
+			fflush(stdout);
+		} else if (!strncmp(buffer, "connect ", 8)) {
+			printf("\n");
+			fflush(stdout);
+			return run_child(child, buffer + 8);
+		} else {
+			fprintf(stderr, "Bad command");
+			return 1;
+		}
+	}
+}
+</source>
+<source file="git/builtin/remote-fd.c.ifdefed" startline="24" endline="54" pcid="1550">
+static void command_loop(int input_fd, int output_fd)
+{
+	char buffer[MAXCOMMAND];
+
+	while (1) {
+		size_t i;
+		if (!fgets(buffer, MAXCOMMAND - 1, stdin)) {
+			if (ferror(stdin))
+				die("Input error");
+			return;
+		}
+		/* Strip end of line characters. */
+		i = strlen(buffer);
+		while (i > 0 && isspace(buffer[i - 1]))
+			buffer[--i] = 0;
+
+		if (!strcmp(buffer, "capabilities")) {
+			printf("*connect\n\n");
+			fflush(stdout);
+		} else if (!strncmp(buffer, "connect ", 8)) {
+			printf("\n");
+			fflush(stdout);
+			if (bidirectional_transfer_loop(input_fd,
+				output_fd))
+				die("Copying data between file descriptors failed");
+			return;
+		} else {
+			die("Bad command: %s", buffer);
+		}
+	}
+}
+</source>
+</class>
+
+<class classid="7" nclones="2" nlines="11" similarity="72">
+<source file="git/builtin/update-index.c.ifdefed" startline="890" endline="905" pcid="1855">
+static int unresolve_callback(struct parse_opt_ctx_t *ctx,
+				const struct option *opt, int flags)
+{
+	int *has_errors = opt->value;
+	const char *prefix = startup_info->prefix;
+
+	/* consume remaining arguments. */
+	*has_errors = do_unresolve(ctx->argc, ctx->argv,
+				prefix, prefix ? strlen(prefix) : 0);
+	if (*has_errors)
+		active_cache_changed = 0;
+
+	ctx->argv += ctx->argc - 1;
+	ctx->argc = 1;
+	return 0;
+}
+</source>
+<source file="git/builtin/update-index.c.ifdefed" startline="907" endline="923" pcid="1856">
+static int reupdate_callback(struct parse_opt_ctx_t *ctx,
+				const struct option *opt, int flags)
+{
+	int *has_errors = opt->value;
+	const char *prefix = startup_info->prefix;
+
+	/* consume remaining arguments. */
+	setup_work_tree();
+	*has_errors = do_reupdate(ctx->argc, ctx->argv,
+				prefix, prefix ? strlen(prefix) : 0);
+	if (*has_errors)
+		active_cache_changed = 0;
+
+	ctx->argv += ctx->argc - 1;
+	ctx->argc = 1;
+	return 0;
+}
+</source>
+</class>
+
+<class classid="8" nclones="2" nlines="11" similarity="81">
+<source file="git/builtin/worktree.c.ifdefed" startline="801" endline="813" pcid="1908">
+static int delete_git_work_tree(struct worktree *wt)
+{
+	struct strbuf sb = STRBUF_INIT;
+	int ret = 0;
+
+	strbuf_addstr(&sb, wt->path);
+	if (remove_dir_recursively(&sb, 0)) {
+		error_errno(_("failed to delete '%s'"), sb.buf);
+		ret = -1;
+	}
+	strbuf_release(&sb);
+	return ret;
+}
+</source>
+<source file="git/builtin/worktree.c.ifdefed" startline="815" endline="827" pcid="1909">
+static int delete_git_dir(struct worktree *wt)
+{
+	struct strbuf sb = STRBUF_INIT;
+	int ret = 0;
+
+	strbuf_addstr(&sb, git_common_path("worktrees/%s", wt->id));
+	if (remove_dir_recursively(&sb, 0)) {
+		error_errno(_("failed to delete '%s'"), sb.buf);
+		ret = -1;
+	}
+	strbuf_release(&sb);
+	return ret;
+}
+</source>
+</class>
+
+<class classid="9" nclones="2" nlines="18" similarity="78">
+<source file="git/compat/mingw.c.ifdefed" startline="411" endline="431" pcid="2181">
+FILE *mingw_fopen (const char *filename, const char *otype)
+{
+	int hide = needs_hiding(filename);
+	FILE *file;
+	wchar_t wfilename[MAX_PATH], wotype[4];
+	if (filename && !strcmp(filename, "/dev/null"))
+		filename = "nul";
+	if (xutftowcs_path(wfilename, filename) < 0 ||
+		xutftowcs(wotype, otype, ARRAY_SIZE(wotype)) < 0)
+		return NULL;
+	if (hide && !access(filename, F_OK) && set_hidden_flag(wfilename, 0)) {
+		error("could not unhide %s", filename);
+		return NULL;
+	}
+	file = _wfopen(wfilename, wotype);
+	if (!file && GetLastError() == ERROR_INVALID_NAME)
+		errno = ENOENT;
+	if (file && hide && set_hidden_flag(wfilename, 1))
+		warning("could not mark '%s' as hidden.", filename);
+	return file;
+}
+</source>
+<source file="git/compat/mingw.c.ifdefed" startline="433" endline="451" pcid="2182">
+FILE *mingw_freopen (const char *filename, const char *otype, FILE *stream)
+{
+	int hide = needs_hiding(filename);
+	FILE *file;
+	wchar_t wfilename[MAX_PATH], wotype[4];
+	if (filename && !strcmp(filename, "/dev/null"))
+		filename = "nul";
+	if (xutftowcs_path(wfilename, filename) < 0 ||
+		xutftowcs(wotype, otype, ARRAY_SIZE(wotype)) < 0)
+		return NULL;
+	if (hide && !access(filename, F_OK) && set_hidden_flag(wfilename, 0)) {
+		error("could not unhide %s", filename);
+		return NULL;
+	}
+	file = _wfreopen(wfilename, wotype, stream);
+	if (file && hide && set_hidden_flag(wfilename, 1))
+		warning("could not mark '%s' as hidden.", filename);
+	return file;
+}
+</source>
+</class>
+
+<class classid="10" nclones="2" nlines="24" similarity="87">
+<source file="git/compat/obstack.c.ifdefed" startline="135" endline="180" pcid="2310">
+int
+_obstack_begin (struct obstack *h,
+		int size, int alignment,
+		void *(*chunkfun) (long),
+		void (*freefun) (void *))
+{
+  register struct _obstack_chunk *chunk; /* points to new chunk */
+
+  if (alignment == 0)
+    alignment = DEFAULT_ALIGNMENT;
+  if (size == 0)
+    /* Default size is what GNU malloc can fit in a 4096-byte block.  */
+    {
+      /* 12 is sizeof (mhead) and 4 is EXTRA from GNU malloc.
+	 Use the values for range checking, because if range checking is off,
+	 the extra bytes won't be missed terribly, but if range checking is on
+	 and we used a larger request, a whole extra 4096 bytes would be
+	 allocated.
+
+	 These number are irrelevant to the new GNU malloc.  I suspect it is
+	 less sensitive to the size of the request.  */
+      int extra = ((((12 + DEFAULT_ROUNDING - 1) & ~(DEFAULT_ROUNDING - 1))
+		    + 4 + DEFAULT_ROUNDING - 1)
+		   & ~(DEFAULT_ROUNDING - 1));
+      size = 4096 - extra;
+    }
+
+  h->chunkfun = (struct _obstack_chunk * (*)(void *, long)) chunkfun;
+  h->freefun = (void (*) (void *, struct _obstack_chunk *)) freefun;
+  h->chunk_size = size;
+  h->alignment_mask = alignment - 1;
+  h->use_extra_arg = 0;
+
+  chunk = h->chunk = CALL_CHUNKFUN (h, h -> chunk_size);
+  if (!chunk)
+    (*obstack_alloc_failed_handler) ();
+  h->next_free = h->object_base = __PTR_ALIGN ((char *) chunk, chunk->contents,
+					       alignment - 1);
+  h->chunk_limit = chunk->limit
+    = (char *) chunk + h->chunk_size;
+  chunk->prev = NULL;
+  /* The initial chunk now contains no empty object.  */
+  h->maybe_empty_object = 0;
+  h->alloc_failed = 0;
+  return 1;
+}
+</source>
+<source file="git/compat/obstack.c.ifdefed" startline="182" endline="228" pcid="2311">
+int
+_obstack_begin_1 (struct obstack *h, int size, int alignment,
+		  void *(*chunkfun) (void *, long),
+		  void (*freefun) (void *, void *),
+		  void *arg)
+{
+  register struct _obstack_chunk *chunk; /* points to new chunk */
+
+  if (alignment == 0)
+    alignment = DEFAULT_ALIGNMENT;
+  if (size == 0)
+    /* Default size is what GNU malloc can fit in a 4096-byte block.  */
+    {
+      /* 12 is sizeof (mhead) and 4 is EXTRA from GNU malloc.
+	 Use the values for range checking, because if range checking is off,
+	 the extra bytes won't be missed terribly, but if range checking is on
+	 and we used a larger request, a whole extra 4096 bytes would be
+	 allocated.
+
+	 These number are irrelevant to the new GNU malloc.  I suspect it is
+	 less sensitive to the size of the request.  */
+      int extra = ((((12 + DEFAULT_ROUNDING - 1) & ~(DEFAULT_ROUNDING - 1))
+		    + 4 + DEFAULT_ROUNDING - 1)
+		   & ~(DEFAULT_ROUNDING - 1));
+      size = 4096 - extra;
+    }
+
+  h->chunkfun = (struct _obstack_chunk * (*)(void *,long)) chunkfun;
+  h->freefun = (void (*) (void *, struct _obstack_chunk *)) freefun;
+  h->chunk_size = size;
+  h->alignment_mask = alignment - 1;
+  h->extra_arg = arg;
+  h->use_extra_arg = 1;
+
+  chunk = h->chunk = CALL_CHUNKFUN (h, h -> chunk_size);
+  if (!chunk)
+    (*obstack_alloc_failed_handler) ();
+  h->next_free = h->object_base = __PTR_ALIGN ((char *) chunk, chunk->contents,
+					       alignment - 1);
+  h->chunk_limit = chunk->limit
+    = (char *) chunk + h->chunk_size;
+  chunk->prev = NULL;
+  /* The initial chunk now contains no empty object.  */
+  h->maybe_empty_object = 0;
+  h->alloc_failed = 0;
+  return 1;
+}
+</source>
+</class>
+
+<class classid="11" nclones="2" nlines="31" similarity="87">
+<source file="git/compat/qsort.c.ifdefed" startline="8" endline="45" pcid="2326">
+static void msort_with_tmp(void *b, size_t n, size_t s,
+			   int (*cmp)(const void *, const void *),
+			   char *t)
+{
+	char *tmp;
+	char *b1, *b2;
+	size_t n1, n2;
+
+	if (n <= 1)
+		return;
+
+	n1 = n / 2;
+	n2 = n - n1;
+	b1 = b;
+	b2 = (char *)b + (n1 * s);
+
+	msort_with_tmp(b1, n1, s, cmp, t);
+	msort_with_tmp(b2, n2, s, cmp, t);
+
+	tmp = t;
+
+	while (n1 > 0 && n2 > 0) {
+		if (cmp(b1, b2) <= 0) {
+			memcpy(tmp, b1, s);
+			tmp += s;
+			b1 += s;
+			--n1;
+		} else {
+			memcpy(tmp, b2, s);
+			tmp += s;
+			b2 += s;
+			--n2;
+		}
+	}
+	if (n1 > 0)
+		memcpy(tmp, b1, n1 * s);
+	memcpy(b, t, (n - n2) * s);
+}
+</source>
+<source file="git/compat/qsort_s.c.ifdefed" startline="9" endline="46" pcid="2328">
+static void msort_with_tmp(void *b, size_t n, size_t s,
+			   int (*cmp)(const void *, const void *, void *),
+			   char *t, void *ctx)
+{
+	char *tmp;
+	char *b1, *b2;
+	size_t n1, n2;
+
+	if (n <= 1)
+		return;
+
+	n1 = n / 2;
+	n2 = n - n1;
+	b1 = b;
+	b2 = (char *)b + (n1 * s);
+
+	msort_with_tmp(b1, n1, s, cmp, t, ctx);
+	msort_with_tmp(b2, n2, s, cmp, t, ctx);
+
+	tmp = t;
+
+	while (n1 > 0 && n2 > 0) {
+		if (cmp(b1, b2, ctx) <= 0) {
+			memcpy(tmp, b1, s);
+			tmp += s;
+			b1 += s;
+			--n1;
+		} else {
+			memcpy(tmp, b2, s);
+			tmp += s;
+			b2 += s;
+			--n2;
+		}
+	}
+	if (n1 > 0)
+		memcpy(tmp, b1, n1 * s);
+	memcpy(b, t, (n - n2) * s);
+}
+</source>
+</class>
+
+<class classid="12" nclones="2" nlines="27" similarity="74">
+<source file="git/contrib/credential/gnome-keyring/git-credential-gnome-keyring.c.ifdefed" startline="166" endline="213" pcid="2655">
+static int keyring_get(struct credential *c)
+{
+	char *object = NULL;
+	GList *entries;
+	GnomeKeyringNetworkPasswordData *password_data;
+	GnomeKeyringResult result;
+
+	if (!c->protocol || !(c->host || c->path))
+		return EXIT_FAILURE;
+
+	object = keyring_object(c);
+
+	result = gnome_keyring_find_network_password_sync(
+				c->username,
+				NULL /* domain */,
+				c->host,
+				object,
+				c->protocol,
+				NULL /* authtype */,
+				c->port,
+				&entries);
+
+	g_free(object);
+
+	if (result == GNOME_KEYRING_RESULT_NO_MATCH)
+		return EXIT_SUCCESS;
+
+	if (result == GNOME_KEYRING_RESULT_CANCELLED)
+		return EXIT_SUCCESS;
+
+	if (result != GNOME_KEYRING_RESULT_OK) {
+		g_critical("%s", gnome_keyring_result_to_message(result));
+		return EXIT_FAILURE;
+	}
+
+	/* pick the first one from the list */
+	password_data = (GnomeKeyringNetworkPasswordData *)entries->data;
+
+	gnome_keyring_memory_free(c->password);
+	c->password = gnome_keyring_memory_strdup(password_data->password);
+
+	if (!c->username)
+		c->username = g_strdup(password_data->user);
+
+	gnome_keyring_network_password_list_free(entries);
+
+	return EXIT_SUCCESS;
+}
+</source>
+<source file="git/contrib/credential/gnome-keyring/git-credential-gnome-keyring.c.ifdefed" startline="258" endline="315" pcid="2657">
+static int keyring_erase(struct credential *c)
+{
+	char *object = NULL;
+	GList *entries;
+	GnomeKeyringNetworkPasswordData *password_data;
+	GnomeKeyringResult result;
+
+	/*
+	 * Sanity check that we actually have something to match
+	 * against. The input we get is a restrictive pattern,
+	 * so technically a blank credential means "erase everything".
+	 * But it is too easy to accidentally send this, since it is equivalent
+	 * to empty input. So explicitly disallow it, and require that the
+	 * pattern have some actual content to match.
+	 */
+	if (!c->protocol && !c->host && !c->path && !c->username)
+		return EXIT_FAILURE;
+
+	object = keyring_object(c);
+
+	result = gnome_keyring_find_network_password_sync(
+				c->username,
+				NULL /* domain */,
+				c->host,
+				object,
+				c->protocol,
+				NULL /* authtype */,
+				c->port,
+				&entries);
+
+	g_free(object);
+
+	if (result == GNOME_KEYRING_RESULT_NO_MATCH)
+		return EXIT_SUCCESS;
+
+	if (result == GNOME_KEYRING_RESULT_CANCELLED)
+		return EXIT_SUCCESS;
+
+	if (result != GNOME_KEYRING_RESULT_OK) {
+		g_critical("%s", gnome_keyring_result_to_message(result));
+		return EXIT_FAILURE;
+	}
+
+	/* pick the first one from the list (delete all matches?) */
+	password_data = (GnomeKeyringNetworkPasswordData *)entries->data;
+
+	result = gnome_keyring_item_delete_sync(
+		password_data->keyring, password_data->item_id);
+
+	gnome_keyring_network_password_list_free(entries);
+
+	if (result != GNOME_KEYRING_RESULT_OK) {
+		g_critical("%s", gnome_keyring_result_to_message(result));
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+</source>
+</class>
+
+<class classid="13" nclones="2" nlines="50" similarity="90">
+<source file="git/contrib/credential/gnome-keyring/git-credential-gnome-keyring.c.ifdefed" startline="346" endline="405" pcid="2660">
+static int credential_read(struct credential *c)
+{
+	char *buf;
+	size_t line_len;
+	char *key;
+	char *value;
+
+	key = buf = gnome_keyring_memory_alloc(1024);
+
+	while (fgets(buf, 1024, stdin)) {
+		line_len = strlen(buf);
+
+		if (line_len && buf[line_len-1] == '\n')
+			buf[--line_len] = '\0';
+
+		if (!line_len)
+			break;
+
+		value = strchr(buf, '=');
+		if (!value) {
+			g_warning("invalid credential line: %s", key);
+			gnome_keyring_memory_free(buf);
+			return -1;
+		}
+		*value++ = '\0';
+
+		if (!strcmp(key, "protocol")) {
+			g_free(c->protocol);
+			c->protocol = g_strdup(value);
+		} else if (!strcmp(key, "host")) {
+			g_free(c->host);
+			c->host = g_strdup(value);
+			value = strrchr(c->host, ':');
+			if (value) {
+				*value++ = '\0';
+				c->port = atoi(value);
+			}
+		} else if (!strcmp(key, "path")) {
+			g_free(c->path);
+			c->path = g_strdup(value);
+		} else if (!strcmp(key, "username")) {
+			g_free(c->username);
+			c->username = g_strdup(value);
+		} else if (!strcmp(key, "password")) {
+			gnome_keyring_memory_free(c->password);
+			c->password = gnome_keyring_memory_strdup(value);
+			while (*value)
+				*value++ = '\0';
+		}
+		/*
+		 * Ignore other lines; we don't know what they mean, but
+		 * this future-proofs us when later versions of git do
+		 * learn new lines, and the helpers are updated to match.
+		 */
+	}
+
+	gnome_keyring_memory_free(buf);
+
+	return 0;
+}
+</source>
+<source file="git/contrib/credential/libsecret/git-credential-libsecret.c.ifdefed" startline="245" endline="304" pcid="2672">
+static int credential_read(struct credential *c)
+{
+	char *buf;
+	size_t line_len;
+	char *key;
+	char *value;
+
+	key = buf = g_malloc(1024);
+
+	while (fgets(buf, 1024, stdin)) {
+		line_len = strlen(buf);
+
+		if (line_len && buf[line_len-1] == '\n')
+			buf[--line_len] = '\0';
+
+		if (!line_len)
+			break;
+
+		value = strchr(buf, '=');
+		if (!value) {
+			g_warning("invalid credential line: %s", key);
+			g_free(buf);
+			return -1;
+		}
+		*value++ = '\0';
+
+		if (!strcmp(key, "protocol")) {
+			g_free(c->protocol);
+			c->protocol = g_strdup(value);
+		} else if (!strcmp(key, "host")) {
+			g_free(c->host);
+			c->host = g_strdup(value);
+			value = strrchr(c->host, ':');
+			if (value) {
+				*value++ = '\0';
+				c->port = atoi(value);
+			}
+		} else if (!strcmp(key, "path")) {
+			g_free(c->path);
+			c->path = g_strdup(value);
+		} else if (!strcmp(key, "username")) {
+			g_free(c->username);
+			c->username = g_strdup(value);
+		} else if (!strcmp(key, "password")) {
+			g_free(c->password);
+			c->password = g_strdup(value);
+			while (*value)
+				*value++ = '\0';
+		}
+		/*
+		 * Ignore other lines; we don't know what they mean, but
+		 * this future-proofs us when later versions of git do
+		 * learn new lines, and the helpers are updated to match.
+		 */
+	}
+
+	g_free(buf);
+
+	return 0;
+}
+</source>
+</class>
+
+<class classid="14" nclones="2" nlines="12" similarity="100">
+<source file="git/contrib/credential/gnome-keyring/git-credential-gnome-keyring.c.ifdefed" startline="421" endline="434" pcid="2663">
+static void usage(const char *name)
+{
+	struct credential_operation const *try_op = credential_helper_ops;
+	const char *basename = strrchr(name, '/');
+
+	basename = (basename) ? basename + 1 : name;
+	fprintf(stderr, "usage: %s <", basename);
+	while (try_op->name) {
+		fprintf(stderr, "%s", (try_op++)->name);
+		if (try_op->name)
+			fprintf(stderr, "%s", "|");
+	}
+	fprintf(stderr, "%s", ">\n");
+}
+</source>
+<source file="git/contrib/credential/libsecret/git-credential-libsecret.c.ifdefed" startline="320" endline="333" pcid="2675">
+static void usage(const char *name)
+{
+	struct credential_operation const *try_op = credential_helper_ops;
+	const char *basename = strrchr(name, '/');
+
+	basename = (basename) ? basename + 1 : name;
+	fprintf(stderr, "usage: %s <", basename);
+	while (try_op->name) {
+		fprintf(stderr, "%s", (try_op++)->name);
+		if (try_op->name)
+			fprintf(stderr, "%s", "|");
+	}
+	fprintf(stderr, "%s", ">\n");
+}
+</source>
+</class>
+
+<class classid="15" nclones="2" nlines="22" similarity="100">
+<source file="git/contrib/credential/gnome-keyring/git-credential-gnome-keyring.c.ifdefed" startline="436" endline="470" pcid="2664">
+int main(int argc, char *argv[])
+{
+	int ret = EXIT_SUCCESS;
+
+	struct credential_operation const *try_op = credential_helper_ops;
+	struct credential cred = CREDENTIAL_INIT;
+
+	if (!argv[1]) {
+		usage(argv[0]);
+		exit(EXIT_FAILURE);
+	}
+
+	g_set_application_name("Git Credential Helper");
+
+	/* lookup operation callback */
+	while (try_op->name && strcmp(argv[1], try_op->name))
+		try_op++;
+
+	/* unsupported operation given -- ignore silently */
+	if (!try_op->name || !try_op->op)
+		goto out;
+
+	ret = credential_read(&cred);
+	if (ret)
+		goto out;
+
+	/* perform credential operation */
+	ret = (*try_op->op)(&cred);
+
+	credential_write(&cred);
+
+out:
+	credential_clear(&cred);
+	return ret;
+}
+</source>
+<source file="git/contrib/credential/libsecret/git-credential-libsecret.c.ifdefed" startline="335" endline="369" pcid="2676">
+int main(int argc, char *argv[])
+{
+	int ret = EXIT_SUCCESS;
+
+	struct credential_operation const *try_op = credential_helper_ops;
+	struct credential cred = CREDENTIAL_INIT;
+
+	if (!argv[1]) {
+		usage(argv[0]);
+		exit(EXIT_FAILURE);
+	}
+
+	g_set_application_name("Git Credential Helper");
+
+	/* lookup operation callback */
+	while (try_op->name && strcmp(argv[1], try_op->name))
+		try_op++;
+
+	/* unsupported operation given -- ignore silently */
+	if (!try_op->name || !try_op->op)
+		goto out;
+
+	ret = credential_read(&cred);
+	if (ret)
+		goto out;
+
+	/* perform credential operation */
+	ret = (*try_op->op)(&cred);
+
+	credential_write(&cred);
+
+out:
+	credential_clear(&cred);
+	return ret;
+}
+</source>
+</class>
+
+<class classid="16" nclones="2" nlines="10" similarity="80">
+<source file="git/daemon.c.ifdefed" startline="516" endline="526" pcid="2835">
+static void enable_service(const char *name, int ena)
+{
+	int i;
+	for (i = 0; i < ARRAY_SIZE(daemon_service); i++) {
+		if (!strcmp(daemon_service[i].name, name)) {
+			daemon_service[i].enabled = ena;
+			return;
+		}
+	}
+	die("No such service %s", name);
+}
+</source>
+<source file="git/daemon.c.ifdefed" startline="528" endline="538" pcid="2836">
+static void make_service_overridable(const char *name, int ena)
+{
+	int i;
+	for (i = 0; i < ARRAY_SIZE(daemon_service); i++) {
+		if (!strcmp(daemon_service[i].name, name)) {
+			daemon_service[i].overridable = ena;
+			return;
+		}
+	}
+	die("No such service %s", name);
+}
+</source>
+</class>
+
+<class classid="17" nclones="2" nlines="11" similarity="81">
+<source file="git/date.c.ifdefed" startline="924" endline="936" pcid="2893">
+static void date_pm(struct tm *tm, struct tm *now, int *num)
+{
+	int hour, n = *num;
+	*num = 0;
+
+	hour = tm->tm_hour;
+	if (n) {
+		hour = n;
+		tm->tm_min = 0;
+		tm->tm_sec = 0;
+	}
+	tm->tm_hour = (hour % 12) + 12;
+}
+</source>
+<source file="git/date.c.ifdefed" startline="938" endline="950" pcid="2894">
+static void date_am(struct tm *tm, struct tm *now, int *num)
+{
+	int hour, n = *num;
+	*num = 0;
+
+	hour = tm->tm_hour;
+	if (n) {
+		hour = n;
+		tm->tm_min = 0;
+		tm->tm_sec = 0;
+	}
+	tm->tm_hour = (hour % 12);
+}
+</source>
+</class>
+
+<class classid="18" nclones="2" nlines="16" similarity="75">
+<source file="git/diff.c.ifdefed" startline="4251" endline="4273" pcid="3053">
+static void run_diffstat(struct diff_filepair *p, struct diff_options *o,
+			 struct diffstat_t *diffstat)
+{
+	const char *name;
+	const char *other;
+
+	if (DIFF_PAIR_UNMERGED(p)) {
+		/* unmerged */
+		builtin_diffstat(p->one->path, NULL, NULL, NULL, diffstat, o, p);
+		return;
+	}
+
+	name = p->one->path;
+	other = (strcmp(name, p->two->path) ? p->two->path : NULL);
+
+	if (o->prefix_length)
+		strip_prefix(o->prefix_length, &name, &other);
+
+	diff_fill_oid_info(p->one);
+	diff_fill_oid_info(p->two);
+
+	builtin_diffstat(name, other, p->one, p->two, diffstat, o, p);
+}
+</source>
+<source file="git/diff.c.ifdefed" startline="4275" endline="4297" pcid="3054">
+static void run_checkdiff(struct diff_filepair *p, struct diff_options *o)
+{
+	const char *name;
+	const char *other;
+	const char *attr_path;
+
+	if (DIFF_PAIR_UNMERGED(p)) {
+		/* unmerged */
+		return;
+	}
+
+	name = p->one->path;
+	other = (strcmp(name, p->two->path) ? p->two->path : NULL);
+	attr_path = other ? other : name;
+
+	if (o->prefix_length)
+		strip_prefix(o->prefix_length, &name, &other);
+
+	diff_fill_oid_info(p->one);
+	diff_fill_oid_info(p->two);
+
+	builtin_checkdiff(name, other, attr_path, p->one, p->two, o);
+}
+</source>
+</class>
+
+<class classid="19" nclones="2" nlines="18" similarity="77">
+<source file="git/diffcore-rename.c.ifdefed" startline="19" endline="38" pcid="3140">
+static int find_rename_dst(struct diff_filespec *two)
+{
+	int first, last;
+
+	first = 0;
+	last = rename_dst_nr;
+	while (last > first) {
+		int next = (last + first) >> 1;
+		struct diff_rename_dst *dst = &(rename_dst[next]);
+		int cmp = strcmp(two->path, dst->two->path);
+		if (!cmp)
+			return next;
+		if (cmp < 0) {
+			last = next;
+			continue;
+		}
+		first = next+1;
+	}
+	return -first - 1;
+}
+</source>
+<source file="git/read-cache.c.ifdefed" startline="538" endline="557" pcid="5013">
+static int index_name_stage_pos(const struct index_state *istate, const char *name, int namelen, int stage)
+{
+	int first, last;
+
+	first = 0;
+	last = istate->cache_nr;
+	while (last > first) {
+		int next = (last + first) >> 1;
+		struct cache_entry *ce = istate->cache[next];
+		int cmp = cache_name_stage_compare(name, namelen, stage, ce->name, ce_namelen(ce), ce_stage(ce));
+		if (!cmp)
+			return next;
+		if (cmp < 0) {
+			last = next;
+			continue;
+		}
+		first = next+1;
+	}
+	return -first-1;
+}
+</source>
+</class>
+
+<class classid="20" nclones="2" nlines="11" similarity="81">
+<source file="git/hashmap.c.ifdefed" startline="40" endline="51" pcid="3709">
+unsigned int memihash(const void *buf, size_t len)
+{
+	unsigned int hash = FNV32_BASE;
+	unsigned char *ucbuf = (unsigned char *) buf;
+	while (len--) {
+		unsigned int c = *ucbuf++;
+		if (c >= 'a' && c <= 'z')
+			c -= 'a' - 'A';
+		hash = (hash * FNV32_PRIME) ^ c;
+	}
+	return hash;
+}
+</source>
+<source file="git/hashmap.c.ifdefed" startline="57" endline="68" pcid="3710">
+unsigned int memihash_cont(unsigned int hash_seed, const void *buf, size_t len)
+{
+	unsigned int hash = hash_seed;
+	unsigned char *ucbuf = (unsigned char *) buf;
+	while (len--) {
+		unsigned int c = *ucbuf++;
+		if (c >= 'a' && c <= 'z')
+			c -= 'a' - 'A';
+		hash = (hash * FNV32_PRIME) ^ c;
+	}
+	return hash;
+}
+</source>
+</class>
+
+<class classid="21" nclones="2" nlines="11" similarity="72">
+<source file="git/help.c.ifdefed" startline="313" endline="327" pcid="3744">
+void list_all_main_cmds(struct string_list *list)
+{
+	struct cmdnames main_cmds, other_cmds;
+	int i;
+
+	memset(&main_cmds, 0, sizeof(main_cmds));
+	memset(&other_cmds, 0, sizeof(other_cmds));
+	load_command_list("git-", &main_cmds, &other_cmds);
+
+	for (i = 0; i < main_cmds.cnt; i++)
+		string_list_append(list, main_cmds.names[i]->name);
+
+	clean_cmdnames(&main_cmds);
+	clean_cmdnames(&other_cmds);
+}
+</source>
+<source file="git/help.c.ifdefed" startline="329" endline="343" pcid="3745">
+void list_all_other_cmds(struct string_list *list)
+{
+	struct cmdnames main_cmds, other_cmds;
+	int i;
+
+	memset(&main_cmds, 0, sizeof(main_cmds));
+	memset(&other_cmds, 0, sizeof(other_cmds));
+	load_command_list("git-", &main_cmds, &other_cmds);
+
+	for (i = 0; i < other_cmds.cnt; i++)
+		string_list_append(list, other_cmds.names[i]->name);
+
+	clean_cmdnames(&main_cmds);
+	clean_cmdnames(&other_cmds);
+}
+</source>
+</class>
+
+<class classid="22" nclones="2" nlines="11" similarity="81">
+<source file="git/http-backend.c.ifdefed" startline="126" endline="140" pcid="3778">
+__attribute__((format (printf, 2, 3)))
+static NORETURN void not_found(struct strbuf *hdr, const char *err, ...)
+{
+	va_list params;
+
+	http_status(hdr, 404, "Not Found");
+	hdr_nocache(hdr);
+	end_headers(hdr);
+
+	va_start(params, err);
+	if (err && *err)
+		vfprintf(stderr, err, params);
+	va_end(params);
+	exit(0);
+}
+</source>
+<source file="git/http-backend.c.ifdefed" startline="142" endline="156" pcid="3779">
+__attribute__((format (printf, 2, 3)))
+static NORETURN void forbidden(struct strbuf *hdr, const char *err, ...)
+{
+	va_list params;
+
+	http_status(hdr, 403, "Forbidden");
+	hdr_nocache(hdr);
+	end_headers(hdr);
+
+	va_start(params, err);
+	if (err && *err)
+		vfprintf(stderr, err, params);
+	va_end(params);
+	exit(0);
+}
+</source>
+</class>
+
+<class classid="23" nclones="2" nlines="12" similarity="83">
+<source file="git/list-objects-filter.c.ifdefed" startline="322" endline="341" pcid="4120">
+static void *filter_sparse_oid__init(
+	struct oidset *omitted,
+	struct list_objects_filter_options *filter_options,
+	filter_object_fn *filter_fn,
+	filter_free_fn *filter_free_fn)
+{
+	struct filter_sparse_data *d = xcalloc(1, sizeof(*d));
+	d->omits = omitted;
+	if (add_excludes_from_blob_to_list(filter_options->sparse_oid_value,
+					   NULL, 0, &d->el) < 0)
+		die("could not load filter specification");
+
+	ALLOC_GROW(d->array_frame, d->nr + 1, d->alloc);
+	d->array_frame[d->nr].defval = 0; /* default to include */
+	d->array_frame[d->nr].child_prov_omit = 0;
+
+	*filter_fn = filter_sparse;
+	*filter_free_fn = filter_sparse_free;
+	return d;
+}
+</source>
+<source file="git/list-objects-filter.c.ifdefed" startline="343" endline="362" pcid="4121">
+static void *filter_sparse_path__init(
+	struct oidset *omitted,
+	struct list_objects_filter_options *filter_options,
+	filter_object_fn *filter_fn,
+	filter_free_fn *filter_free_fn)
+{
+	struct filter_sparse_data *d = xcalloc(1, sizeof(*d));
+	d->omits = omitted;
+	if (add_excludes_from_file_to_list(filter_options->sparse_path_value,
+					   NULL, 0, &d->el, NULL) < 0)
+		die("could not load filter specification");
+
+	ALLOC_GROW(d->array_frame, d->nr + 1, d->alloc);
+	d->array_frame[d->nr].defval = 0; /* default to include */
+	d->array_frame[d->nr].child_prov_omit = 0;
+
+	*filter_fn = filter_sparse;
+	*filter_free_fn = filter_sparse_free;
+	return d;
+}
+</source>
+</class>
+
+<class classid="24" nclones="2" nlines="23" similarity="72">
+<source file="git/mailinfo.c.ifdefed" startline="58" endline="86" pcid="4188">
+static const char *unquote_comment(struct strbuf *outbuf, const char *in)
+{
+	int c;
+	int take_next_literally = 0;
+
+	strbuf_addch(outbuf, '(');
+
+	while ((c = *in++) != 0) {
+		if (take_next_literally == 1) {
+			take_next_literally = 0;
+		} else {
+			switch (c) {
+			case '\\':
+				take_next_literally = 1;
+				continue;
+			case '(':
+				in = unquote_comment(outbuf, in);
+				continue;
+			case ')':
+				strbuf_addch(outbuf, ')');
+				return in;
+			}
+		}
+
+		strbuf_addch(outbuf, c);
+	}
+
+	return in;
+}
+</source>
+<source file="git/mailinfo.c.ifdefed" startline="88" endline="110" pcid="4189">
+static const char *unquote_quoted_string(struct strbuf *outbuf, const char *in)
+{
+	int c;
+	int take_next_literally = 0;
+
+	while ((c = *in++) != 0) {
+		if (take_next_literally == 1) {
+			take_next_literally = 0;
+		} else {
+			switch (c) {
+			case '\\':
+				take_next_literally = 1;
+				continue;
+			case '"':
+				return in;
+			}
+		}
+
+		strbuf_addch(outbuf, c);
+	}
+
+	return in;
+}
+</source>
+</class>
+
+<class classid="25" nclones="2" nlines="14" similarity="71">
+<source file="git/read-cache.c.ifdefed" startline="1836" endline="1850" pcid="5052">
+static void tweak_untracked_cache(struct index_state *istate)
+{
+	switch (git_config_get_untracked_cache()) {
+	case -1: /* keep: do nothing */
+		break;
+	case 0: /* false */
+		remove_untracked_cache(istate);
+		break;
+	case 1: /* true */
+		add_untracked_cache(istate);
+		break;
+	default: /* unknown value: do nothing */
+		break;
+	}
+}
+</source>
+<source file="git/read-cache.c.ifdefed" startline="1852" endline="1866" pcid="5053">
+static void tweak_split_index(struct index_state *istate)
+{
+	switch (git_config_get_split_index()) {
+	case -1: /* unset: do nothing */
+		break;
+	case 0: /* false */
+		remove_split_index(istate);
+		break;
+	case 1: /* true */
+		add_split_index(istate);
+		break;
+	default: /* unknown value: do nothing */
+		break;
+	}
+}
+</source>
+</class>
+
+<class classid="26" nclones="2" nlines="13" similarity="76">
+<source file="git/refs/files-backend.c.ifdefed" startline="152" endline="168" pcid="5206">
+static void files_reflog_path(struct files_ref_store *refs,
+			      struct strbuf *sb,
+			      const char *refname)
+{
+	switch (ref_type(refname)) {
+	case REF_TYPE_PER_WORKTREE:
+	case REF_TYPE_PSEUDOREF:
+		strbuf_addf(sb, "%s/logs/%s", refs->gitdir, refname);
+		break;
+	case REF_TYPE_NORMAL:
+		strbuf_addf(sb, "%s/logs/%s", refs->gitcommondir, refname);
+		break;
+	default:
+		BUG("unknown ref type %d of ref %s",
+		    ref_type(refname), refname);
+	}
+}
+</source>
+<source file="git/refs/files-backend.c.ifdefed" startline="170" endline="186" pcid="5207">
+static void files_ref_path(struct files_ref_store *refs,
+			   struct strbuf *sb,
+			   const char *refname)
+{
+	switch (ref_type(refname)) {
+	case REF_TYPE_PER_WORKTREE:
+	case REF_TYPE_PSEUDOREF:
+		strbuf_addf(sb, "%s/%s", refs->gitdir, refname);
+		break;
+	case REF_TYPE_NORMAL:
+		strbuf_addf(sb, "%s/%s", refs->gitcommondir, refname);
+		break;
+	default:
+		BUG("unknown ref type %d of ref %s",
+		    ref_type(refname), refname);
+	}
+}
+</source>
+</class>
+
+<class classid="27" nclones="2" nlines="11" similarity="72">
+<source file="git/resolve-undo.c.ifdefed" startline="168" endline="180" pcid="5711">
+void unmerge_marked_index(struct index_state *istate)
+{
+	int i;
+
+	if (!istate->resolve_undo)
+		return;
+
+	for (i = 0; i < istate->cache_nr; i++) {
+		const struct cache_entry *ce = istate->cache[i];
+		if (ce->ce_flags & CE_MATCHED)
+			i = unmerge_index_entry_at(istate, i);
+	}
+}
+</source>
+<source file="git/resolve-undo.c.ifdefed" startline="182" endline="195" pcid="5712">
+void unmerge_index(struct index_state *istate, const struct pathspec *pathspec)
+{
+	int i;
+
+	if (!istate->resolve_undo)
+		return;
+
+	for (i = 0; i < istate->cache_nr; i++) {
+		const struct cache_entry *ce = istate->cache[i];
+		if (!ce_path_match(ce, pathspec, NULL))
+			continue;
+		i = unmerge_index_entry_at(istate, i);
+	}
+}
+</source>
+</class>
+
+<class classid="28" nclones="2" nlines="13" similarity="76">
+<source file="git/sha1-name.c.ifdefed" startline="230" endline="247" pcid="6189">
+static int disambiguate_committish_only(const struct object_id *oid, void *cb_data_unused)
+{
+	struct object *obj;
+	int kind;
+
+	kind = oid_object_info(the_repository, oid, NULL);
+	if (kind == OBJ_COMMIT)
+		return 1;
+	if (kind != OBJ_TAG)
+		return 0;
+
+	/* We need to do this the hard way... */
+	obj = deref_tag(the_repository, parse_object(the_repository, oid),
+			NULL, 0);
+	if (obj && obj->type == OBJ_COMMIT)
+		return 1;
+	return 0;
+}
+</source>
+<source file="git/sha1-name.c.ifdefed" startline="255" endline="272" pcid="6191">
+static int disambiguate_treeish_only(const struct object_id *oid, void *cb_data_unused)
+{
+	struct object *obj;
+	int kind;
+
+	kind = oid_object_info(the_repository, oid, NULL);
+	if (kind == OBJ_TREE || kind == OBJ_COMMIT)
+		return 1;
+	if (kind != OBJ_TAG)
+		return 0;
+
+	/* We need to do this the hard way... */
+	obj = deref_tag(the_repository, parse_object(the_repository, oid),
+			NULL, 0);
+	if (obj && (obj->type == OBJ_TREE || obj->type == OBJ_COMMIT))
+		return 1;
+	return 0;
+}
+</source>
+</class>
+
+<class classid="29" nclones="2" nlines="10" similarity="70">
+<source file="git/strbuf.c.ifdefed" startline="788" endline="798" pcid="6355">
+int printf_ln(const char *fmt, ...)
+{
+	int ret;
+	va_list ap;
+	va_start(ap, fmt);
+	ret = vprintf(fmt, ap);
+	va_end(ap);
+	if (ret < 0 || putchar('\n') == EOF)
+		return -1;
+	return ret + 1;
+}
+</source>
+<source file="git/strbuf.c.ifdefed" startline="800" endline="810" pcid="6356">
+int fprintf_ln(FILE *fp, const char *fmt, ...)
+{
+	int ret;
+	va_list ap;
+	va_start(ap, fmt);
+	ret = vfprintf(fp, fmt, ap);
+	va_end(ap);
+	if (ret < 0 || putc('\n', fp) == EOF)
+		return -1;
+	return ret + 1;
+}
+</source>
+</class>
+
+<class classid="30" nclones="2" nlines="23" similarity="73">
+<source file="git/string-list.c.ifdefed" startline="279" endline="303" pcid="6407">
+int string_list_split(struct string_list *list, const char *string,
+		      int delim, int maxsplit)
+{
+	int count = 0;
+	const char *p = string, *end;
+
+	if (!list->strdup_strings)
+		die("internal error in string_list_split(): "
+		    "list->strdup_strings must be set");
+	for (;;) {
+		count++;
+		if (maxsplit >= 0 && count > maxsplit) {
+			string_list_append(list, p);
+			return count;
+		}
+		end = strchr(p, delim);
+		if (end) {
+			string_list_append_nodup(list, xmemdupz(p, end - p));
+			p = end + 1;
+		} else {
+			string_list_append(list, p);
+			return count;
+		}
+	}
+}
+</source>
+<source file="git/string-list.c.ifdefed" startline="305" endline="330" pcid="6408">
+int string_list_split_in_place(struct string_list *list, char *string,
+			       int delim, int maxsplit)
+{
+	int count = 0;
+	char *p = string, *end;
+
+	if (list->strdup_strings)
+		die("internal error in string_list_split_in_place(): "
+		    "list->strdup_strings must not be set");
+	for (;;) {
+		count++;
+		if (maxsplit >= 0 && count > maxsplit) {
+			string_list_append(list, p);
+			return count;
+		}
+		end = strchr(p, delim);
+		if (end) {
+			*end = '\0';
+			string_list_append(list, p);
+			p = end + 1;
+		} else {
+			string_list_append(list, p);
+			return count;
+		}
+	}
+}
+</source>
+</class>
+
+<class classid="31" nclones="2" nlines="14" similarity="71">
+<source file="git/submodule-config.c.ifdefed" startline="154" endline="172" pcid="6429">
+static const struct submodule *cache_lookup_path(struct submodule_cache *cache,
+		const struct object_id *gitmodules_oid, const char *path)
+{
+	struct submodule_entry *entry;
+	unsigned int hash = hash_oid_string(gitmodules_oid, path);
+	struct submodule_entry key;
+	struct submodule key_config;
+
+	oidcpy(&key_config.gitmodules_oid, gitmodules_oid);
+	key_config.path = path;
+
+	hashmap_entry_init(&key, hash);
+	key.config = &key_config;
+
+	entry = hashmap_get(&cache->for_path, &key, NULL);
+	if (entry)
+		return entry->config;
+	return NULL;
+}
+</source>
+<source file="git/submodule-config.c.ifdefed" startline="174" endline="192" pcid="6430">
+static struct submodule *cache_lookup_name(struct submodule_cache *cache,
+		const struct object_id *gitmodules_oid, const char *name)
+{
+	struct submodule_entry *entry;
+	unsigned int hash = hash_oid_string(gitmodules_oid, name);
+	struct submodule_entry key;
+	struct submodule key_config;
+
+	oidcpy(&key_config.gitmodules_oid, gitmodules_oid);
+	key_config.name = name;
+
+	hashmap_entry_init(&key, hash);
+	key.config = &key_config;
+
+	entry = hashmap_get(&cache->for_name, &key, NULL);
+	if (entry)
+		return entry->config;
+	return NULL;
+}
+</source>
+</class>
+
+<class classid="32" nclones="2" nlines="14" similarity="73">
+<source file="git/submodule-config.c.ifdefed" startline="272" endline="289" pcid="6434">
+static int parse_fetch_recurse(const char *opt, const char *arg,
+			       int die_on_error)
+{
+	switch (git_parse_maybe_bool(arg)) {
+	case 1:
+		return RECURSE_SUBMODULES_ON;
+	case 0:
+		return RECURSE_SUBMODULES_OFF;
+	default:
+		if (!strcmp(arg, "on-demand"))
+			return RECURSE_SUBMODULES_ON_DEMAND;
+
+		if (die_on_error)
+			die("bad %s argument: %s", opt, arg);
+		else
+			return RECURSE_SUBMODULES_ERROR;
+	}
+}
+</source>
+<source file="git/submodule-config.c.ifdefed" startline="325" endline="338" pcid="6438">
+static int parse_update_recurse(const char *opt, const char *arg,
+				int die_on_error)
+{
+	switch (git_parse_maybe_bool(arg)) {
+	case 1:
+		return RECURSE_SUBMODULES_ON;
+	case 0:
+		return RECURSE_SUBMODULES_OFF;
+	default:
+		if (die_on_error)
+			die("bad %s argument: %s", opt, arg);
+		return RECURSE_SUBMODULES_ERROR;
+	}
+}
+</source>
+</class>
+
+<class classid="33" nclones="2" nlines="13" similarity="84">
+<source file="git/transport.c.ifdefed" startline="365" endline="378" pcid="6862">
+static int push_had_errors(struct ref *ref)
+{
+	for (; ref; ref = ref->next) {
+		switch (ref->status) {
+		case REF_STATUS_NONE:
+		case REF_STATUS_UPTODATE:
+		case REF_STATUS_OK:
+			break;
+		default:
+			return 1;
+		}
+	}
+	return 0;
+}
+</source>
+<source file="git/transport.c.ifdefed" startline="380" endline="392" pcid="6863">
+int transport_refs_pushed(struct ref *ref)
+{
+	for (; ref; ref = ref->next) {
+		switch(ref->status) {
+		case REF_STATUS_NONE:
+		case REF_STATUS_UPTODATE:
+			break;
+		default:
+			return 1;
+		}
+	}
+	return 0;
+}
+</source>
+</class>
+
+<class classid="34" nclones="2" nlines="20" similarity="76">
+<source file="git/unix-socket.c.ifdefed" startline="74" endline="94" pcid="6956">
+int unix_stream_connect(const char *path)
+{
+	int fd, saved_errno;
+	struct sockaddr_un sa;
+	struct unix_sockaddr_context ctx;
+
+	if (unix_sockaddr_init(&sa, path, &ctx) < 0)
+		return -1;
+	fd = unix_stream_socket();
+	if (connect(fd, (struct sockaddr *)&sa, sizeof(sa)) < 0)
+		goto fail;
+	unix_sockaddr_cleanup(&ctx);
+	return fd;
+
+fail:
+	saved_errno = errno;
+	unix_sockaddr_cleanup(&ctx);
+	close(fd);
+	errno = saved_errno;
+	return -1;
+}
+</source>
+<source file="git/unix-socket.c.ifdefed" startline="96" endline="123" pcid="6957">
+int unix_stream_listen(const char *path)
+{
+	int fd, saved_errno;
+	struct sockaddr_un sa;
+	struct unix_sockaddr_context ctx;
+
+	unlink(path);
+
+	if (unix_sockaddr_init(&sa, path, &ctx) < 0)
+		return -1;
+	fd = unix_stream_socket();
+
+	if (bind(fd, (struct sockaddr *)&sa, sizeof(sa)) < 0)
+		goto fail;
+
+	if (listen(fd, 5) < 0)
+		goto fail;
+
+	unix_sockaddr_cleanup(&ctx);
+	return fd;
+
+fail:
+	saved_errno = errno;
+	unix_sockaddr_cleanup(&ctx);
+	close(fd);
+	errno = saved_errno;
+	return -1;
+}
+</source>
+</class>
+
+<class classid="35" nclones="2" nlines="18" similarity="72">
+<source file="git/unpack-trees.c.ifdefed" startline="707" endline="730" pcid="6983">
+static int do_compare_entry_piecewise(const struct cache_entry *ce, const struct traverse_info *info, const struct name_entry *n)
+{
+	int len, pathlen, ce_len;
+	const char *ce_name;
+
+	if (info->prev) {
+		int cmp = do_compare_entry_piecewise(ce, info->prev,
+						     &info->name);
+		if (cmp)
+			return cmp;
+	}
+	pathlen = info->pathlen;
+	ce_len = ce_namelen(ce);
+
+	/* If ce_len < pathlen then we must have previously hit "name == directory" entry */
+	if (ce_len < pathlen)
+		return -1;
+
+	ce_len -= pathlen;
+	ce_name = ce->name + pathlen;
+
+	len = tree_entry_len(n);
+	return df_name_compare(ce_name, ce_len, S_IFREG, n->path, len, n->mode);
+}
+</source>
+<source file="git/unpack-trees.c.ifdefed" startline="732" endline="763" pcid="6984">
+static int do_compare_entry(const struct cache_entry *ce,
+			    const struct traverse_info *info,
+			    const struct name_entry *n)
+{
+	int len, pathlen, ce_len;
+	const char *ce_name;
+	int cmp;
+
+	/*
+	 * If we have not precomputed the traverse path, it is quicker
+	 * to avoid doing so.  But if we have precomputed it,
+	 * it is quicker to use the precomputed version.
+	 */
+	if (!info->traverse_path)
+		return do_compare_entry_piecewise(ce, info, n);
+
+	cmp = strncmp(ce->name, info->traverse_path, info->pathlen);
+	if (cmp)
+		return cmp;
+
+	pathlen = info->pathlen;
+	ce_len = ce_namelen(ce);
+
+	if (ce_len < pathlen)
+		return -1;
+
+	ce_len -= pathlen;
+	ce_name = ce->name + pathlen;
+
+	len = tree_entry_len(n);
+	return df_name_compare(ce_name, ce_len, S_IFREG, n->path, len, n->mode);
+}
+</source>
+</class>
+
+<class classid="36" nclones="2" nlines="29" similarity="72">
+<source file="git/upload-pack.c.ifdefed" startline="306" endline="338" pcid="7025">
+static int got_oid(const char *hex, struct object_id *oid)
+{
+	struct object *o;
+	int we_knew_they_have = 0;
+
+	if (get_oid_hex(hex, oid))
+		die("git upload-pack: expected SHA1 object, got '%s'", hex);
+	if (!has_object_file(oid))
+		return -1;
+
+	o = parse_object(the_repository, oid);
+	if (!o)
+		die("oops (%s)", oid_to_hex(oid));
+	if (o->type == OBJ_COMMIT) {
+		struct commit_list *parents;
+		struct commit *commit = (struct commit *)o;
+		if (o->flags & THEY_HAVE)
+			we_knew_they_have = 1;
+		else
+			o->flags |= THEY_HAVE;
+		if (!oldest_have || (commit->date < oldest_have))
+			oldest_have = commit->date;
+		for (parents = commit->parents;
+		     parents;
+		     parents = parents->next)
+			parents->item->object.flags |= THEY_HAVE;
+	}
+	if (!we_knew_they_have) {
+		add_object_array(o, NULL, &have_obj);
+		return 1;
+	}
+	return 0;
+}
+</source>
+<source file="git/upload-pack.c.ifdefed" startline="1305" endline="1342" pcid="7057">
+static int process_haves(struct oid_array *haves, struct oid_array *common)
+{
+	int i;
+
+	/* Process haves */
+	for (i = 0; i < haves->nr; i++) {
+		const struct object_id *oid = &haves->oid[i];
+		struct object *o;
+		int we_knew_they_have = 0;
+
+		if (!has_object_file(oid))
+			continue;
+
+		oid_array_append(common, oid);
+
+		o = parse_object(the_repository, oid);
+		if (!o)
+			die("oops (%s)", oid_to_hex(oid));
+		if (o->type == OBJ_COMMIT) {
+			struct commit_list *parents;
+			struct commit *commit = (struct commit *)o;
+			if (o->flags & THEY_HAVE)
+				we_knew_they_have = 1;
+			else
+				o->flags |= THEY_HAVE;
+			if (!oldest_have || (commit->date < oldest_have))
+				oldest_have = commit->date;
+			for (parents = commit->parents;
+			     parents;
+			     parents = parents->next)
+				parents->item->object.flags |= THEY_HAVE;
+		}
+		if (!we_knew_they_have)
+			add_object_array(o, NULL, &have_obj);
+	}
+
+	return 0;
+}
+</source>
+</class>
+
+<class classid="37" nclones="2" nlines="15" similarity="80">
+<source file="git/wrapper.c.ifdefed" startline="254" endline="269" pcid="7277">
+ssize_t xread(int fd, void *buf, size_t len)
+{
+	ssize_t nr;
+	if (len > MAX_IO_SIZE)
+	    len = MAX_IO_SIZE;
+	while (1) {
+		nr = read(fd, buf, len);
+		if (nr < 0) {
+			if (errno == EINTR)
+				continue;
+			if (handle_nonblock(fd, POLLIN, errno))
+				continue;
+		}
+		return nr;
+	}
+}
+</source>
+<source file="git/wrapper.c.ifdefed" startline="276" endline="292" pcid="7278">
+ssize_t xwrite(int fd, const void *buf, size_t len)
+{
+	ssize_t nr;
+	if (len > MAX_IO_SIZE)
+	    len = MAX_IO_SIZE;
+	while (1) {
+		nr = write(fd, buf, len);
+		if (nr < 0) {
+			if (errno == EINTR)
+				continue;
+			if (handle_nonblock(fd, POLLOUT, errno))
+				continue;
+		}
+
+		return nr;
+	}
+}
+</source>
+</class>
+
+<class classid="38" nclones="2" nlines="16" similarity="81">
+<source file="git/wrapper.c.ifdefed" startline="312" endline="329" pcid="7280">
+ssize_t read_in_full(int fd, void *buf, size_t count)
+{
+	char *p = buf;
+	ssize_t total = 0;
+
+	while (count > 0) {
+		ssize_t loaded = xread(fd, p, count);
+		if (loaded < 0)
+			return -1;
+		if (loaded == 0)
+			return total;
+		count -= loaded;
+		p += loaded;
+		total += loaded;
+	}
+
+	return total;
+}
+</source>
+<source file="git/wrapper.c.ifdefed" startline="352" endline="370" pcid="7282">
+ssize_t pread_in_full(int fd, void *buf, size_t count, off_t offset)
+{
+	char *p = buf;
+	ssize_t total = 0;
+
+	while (count > 0) {
+		ssize_t loaded = xpread(fd, p, count, offset);
+		if (loaded < 0)
+			return -1;
+		if (loaded == 0)
+			return total;
+		count -= loaded;
+		p += loaded;
+		total += loaded;
+		offset += loaded;
+	}
+
+	return total;
+}
+</source>
+</class>
+
+<class classid="39" nclones="2" nlines="16" similarity="81">
+<source file="git/wrapper.c.ifdefed" startline="448" endline="468" pcid="7290">
+int xmkstemp(char *filename_template)
+{
+	int fd;
+	char origtemplate[PATH_MAX];
+	strlcpy(origtemplate, filename_template, sizeof(origtemplate));
+
+	fd = mkstemp(filename_template);
+	if (fd < 0) {
+		int saved_errno = errno;
+		const char *nonrelative_template;
+
+		if (strlen(filename_template) != strlen(origtemplate))
+			filename_template = origtemplate;
+
+		nonrelative_template = absolute_path(filename_template);
+		errno = saved_errno;
+		die_errno("Unable to create temporary file '%s'",
+			nonrelative_template);
+	}
+	return fd;
+}
+</source>
+<source file="git/wrapper.c.ifdefed" startline="544" endline="564" pcid="7293">
+int xmkstemp_mode(char *filename_template, int mode)
+{
+	int fd;
+	char origtemplate[PATH_MAX];
+	strlcpy(origtemplate, filename_template, sizeof(origtemplate));
+
+	fd = git_mkstemp_mode(filename_template, mode);
+	if (fd < 0) {
+		int saved_errno = errno;
+		const char *nonrelative_template;
+
+		if (!filename_template[0])
+			filename_template = origtemplate;
+
+		nonrelative_template = absolute_path(filename_template);
+		errno = saved_errno;
+		die_errno("Unable to create temporary file '%s'",
+			nonrelative_template);
+	}
+	return fd;
+}
+</source>
+</class>
+
+<class classid="40" nclones="2" nlines="20" similarity="75">
+<source file="git/wt-status.c.ifdefed" startline="738" endline="759" pcid="7345">
+static void wt_longstatus_print_unmerged(struct wt_status *s)
+{
+	int shown_header = 0;
+	int i;
+
+	for (i = 0; i < s->change.nr; i++) {
+		struct wt_status_change_data *d;
+		struct string_list_item *it;
+		it = &(s->change.items[i]);
+		d = it->util;
+		if (!d->stagemask)
+			continue;
+		if (!shown_header) {
+			wt_longstatus_print_unmerged_header(s);
+			shown_header = 1;
+		}
+		wt_longstatus_print_unmerged_data(s, it);
+	}
+	if (shown_header)
+		wt_longstatus_print_trailer(s);
+
+}
+</source>
+<source file="git/wt-status.c.ifdefed" startline="761" endline="783" pcid="7346">
+static void wt_longstatus_print_updated(struct wt_status *s)
+{
+	int shown_header = 0;
+	int i;
+
+	for (i = 0; i < s->change.nr; i++) {
+		struct wt_status_change_data *d;
+		struct string_list_item *it;
+		it = &(s->change.items[i]);
+		d = it->util;
+		if (!d->index_status ||
+		    d->index_status == DIFF_STATUS_UNMERGED)
+			continue;
+		if (!shown_header) {
+			wt_longstatus_print_cached_header(s);
+			s->commitable = 1;
+			shown_header = 1;
+		}
+		wt_longstatus_print_change_data(s, WT_STATUS_UPDATED, it);
+	}
+	if (shown_header)
+		wt_longstatus_print_trailer(s);
+}
+</source>
+</class>
+
+<class classid="41" nclones="2" nlines="23" similarity="82">
+<source file="git/zlib.c.ifdefed" startline="111" endline="147" pcid="7511">
+int git_inflate(git_zstream *strm, int flush)
+{
+	int status;
+
+	for (;;) {
+		zlib_pre_call(strm);
+		/* Never say Z_FINISH unless we are feeding everything */
+		status = inflate(&strm->z,
+				 (strm->z.avail_in != strm->avail_in)
+				 ? 0 : flush);
+		if (status == Z_MEM_ERROR)
+			die("inflate: out of memory");
+		zlib_post_call(strm);
+
+		/*
+		 * Let zlib work another round, while we can still
+		 * make progress.
+		 */
+		if ((strm->avail_out && !strm->z.avail_out) &&
+		    (status == Z_OK || status == Z_BUF_ERROR))
+			continue;
+		break;
+	}
+
+	switch (status) {
+	/* Z_BUF_ERROR: normal, needs more space in the output buffer */
+	case Z_BUF_ERROR:
+	case Z_OK:
+	case Z_STREAM_END:
+		return status;
+	default:
+		break;
+	}
+	error("inflate: %s (%s)", zerr_to_string(status),
+	      strm->z.msg ? strm->z.msg : "no message");
+	return status;
+}
+</source>
+<source file="git/zlib.c.ifdefed" startline="236" endline="273" pcid="7520">
+int git_deflate(git_zstream *strm, int flush)
+{
+	int status;
+
+	for (;;) {
+		zlib_pre_call(strm);
+
+		/* Never say Z_FINISH unless we are feeding everything */
+		status = deflate(&strm->z,
+				 (strm->z.avail_in != strm->avail_in)
+				 ? 0 : flush);
+		if (status == Z_MEM_ERROR)
+			die("deflate: out of memory");
+		zlib_post_call(strm);
+
+		/*
+		 * Let zlib work another round, while we can still
+		 * make progress.
+		 */
+		if ((strm->avail_out && !strm->z.avail_out) &&
+		    (status == Z_OK || status == Z_BUF_ERROR))
+			continue;
+		break;
+	}
+
+	switch (status) {
+	/* Z_BUF_ERROR: normal, needs more space in the output buffer */
+	case Z_BUF_ERROR:
+	case Z_OK:
+	case Z_STREAM_END:
+		return status;
+	default:
+		break;
+	}
+	error("deflate: %s (%s)", zerr_to_string(status),
+	      strm->z.msg ? strm->z.msg : "no message");
+	return status;
+}
+</source>
+</class>
+
+<class classid="42" nclones="2" nlines="10" similarity="70">
+<source file="git/zlib.c.ifdefed" startline="158" endline="170" pcid="7513">
+void git_deflate_init(git_zstream *strm, int level)
+{
+	int status;
+
+	memset(strm, 0, sizeof(*strm));
+	zlib_pre_call(strm);
+	status = deflateInit(&strm->z, level);
+	zlib_post_call(strm);
+	if (status == Z_OK)
+		return;
+	die("deflateInit: %s (%s)", zerr_to_string(status),
+	    strm->z.msg ? strm->z.msg : "no message");
+}
+</source>
+<source file="git/zlib.c.ifdefed" startline="172" endline="186" pcid="7514">
+static void do_git_deflate_init(git_zstream *strm, int level, int windowBits)
+{
+	int status;
+
+	memset(strm, 0, sizeof(*strm));
+	zlib_pre_call(strm);
+	status = deflateInit2(&strm->z, level,
+				  Z_DEFLATED, windowBits,
+				  8, Z_DEFAULT_STRATEGY);
+	zlib_post_call(strm);
+	if (status == Z_OK)
+		return;
+	die("deflateInit2: %s (%s)", zerr_to_string(status),
+	    strm->z.msg ? strm->z.msg : "no message");
+}
+</source>
+</class>
+
+</clones>

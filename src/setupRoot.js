@@ -6,7 +6,7 @@ import toastr from './toastr';
 
 export default function() {
 
-    var serverLink = "https://cloneswarm.serveo.net";
+    var serverLink = "https://clone-swarm.usask.ca:8080";
 
     // load the documentation and loader template files
     d3.select('#doc-root').html(documentationTemplate);
@@ -44,13 +44,6 @@ export default function() {
             if (!(githubLink.indexOf('.git') > -1)) {
                 toastr["error"]("Please enter a valid git link", "ERROR");
             } else if (email && language && granularity) {
-
-                // 
-                if (language == 'python' && granularity == 'functions') {
-                    toastr["info"]("Python doesnt support function level clone detection , defaulting to block level", "GRANULARITY");
-                    granularity = 'blocks';
-                };
-
                 axios.get(serverLink + "/processRepository", { params: { 'githubLink': githubLink, 'email': email, 'language': language, 'granularity': granularity } })
                     .then(() => {
                         toastr["success"]("Your project is being analyzed , We will send you a mail once the results are ready.", "STATUS");

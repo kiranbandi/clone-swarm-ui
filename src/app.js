@@ -13,7 +13,7 @@ setupRoot();
 // get the source name based on window query params or set to default - windows powershell
 let sourceName = processQueryParams().source || 'powershell';
 let sourceLink;
-if (['powershell', 'sentinel', 'jhotdraw', 'curl', 'springboot'].indexOf(sourceName) > -1) {
+if (['powershell', 'sentinel', 'jhotdraw', 'curl', 'springboot', 'git', 'django', 'keras', 'scikitlearn', 'pandas', 'guava', 'tensorflow'].indexOf(sourceName) > -1) {
     sourceLink = 'assets/files/clone-info-' + sourceName + '.xml';
 } else {
     sourceLink = "https://s3.ca-central-1.amazonaws.com/cloneswarm-store/clone-data/clone-xml-info/" + sourceName + "-clone-info.xml";
