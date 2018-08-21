@@ -47,6 +47,8 @@ export default function() {
                 axios.get(serverLink + "/processRepository", { params: { 'githubLink': githubLink, 'email': email, 'language': language, 'granularity': granularity } })
                     .then(() => {
                         toastr["success"]("Your project is being analyzed , We will send you a mail once the results are ready.", "STATUS");
+                        d3.select('#submit-job-form').classed('hide', true);
+                        d3.select('#submit-job-complete').classed('hide', false);
                     })
                     .catch((err) => {
                         toastr["error"]("Servers are Down Currently, Please try later", "ERROR");
