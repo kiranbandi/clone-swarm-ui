@@ -165,3 +165,7 @@ div#compare-modal {
 h5#info-header {
     margin-top: 50px;
 }
+
+div.banner-top {
+    padding-top: 1em;
+}
