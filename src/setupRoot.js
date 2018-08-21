@@ -3,6 +3,7 @@ import axios from 'axios';
 import documentationTemplate from './template/documentation.html';
 import loaderTemplate from './template/loader.html';
 import toastr from './toastr';
+import processQueryParams from './processQueryParams';
 
 export default function() {
 
@@ -20,6 +21,12 @@ export default function() {
 
     var elems = document.querySelectorAll('select');
     var instances = M.FormSelect.init(elems, {});
+
+    // If the query params has page set to dashboard then directly open the dashboard 
+    if (processQueryParams().page == 'dashboard') {
+        d3.selectAll('.root-container').classed('hide', true);
+        d3.select('#tool-root').classed('hide', false);
+    }
 
     d3.selectAll('.nav-link')
         .on('click', function() {
