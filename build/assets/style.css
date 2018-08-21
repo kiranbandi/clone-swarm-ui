@@ -169,3 +169,14 @@ h5#info-header {
 div.banner-top {
     padding-top: 1em;
 }
+
+.graph-wrapper {
+    display: inline-block;
+}
+
+.instruction-panel {
+    background: #a5c7e0;
+    padding: 5px 10px;
+    border-radius: 20px;
+    margin: 0em 0em 1em 0em;
+}

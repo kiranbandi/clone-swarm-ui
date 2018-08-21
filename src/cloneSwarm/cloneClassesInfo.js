@@ -26,7 +26,7 @@ export default function(filePath, cloneData, selected) {
         d3.select('#cloneInfoContainer').remove();
     }
 
-    var rootContainerWidth = +d3.select(".rootContainer").node().getBoundingClientRect().width;
+    var rootContainerWidth = +d3.select("main.container").node().getBoundingClientRect().width;
     var cloneInfoContainerWidth = rootContainerWidth - (Math.max(screen.width * 0.4, 750));
 
     var cloneInfoContainer = d3.select(".rootContainer")

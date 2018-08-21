@@ -22,10 +22,21 @@ export default function(cloneData) {
 
     var rootContainer = d3.select("#tool-root")
         .append('div')
-        .attr('class', 'rootContainer');
+        .attr('class', 'rootContainer col s12');
 
     // Create root svg 
-    var svg = rootContainer.append('svg')
+    var svg_wrapper = rootContainer.append('div')
+        .attr('class', 'graph-wrapper');
+
+    svg_wrapper.append('div').attr('class', 'instruction-panel')
+        .style('width', Math.max(screen.width * 0.4, 750) + "px")
+        .html('<p><b>Instructions</b> : The interactive graph below is a radial tree map of all the clones in the project.' +
+            'Every node is a folder or a file and hovering with the mouse on it will show its name.' +
+            'Each <b>leaf node</b>(final node in a branch) is a file and the more red it is the more clones it has.Double clicking a leaf node will display all the clones sets detected in it, in the panel to the side.</p>' +
+            '<p>The panel by default displays the clone sets found in the file with the maximum clones in it.Clicking on a clone set in the panel will show all the similar code fragments in that clone set.Each fragment can be clicked to view its source code and also compared with other fragments.</p>')
+
+
+    var svg = svg_wrapper.append('svg')
         .attr('width', Math.max(screen.width * 0.4, 750))
         .attr('height', Math.max(screen.width * 0.4, 750))
         .attr('class', 'blockViewRoot');
@@ -132,6 +143,7 @@ export default function(cloneData) {
 
     // Display the clone Class Info of the file with max clone classes by default 
     cloneClassesInfo(cloneInformation.maxSourceCloneClassesPerFile.path, cloneInformation);
+
 }
 
 function resetEffects() {
