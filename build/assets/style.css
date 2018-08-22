@@ -20,14 +20,23 @@ body {
     background: #dbdbdb;
 }
 
+.blockViewRoot.dark {
+    background: black;
+}
+
+svg.dark>g>.node>text {
+    fill: grey;
+}
+
 #cloneInfoContainer {
     display: inline-block;
     vertical-align: top;
     padding-left: 15px;
 }
 
-.chromosomeViewReset {
-    fill: #dbdbdb;
+.chromosomeViewReset,
+rect.colorInvert {
+    fill: transparent;
 }
 
 .footer-link {

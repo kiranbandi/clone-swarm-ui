@@ -141,6 +141,31 @@ export default function(cloneData) {
         .attr('d', 'M 15.324219 4.445313 C 13.496094 3.640625 11.433594 3.515625 9.515625 4.121094 C 5.871094 5.269531 3.507813 8.726563 3.753906 12.53125 L 1.265625 12.695313 C 0.945313 7.738281 4.027344 3.238281 8.765625 1.742188 C 11.539063 0.867188 14.546875 1.171875 17.097656 2.550781 L 19.484375 0 L 20.121094 7.074219 L 12.628906 7.324219 Z M 15.230469 22.257813 C 14.179688 22.585938 13.089844 22.753906 12.007813 22.753906 C 10.242188 22.753906 8.488281 22.296875 6.90625 21.445313 L 4.515625 24 L 3.882813 16.925781 L 11.371094 16.675781 L 8.679688 19.554688 C 10.5 20.355469 12.5625 20.484375 14.480469 19.878906 C 18.125 18.726563 20.492188 15.265625 20.246094 11.46875 L 22.730469 11.304688 C 23.058594 16.253906 19.972656 20.757813 15.230469 22.257813 Z ')
         .on('click', resetEffects.bind(zoomInstance));
 
+
+    // invert color button 
+    svg
+        .append('rect')
+        .attr('class', 'colorInvert')
+        .style('cursor', 'pointer')
+        .attr('x', width - 120)
+        .attr('y', 35)
+        .attr('height', 24)
+        .attr('width', 24)
+        .on('click', function() { toggleLights(); });
+
+    // icon for reset button
+    svg
+        .append('svg')
+        .attr('x', width - 120)
+        .attr('y', 35)
+        .append('path')
+        .style('cursor', 'pointer')
+        .style('fill', '#2bbbad')
+        .style('pointer-events', 'all')
+        .attr('d', 'M12,0C7,0,3,4,3,9c0,1.1,0.2,2.1,0.5,3L6,17c0.3,0.4,0.6,0.8,1,1c0,0,0,0,0,0v1c0,0.6,0.4,1,1,1v1c0,0.6,0.4,1,1,1v1   c0,0.6,0.4,1,1,1h4c0.6,0,1-0.4,1-1v-1c0.6,0,1-0.4,1-1v-1c0.6,0,1-0.4,1-1v-1c0,0,0,0,0-0.1c0.4-0.1,0.8-0.5,1-0.9l2.5-5   c0.3-0.9,0.5-1.9,0.5-3C21,4,17,0,12,0z M14,23h-4v-1h4V23z M15,21h-1h-4H9v-1h6V21z M16,19h-1H9H8v-1h8V19z M18.3,12l-2,4H7.7   l-2-4C5.2,11.1,5,10.1,5,9c0-3.9,3.1-7,7-7s7,3.1,7,7C19,10.1,18.8,11.1,18.3,12z')
+        .on('click', function() { toggleLights(); });
+
+
     // Display the clone Class Info of the file with max clone classes by default 
     cloneClassesInfo(cloneInformation.maxSourceCloneClassesPerFile.path, cloneInformation);
 
@@ -148,6 +173,10 @@ export default function(cloneData) {
 
 function resetEffects() {
     d3.select('.rootContainer svg').call(this.transform, d3.zoomIdentity.scale(1).translate(0, 0));
+}
+
+function toggleLights() {
+    d3.select('.blockViewRoot').classed('dark', !d3.select('.blockViewRoot').classed('dark'));
 }
 
 function radialPoint(x, y) {
