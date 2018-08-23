@@ -17,7 +17,7 @@ if (['powershell', 'sentinel', 'jhotdraw', 'curl', 'springboot', 'git', 'django'
     sourceLink = "https://s3.ca-central-1.amazonaws.com/cloneswarm-store/clone-data/clone-xml-info/" + sourceName + "-clone-info.xml";
 }
 
-var serverLink = "http://clone-swarm.usask.ca:8081";
+var serverLink = "https://clone-swarm.usask.ca:8443";
 
 //initialise root ,navbar and homepage form
 setupRoot(serverLink);
