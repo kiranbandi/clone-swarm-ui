@@ -5,9 +5,7 @@ import loaderTemplate from './template/loader.html';
 import toastr from './toastr';
 import processQueryParams from './processQueryParams';
 
-export default function() {
-
-    var serverLink = "https://clone-swarm.usask.ca:8080";
+export default function(serverLink) {
 
     // load the documentation and loader template files
     d3.select('#doc-root').html(documentationTemplate);
@@ -51,7 +49,7 @@ export default function() {
             if (!(githubLink.indexOf('.git') > -1)) {
                 toastr["error"]("Please enter a valid git link", "ERROR");
             } else if (email && language && granularity) {
-                axios.get(serverLink + "/processRepository", { params: { 'githubLink': githubLink, 'email': email, 'language': language, 'granularity': granularity } })
+                axios.get(serverLink + "/process-repository", { params: { 'githubLink': githubLink, 'email': email, 'language': language, 'granularity': granularity } })
                     .then(() => {
                         toastr["success"]("Your project is being analyzed , We will send you a mail once the results are ready.", "STATUS");
                         d3.select('#submit-job-form').classed('hide', true);

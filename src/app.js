@@ -7,8 +7,6 @@ import cloneSwarm from './cloneSwarm/cloneSwarm';
 import displayInformation from './displayInformation';
 import toastr from './toastr';
 
-//initialise root ,navbar and homepage form
-setupRoot();
 
 // get the source name based on window query params or set to default - windows powershell
 let sourceName = processQueryParams().source || 'powershell';
@@ -18,6 +16,11 @@ if (['powershell', 'sentinel', 'jhotdraw', 'curl', 'springboot', 'git', 'django'
 } else {
     sourceLink = "https://s3.ca-central-1.amazonaws.com/cloneswarm-store/clone-data/clone-xml-info/" + sourceName + "-clone-info.xml";
 }
+
+var serverLink = "http://clone-swarm.usask.ca:8081";
+
+//initialise root ,navbar and homepage form
+setupRoot(serverLink);
 
 // Loading the clone info file 
 axios.get(sourceLink).then(function(cloneInfo) {
