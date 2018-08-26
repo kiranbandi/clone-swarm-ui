@@ -153,7 +153,7 @@ export default function(cloneData) {
         .attr('width', 24)
         .on('click', function() { toggleLights(); });
 
-    // icon for reset button
+    // icon for color button
     svg
         .append('svg')
         .attr('x', width - 120)
