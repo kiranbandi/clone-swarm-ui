@@ -52,7 +52,8 @@ export default function(cloneData) {
         .filter(() => !(d3.event.type == 'dblclick'))
         .on("zoom", () => {
             var transform = d3.event.transform;
-            g.attr("transform", "translate(" + (transform.x + (width / 2 + 10)) + "," + (transform.y + (height / 2 + 10)) + ") scale(" + transform.k + ")");
+            g.attr("transform", transform);
+            g.attr("transform", "translate(" + (transform.x + (transform.k * (width / 2 + 10))) + "," + (transform.y + (transform.k * (height / 2 + 10))) + ") scale(" + transform.k + ")");
         });
     // attach zoom event callback
     svg.call(zoomInstance);

@@ -47,7 +47,7 @@ export default function(serverLink) {
             var granularity = document.getElementById("granularity").value;
 
             if (!(githubLink.indexOf('.git') > -1)) {
-                toastr["error"]("Please enter a valid git link", "ERROR");
+                toastr["error"]("Please enter a valid git link , the link should be a .git link that can be used to clone the repostiory.", "ERROR");
             } else if (email && language && granularity) {
                 axios.get(serverLink + "/process-repository", { params: { 'githubLink': githubLink, 'email': email, 'language': language, 'granularity': granularity } })
                     .then(() => {
