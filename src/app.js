@@ -9,8 +9,8 @@ import toastr from './toastr';
 
 
 // get the source name based on window query params or set to default - windows powershell
-let sourceName = processQueryParams().source || 'powershell';
-let sourceLink;
+var sourceName = processQueryParams().source || 'powershell';
+var sourceLink;
 if (['powershell', 'sentinel', 'jhotdraw', 'curl', 'springboot', 'git', 'django', 'keras', 'scikitlearn', 'pandas', 'guava', 'tensorflow', 'gcc', 'open-ssl', 'unity'].indexOf(sourceName) > -1) {
     sourceLink = 'assets/files/clone-info-' + sourceName + '.xml';
 } else {
@@ -27,7 +27,7 @@ axios.get(sourceLink).then(function(cloneInfo) {
     //hide loader once file loading and processing is complete
     d3.select('#loader-container').classed('hide', true);
     var cloneData = processCloneInfo(cloneInfo.data);
-    displayInformation(cloneData.information);
+    displayInformation(cloneData.information, sourceLink);
     if (cloneData.classes.length == 0) {
         d3.select('#info-header').text("No code clones were indentified in the " + cloneData.information.system + " project");
     } else {

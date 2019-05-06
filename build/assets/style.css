@@ -189,3 +189,17 @@ div.banner-top {
     border-radius: 20px;
     margin: 0em 0em 1em 0em;
 }
+
+.download-link {
+    display: inline-block;
+    height: 30px;
+    line-height: 35px;
+    cursor: pointer;
+}
+
+.download-link>.material-icons {
+    font-size: 30px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-top: -11px;
+}
